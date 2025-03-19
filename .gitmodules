@@ -2,3 +2,11 @@
 	path = src/clearpath_common
 	url = https://github.com/clearpathrobotics/clearpath_common.git
 	branch = humble
+[submodule "src/clearpath_simulator"]
+	path = src/clearpath_simulator
+	url = https://github.com/clearpathrobotics/clearpath_simulator.git
+	branch = humble
+[submodule "src/clearpath_config"]
+	path = src/clearpath_config
+	url = https://github.com/clearpathrobotics/clearpath_config.git
+	branch = humble
