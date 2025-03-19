@@ -6,8 +6,11 @@
 
 ```bash
 # Install dependencies
-rosdep install -r --from-paths src -i -y --rosdistro humble
-# Build
+rosdep install -r --from-paths src -i -y --verbose
+
+# Initial Build
+colcon build --packages-skip clearpath_generator_common
+
 colcon_build
 ```
 
