@@ -1,0 +1,4 @@
+[submodule "src/clearpath_common"]
+	path = src/clearpath_common
+	url = https://github.com/clearpathrobotics/clearpath_common.git
+	branch = humble
