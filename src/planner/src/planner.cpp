@@ -1,24 +1,37 @@
 
 #include "rclcpp/rclcpp.hpp"
-#include "std_msgs/msg/int32.hpp"
+#include "geometry_msgs/msg/twist.hpp"
+#include <chrono>
+
+using namespace std::chrono_literals;
+
+class MoveRobot : public rclcpp::Node
+{
+public:
+    MoveRobot()
+        : Node("move_robot")
+    {
+        publisher_ = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
+        timer_ = this->create_wall_timer(
+            500ms, std::bind(&MoveRobot::timer_callback, this));
+    }
+
+private:
+    void timer_callback()
+    {
+        auto message = geometry_msgs::msg::Twist();
+        message.linear.x = 0.2;
+        message.angular.z = 0.2;
+        publisher_->publish(message);
+    }
+    rclcpp::TimerBase::SharedPtr timer_;
+    rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr publisher_;
+};
 
 int main(int argc, char *argv[])
 {
     rclcpp::init(argc, argv);
-    auto node = rclcpp::Node::make_shared("simple_publisher");
-    auto publisher = node->create_publisher<std_msgs::msg::Int32>("counter", 10);
-    auto message = std::make_shared<std_msgs::msg::Int32>();
-    message->data = 0;
-    rclcpp::WallRate loop_rate(2);
-
-    while (rclcpp::ok())
-    {
-
-        publisher->publish(*message);
-        message->data++;
-        rclcpp::spin_some(node);
-        loop_rate.sleep();
-    }
+    rclcpp::spin(std::make_shared<MoveRobot>());
     rclcpp::shutdown();
     return 0;
 }

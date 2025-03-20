@@ -70,7 +70,7 @@ conda install -c robostack-staging -c conda-forge ros-humble-controller-manager 
 - Starting gazebo fortress on mac
 
 ```bash
-ign gazebo -s -r -v 4 warehouse.sdf --force-version 6
+ign gazebo -s -r -v 4 src/clearpath_simulator/clearpath_gz/worlds/warehouse.sdf  --force-version 6
 ```
 
 - `-s` is server

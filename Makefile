@@ -1,6 +1,9 @@
 # PHONY prevents is up to date check
 .PHONY: build
 
+planner:
+	colcon build --symlink-install --packages-select planner
+
 ifeq ($(shell uname -s),Darwin)
 build:
 	colcon build --symlink-install
