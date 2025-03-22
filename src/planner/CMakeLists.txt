@@ -8,8 +8,28 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(nav2_msgs REQUIRED)
+
+add_executable(planner_server src/planner_server.cpp)
+add_executable(planner_client src/planner_client.cpp)
+ament_target_dependencies(planner_server rclcpp rclcpp_action std_msgs geometry_msgs nav2_msgs)
+ament_target_dependencies(planner_client rclcpp rclcpp_action std_msgs geometry_msgs nav2_msgs)
+
+
+install(TARGETS
+   planner_server
+   planner_client
+   DESTINATION lib/${PROJECT_NAME}
+ )
+
+# Install launch files.
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}/
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -23,19 +43,5 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-
-add_executable(planner_node src/planner_node.cpp)
-ament_target_dependencies(planner_node rclcpp std_msgs geometry_msgs)
-
-install(TARGETS
-   planner_node
-   DESTINATION lib/${PROJECT_NAME}
- )
-
-# Install launch files.
-install(DIRECTORY
-  launch
-  DESTINATION share/${PROJECT_NAME}/
-)
 
 ament_package()

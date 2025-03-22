@@ -7,7 +7,7 @@ def generate_launch_description():
         [
             Node(
                 package="planner",
-                executable="planner_node",
+                executable="planner_server",
                 output="screen",
             ),
             Node(

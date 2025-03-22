@@ -42,6 +42,25 @@ git submodule update --init --recursive
 ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path
 ```
 
+2. Running planner server
+
+```bash
+ros2 launch planner planner_server.launch.py
+```
+
+3. Start the planner
+   Either start the planner client or send commands via terminal:
+
+```bash
+ros2 launch planner planner_client.launch.py
+```
+
+or
+
+```bash
+ros2 action send_goal /move_robot nav2_msgs/action/NavigateToPose <msg>
+```
+
 ## Links
 
 - [Clearpath_common Github](https://github.com/clearpathrobotics/clearpath_common/tree/humble)
@@ -70,7 +89,7 @@ conda install -c robostack-staging -c conda-forge ros-humble-controller-manager 
 - Starting gazebo fortress on mac
 
 ```bash
-ign gazebo -s -r -v 4 src/clearpath_simulator/clearpath_gz/worlds/warehouse.sdf  --force-version 6
+ign gazebo -s -r -v 4 src/clearpath_simulator/clearpath_gz/worlds/warehouse.sdf
 ```
 
 - `-s` is server
@@ -79,7 +98,7 @@ ign gazebo -s -r -v 4 src/clearpath_simulator/clearpath_gz/worlds/warehouse.sdf 
 - `--force-version 6` is to force use of ignition gazebo 6 (homebrew gazebo fortress is version 6)
 
 ```bash
-ign gazebo -g -v 4 --force-version 6 --gui-config src/clearpath_simulator/clearpath_gz/config/gui.config
+ign gazebo -g -v 4 --gui-config src/clearpath_simulator/clearpath_gz/config/gui.config
 ```
 
 - Failed to load entry point 'echo': Error importing numpy: you should not try to import numpy from
@@ -87,4 +106,10 @@ ign gazebo -g -v 4 --force-version 6 --gui-config src/clearpath_simulator/clearp
 ```bash
 conda remove --force numpy
 conda install -c conda-forge numpy
+```
+
+- If built bridge from source, need to uninstall conda's bridge
+
+```bash
+conda remove --force ros-humble-ros-gz-bridge ros-humble-ros-ign-bridge ros-humble-cv-bridge
 ```
