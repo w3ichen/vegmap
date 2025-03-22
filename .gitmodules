@@ -10,3 +10,11 @@
 	path = src/clearpath_config
 	url = https://github.com/clearpathrobotics/clearpath_config.git
 	branch = humble
+[submodule "src/gazebo/ros_gz"]
+	path = src/gazebo/ros_gz
+	url = https://github.com/gazebosim/ros_gz.git
+	branch = humble
+[submodule "src/gazebo/gps_umd"]
+	path = src/gazebo/gps_umd
+	url = https://github.com/swri-robotics/gps_umd.git
+	branch = ros2-devel

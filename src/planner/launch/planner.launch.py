@@ -10,5 +10,10 @@ def generate_launch_description():
                 executable="planner_node",
                 output="screen",
             ),
+            Node(
+                package="ros_ign_bridge",
+                executable="parameter_bridge",
+                arguments=["/cmd_vel@geometry_msgs/msg/Twist@ignition.msgs.Twist"],
+            ),
         ]
     )

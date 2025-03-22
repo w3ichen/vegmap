@@ -1,7 +1,7 @@
 # PHONY prevents is up to date check
-.PHONY: build
+.PHONY: build rosdep clean plan
 
-planner:
+plan:
 	colcon build --symlink-install --packages-select planner
 
 ifeq ($(shell uname -s),Darwin)
@@ -15,6 +15,9 @@ else
 build:
 	colcon build --symlink-install
 endif
+
+rosdep:
+	rosdep install --from-paths src --ignore-src -y
 
 clean:
 	rm -rf build install log

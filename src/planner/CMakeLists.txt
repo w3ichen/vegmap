@@ -24,7 +24,7 @@ if(BUILD_TESTING)
 endif()
 
 
-add_executable(planner_node src/planner.cpp)
+add_executable(planner_node src/planner_node.cpp)
 ament_target_dependencies(planner_node rclcpp std_msgs geometry_msgs)
 
 install(TARGETS
