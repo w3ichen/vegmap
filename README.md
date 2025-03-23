@@ -86,21 +86,6 @@ python -m ensurepip --upgrade
 conda install -c robostack-staging -c conda-forge ros-humble-controller-manager ros-humble-controller-interface ros-humble-controller-manager-msgs
 ```
 
-- Starting gazebo fortress on mac
-
-```bash
-ign gazebo -s -r -v 4 src/clearpath_simulator/clearpath_gz/worlds/warehouse.sdf
-```
-
-- `-s` is server
-- `-r` is reset state
-- `-v 4` is verbosity level (most verbose)
-- `--force-version 6` is to force use of ignition gazebo 6 (homebrew gazebo fortress is version 6)
-
-```bash
-ign gazebo -g -v 4 --gui-config src/clearpath_simulator/clearpath_gz/config/gui.config
-```
-
 - Failed to load entry point 'echo': Error importing numpy: you should not try to import numpy from
 
 ```bash
@@ -112,4 +97,39 @@ conda install -c conda-forge numpy
 
 ```bash
 conda remove --force ros-humble-ros-gz-bridge ros-humble-ros-ign-bridge ros-humble-cv-bridge
+```
+
+- [Wrn] [gz.cc:102] Fuel world download failed because Fetch failed. Other errors
+  Need to set env paths:
+
+```bash
+export GZ_SIM_RESOURCE_PATH=/path/to/vegmap/install/clearpath_gz/share/clearpath_gz/worlds:$GZ_SIM_RESOURCE_PATH
+export IGN_GAZEBO_RESOURCE_PATH=/path/to/vegmap/install/clearpath_gz/share/clearpath_gz/worlds:$IGN_GAZEBO_RESOURCE_PATH
+```
+
+- libc++abi: terminating due to uncaught exception of type pluginlib::LibraryLoadException: Could not find library corresponding to plugin sdformat_urdf_plugin/SDFormatURDFParser. Make sure that the library 'sdformat_urdf_plugin' actually exists.
+
+In `${CONDA_PREFIX}/lib`, run `ln -s libsdformat_urdf_plugin.so libsdformat_urdf_plugin.dylib`
+
+Source: https://github.com/RoboStack/ros-humble/issues/104#issuecomment-1774209784
+
+- Starting gazebo on mac
+  In add `-s` to `gz_sim = IncludeLaunchDescription(` in `gz_sim.launch.py` to run server only.
+
+```bash
+# Set paths to meshes
+export GZ_SIM_RESOURCE_PATH=/path/to/vegmap/src/clearpath_common:$GZ_SIM_RESOURCE_PATH
+export IGN_GAZEBO_RESOURCE_PATH=/path/to/vegmap/src/clearpath_common:$IGN_GAZEBO_RESOURCE_PATH
+# Terminal 1: start gz server
+(base) gz sim -v 4 -s src/clearpath_simulator/clearpath_gz/worlds/warehouse.sdf
+# Terminal 2: start gz gui
+(base) gz sim -g -v 4 --gui-config src/clearpath_simulator/clearpath_gz/config/gui.config
+# Terminal 3: spawn the robot
+(ros2) ros2 launch clearpath_gz robot_spawn.launch.py setup_path:=src/setup_path
+```
+
+- To purge a file from git cache, such as `.pyc` files, run:
+
+```bash
+git rm --cached "**/*.pyc"
 ```
