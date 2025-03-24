@@ -6,7 +6,7 @@ plan:
 
 ifeq ($(shell uname -s),Darwin)
 build:
-	colcon build --symlink-install --cmake-args -DPython3_FIND_VIRTUALENV=ONLY --packages-skip spacenav
+	colcon build --symlink-install --cmake-args -DPython3_FIND_VIRTUALENV=ONLY  -DBUILD_TESTING=OFF --packages-skip spacenav
 	@echo 'export PATH=/opt/homebrew/bin/ign:/opt/homebrew/bin/gz:$${PATH}' >> install/setup.bash
 	@echo 'export PATH=/opt/homebrew/bin/ign:/opt/homebrew/bin/gz:$${PATH}' >> install/setup.zsh
 	@echo 'export PYTHONPATH=$${CONDA_PREFIX}/lib/python3.10/site-packages:$${PYTHONPATH}' >> install/setup.bash
