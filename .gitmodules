@@ -34,3 +34,7 @@
 	path = src/gazebo/twist_mux
 	url = https://github.com/ros-teleop/twist_mux.git
 	branch = humble
+[submodule "src/gazebo/topic_tools"]
+	path = src/gazebo/topic_tools
+	url = https://github.com/ros-tooling/topic_tools.git
+	branch = humble

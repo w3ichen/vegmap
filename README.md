@@ -65,6 +65,8 @@ ros2 action send_goal /move_robot nav2_msgs/action/NavigateToPose <msg>
 
 - [Clearpath_common Github](https://github.com/clearpathrobotics/clearpath_common/tree/humble)
 - [Clearpath docs](https://docs.clearpathrobotics.com/docs/ros/)
+- [Custom planer plugin in ROS2 Nav](https://docs.nav2.org/plugin_tutorials/docs/writing_new_nav2planner_plugin.html#)
+  - [ROS Nav2 Sample code](https://github.com/ros-navigation/navigation2_tutorials/tree/humble)
 
 ## ROS Troubleshooting
 
@@ -133,3 +135,9 @@ export IGN_GAZEBO_RESOURCE_PATH=/path/to/vegmap/src/clearpath_common:$IGN_GAZEBO
 ```bash
 git rm --cached "**/*.pyc"
 ```
+
+- `ImportError: The 'nspektr' package is required; normally this is bundled with this package so if you get this warning, consult the packager of your distribution.`
+  Run `pip install --upgrade setuptools`
+
+- `Waiting for '/a200_0000/controller_manager' node to exist`
+  Run `conda install -c robostack-staging -c conda-forge --no-deps ros-humble-controller-manager ros-humble-ros2-control`
