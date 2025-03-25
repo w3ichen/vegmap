@@ -1,5 +1,5 @@
 <library path="planner_plugin">
-    <class name="vegmap_planner::Vegmap" type="vegmap_planner::Vegmap" base_class_type="nav2_core::GlobalPlanner">
+    <class name="vegmap_planner::VegmapPlanner" type="vegmap_planner::VegmapPlanner" base_class_type="nav2_core::GlobalPlanner">
         <description>This is a plugin which plans through vegetation with an adaptive costmap.</description>
     </class>
 </library>

@@ -281,7 +281,7 @@ planner_server:
     plugins: ["GridBased"]
     use_sim_time: True
     GridBased:
-      plugin: "vegmap_planner::Vegmap"
+      plugin: "vegmap_planner::VegmapPlanner"
       interpolation_resolution: 0.1
 
 planner_server_rclcpp_node:
