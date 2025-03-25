@@ -38,4 +38,9 @@ install(DIRECTORY
   DESTINATION share/${PROJECT_NAME}/
 )
 
+install(PROGRAMS
+  launch/pose_info_bridge.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 ament_package()
