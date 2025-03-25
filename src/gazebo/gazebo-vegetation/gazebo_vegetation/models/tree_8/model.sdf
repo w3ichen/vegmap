@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <sdf version="1.5">
   <model name="Tree 8">
-     <static>true</static>
+    <static>true</static>
     <pose frame=''>0 0 0 1.57079 0 0</pose>
     <link name="link">
       <pose frame=''>0 0 0 0 0 0</pose>
@@ -9,7 +9,7 @@
         <geometry>
           <mesh>
             <scale>5 5 5</scale>
-            <uri>model://tree_8/meshes/tree_8.obj</uri>
+            <uri>model://gazebo_vegetation/models/tree_8/meshes/tree_8.obj</uri>
           </mesh>
         </geometry>
       </collision>
@@ -18,7 +18,7 @@
           <mesh>
 
             <scale>5 5 5</scale>
-            <uri>model://tree_8/meshes/tree_8.obj</uri>
+            <uri>model://gazebo_vegetation/models/tree_8/meshes/tree_8.obj</uri>
           </mesh>
         </geometry>
       </visual>

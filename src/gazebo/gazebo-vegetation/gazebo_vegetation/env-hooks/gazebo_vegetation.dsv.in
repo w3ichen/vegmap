@@ -1,0 +1,4 @@
+prepend-non-duplicate;GZ_SIM_RESOURCE_PATH;${prefix}/share/gazebo_vegetation
+prepend-non-duplicate;GZ_SIM_MODEL_PATH;${prefix}/share/gazebo_vegetation/models
+prepend-non-duplicate;GAZEBO_MODEL_PATH;${prefix}/share/gazebo_vegetation/models
+prepend-non-duplicate;IGN_GAZEBO_RESOURCE_PATH;${prefix}/share/gazebo_vegetation

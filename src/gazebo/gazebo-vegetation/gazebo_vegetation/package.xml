@@ -10,7 +10,7 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
   <export>
     <build_type>ament_cmake</build_type>
-    <gazebo_ros GZ_SIM_RESOURCE_PATH="${prefix}/models"/>
+    <gazebo_ros gazebo_model_path="${prefix}/models"/>
   </export>
   <buildtool_depend>ament</buildtool_depend>
 </package>

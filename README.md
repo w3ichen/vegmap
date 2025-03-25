@@ -39,7 +39,7 @@ git submodule update --init --recursive
 1. Launch the `clearpath_gz` simulation:
 
 ```bash
-ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path
+ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path world:=outdoors
 ```
 
 2. Running planner server
@@ -107,6 +107,11 @@ conda remove --force ros-humble-ros-gz-bridge ros-humble-ros-ign-bridge ros-humb
 ```bash
 export GZ_SIM_RESOURCE_PATH=/path/to/vegmap/install/clearpath_gz/share/clearpath_gz/worlds:$GZ_SIM_RESOURCE_PATH
 export IGN_GAZEBO_RESOURCE_PATH=/path/to/vegmap/install/clearpath_gz/share/clearpath_gz/worlds:$IGN_GAZEBO_RESOURCE_PATH
+
+
+export GZ_SIM_RESOURCE_PATH=/path/to/vegmap/src/gazebo/gazebo-vegetation:$GZ_SIM_RESOURCE_PATH
+export IGN_GAZEBO_RESOURCE_PATH=/path/to/vegmap/src/gazebo/gazebo-vegetation:$IGN_GAZEBO_RESOURCE_PATH
+export GAZEBO_MODEL_PATH=/path/to/vegmap/src/gazebo/gazebo-vegetation/gazebo_vegetation/models:$GAZEBO_MODEL_PATH
 ```
 
 - libc++abi: terminating due to uncaught exception of type pluginlib::LibraryLoadException: Could not find library corresponding to plugin sdformat_urdf_plugin/SDFormatURDFParser. Make sure that the library 'sdformat_urdf_plugin' actually exists.
@@ -123,7 +128,7 @@ Source: https://github.com/RoboStack/ros-humble/issues/104#issuecomment-17742097
 export GZ_SIM_RESOURCE_PATH=/path/to/vegmap/src/clearpath_common:$GZ_SIM_RESOURCE_PATH
 export IGN_GAZEBO_RESOURCE_PATH=/path/to/vegmap/src/clearpath_common:$IGN_GAZEBO_RESOURCE_PATH
 # Terminal 1: start gz server
-(base) gz sim -v 4 -s src/clearpath_simulator/clearpath_gz/worlds/warehouse.sdf
+(base) gz sim -v 4 -s src/planner/worlds/outdoors.sdf
 # Terminal 2: start gz gui
 (base) gz sim -g -v 4 --gui-config src/clearpath_simulator/clearpath_gz/config/gui.config
 # Terminal 3: spawn the robot
