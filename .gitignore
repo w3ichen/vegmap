@@ -5,3 +5,7 @@ install/
 log/
 .DS_Store
 **/*.pyc
+
+# David specific
+notes.md
+src/gz_ros2_control
