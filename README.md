@@ -39,13 +39,34 @@ git submodule update --init --recursive
 1. Launch the `clearpath_gz` simulation:
 
 ```bash
-ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path
+ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path world:=outdoors
+```
+
+2. Running planner server
+
+```bash
+ros2 launch planner planner_server.launch.py
+```
+
+3. Start the planner
+   Either start the planner client or send commands via terminal:
+
+```bash
+ros2 launch planner planner_client.launch.py
+```
+
+or
+
+```bash
+ros2 action send_goal /move_robot nav2_msgs/action/NavigateToPose <msg>
 ```
 
 ## Links
 
 - [Clearpath_common Github](https://github.com/clearpathrobotics/clearpath_common/tree/humble)
 - [Clearpath docs](https://docs.clearpathrobotics.com/docs/ros/)
+- [Custom planer plugin in ROS2 Nav](https://docs.nav2.org/plugin_tutorials/docs/writing_new_nav2planner_plugin.html#)
+  - [ROS Nav2 Sample code](https://github.com/ros-navigation/navigation2_tutorials/tree/humble)
 
 ## ROS Troubleshooting
 
@@ -67,24 +88,63 @@ python -m ensurepip --upgrade
 conda install -c robostack-staging -c conda-forge ros-humble-controller-manager ros-humble-controller-interface ros-humble-controller-manager-msgs
 ```
 
-- Starting gazebo fortress on mac
-
-```bash
-ign gazebo -s -r -v 4 src/clearpath_simulator/clearpath_gz/worlds/warehouse.sdf  --force-version 6
-```
-
-- `-s` is server
-- `-r` is reset state
-- `-v 4` is verbosity level (most verbose)
-- `--force-version 6` is to force use of ignition gazebo 6 (homebrew gazebo fortress is version 6)
-
-```bash
-ign gazebo -g -v 4 --force-version 6 --gui-config src/clearpath_simulator/clearpath_gz/config/gui.config
-```
-
 - Failed to load entry point 'echo': Error importing numpy: you should not try to import numpy from
 
 ```bash
 conda remove --force numpy
 conda install -c conda-forge numpy
 ```
+
+- If built bridge from source, need to uninstall conda's bridge
+
+```bash
+conda remove --force ros-humble-ros-gz-bridge ros-humble-ros-ign-bridge ros-humble-cv-bridge
+```
+
+- [Wrn] [gz.cc:102] Fuel world download failed because Fetch failed. Other errors
+  Need to set env paths:
+
+```bash
+export GZ_SIM_RESOURCE_PATH=/path/to/vegmap/install/clearpath_gz/share/clearpath_gz/worlds:$GZ_SIM_RESOURCE_PATH
+export IGN_GAZEBO_RESOURCE_PATH=/path/to/vegmap/install/clearpath_gz/share/clearpath_gz/worlds:$IGN_GAZEBO_RESOURCE_PATH
+
+
+export GZ_SIM_RESOURCE_PATH=/path/to/vegmap/src/gazebo/gazebo-vegetation:$GZ_SIM_RESOURCE_PATH
+export IGN_GAZEBO_RESOURCE_PATH=/path/to/vegmap/src/gazebo/gazebo-vegetation:$IGN_GAZEBO_RESOURCE_PATH
+export GAZEBO_MODEL_PATH=/path/to/vegmap/src/gazebo/gazebo-vegetation/gazebo_vegetation/models:$GAZEBO_MODEL_PATH
+```
+
+- libc++abi: terminating due to uncaught exception of type pluginlib::LibraryLoadException: Could not find library corresponding to plugin sdformat_urdf_plugin/SDFormatURDFParser. Make sure that the library 'sdformat_urdf_plugin' actually exists.
+
+In `${CONDA_PREFIX}/lib`, run `ln -s libsdformat_urdf_plugin.so libsdformat_urdf_plugin.dylib`
+
+Source: https://github.com/RoboStack/ros-humble/issues/104#issuecomment-1774209784
+
+- Starting gazebo on mac
+  In add `-s` to `gz_sim = IncludeLaunchDescription(` in `gz_sim.launch.py` to run server only.
+
+```bash
+# Set paths to meshes
+export GZ_SIM_RESOURCE_PATH=/path/to/vegmap/src/clearpath_common:$GZ_SIM_RESOURCE_PATH
+export IGN_GAZEBO_RESOURCE_PATH=/path/to/vegmap/src/clearpath_common:$IGN_GAZEBO_RESOURCE_PATH
+# Terminal 1: start gz server
+(base) gz sim -v 4 -s src/planner/worlds/outdoors.sdf
+# Terminal 2: start gz gui
+(base) gz sim -g -v 4 --gui-config src/clearpath_simulator/clearpath_gz/config/gui.config
+# Terminal 3: spawn the robot
+(ros2) ros2 launch clearpath_gz robot_spawn.launch.py setup_path:=src/setup_path
+```
+
+- To purge a file from git cache, such as `.pyc` files, run:
+
+```bash
+git rm --cached "**/*.pyc"
+```
+
+- `ImportError: The 'nspektr' package is required; normally this is bundled with this package so if you get this warning, consult the packager of your distribution.`
+  Run `pip install --upgrade setuptools`
+
+- `Waiting for '/a200_0000/controller_manager' node to exist`
+  Run `conda install -c robostack-staging -c conda-forge --no-deps ros-humble-controller-manager ros-humble-ros2-control`
+  Remove the conda install: `conda uninstall --force ros-humble-controller-manager ros-humble-controller-interface ros-humble-hardware-interface ros-humble-controller-manager-msgs ros-humble-ros2-control`
+  Build ros2_control from source: `colcon build --cmake-args -DBUILD_TESTING=OFF -DPython3_FIND_VIRTUALENV=ONLY --packages-select controller_interface hardware_interface controller_manager_msgs controller_manager`

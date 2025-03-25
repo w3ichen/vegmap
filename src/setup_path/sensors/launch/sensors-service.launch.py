@@ -11,8 +11,8 @@ def generate_launch_description():
     # Include Packages
 
     # Declare launch files
-    launch_file_lidar3d_0 = '/home/dseong/vegmap/src/setup_path/sensors/launch/lidar3d_0.launch.py'
-    launch_file_imu_0 = '/home/dseong/vegmap/src/setup_path/sensors/launch/imu_0.launch.py'
+    launch_file_lidar3d_0 = 'src/setup_path/sensors/launch/lidar3d_0.launch.py'
+    launch_file_imu_0 = 'src/setup_path/sensors/launch/imu_0.launch.py'
 
     # Include launch files
     launch_lidar3d_0 = IncludeLaunchDescription(

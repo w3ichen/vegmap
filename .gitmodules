@@ -10,3 +10,39 @@
 	path = src/clearpath_config
 	url = https://github.com/clearpathrobotics/clearpath_config.git
 	branch = humble
+[submodule "src/gazebo/ros_gz"]
+	path = src/gazebo/ros_gz
+	url = https://github.com/gazebosim/ros_gz.git
+	branch = humble
+[submodule "src/gazebo/gps_umd"]
+	path = src/gazebo/gps_umd
+	url = https://github.com/swri-robotics/gps_umd.git
+	branch = ros2-devel
+[submodule "src/gazebo/velodyne_simulator"]
+	path = src/gazebo/velodyne_simulator
+	url = https://bitbucket.org/DataspeedInc/velodyne_simulator.git
+	branch = ros2
+[submodule "src/gazebo/interactive_marker_twist_server"]
+	path = src/gazebo/interactive_marker_twist_server
+	url = https://github.com/ros-visualization/interactive_marker_twist_server.git
+	branch = humble-devel
+[submodule "twist_mux"]
+	path = twist_mux
+	url = https://github.com/ros-teleop/twist_mux.git
+	branch = humble
+[submodule "src/gazebo/twist_mux"]
+	path = src/gazebo/twist_mux
+	url = https://github.com/ros-teleop/twist_mux.git
+	branch = humble
+[submodule "src/gazebo/topic_tools"]
+	path = src/gazebo/topic_tools
+	url = https://github.com/ros-tooling/topic_tools.git
+	branch = humble
+[submodule "src/gazebo/ros2_control"]
+	path = src/gazebo/ros2_control
+	url = https://github.com/ros-controls/ros2_control.git
+	branch = humble
+[submodule "src/gazebo/realtime_tools"]
+	path = src/gazebo/realtime_tools
+	url = https://github.com/ros-controls/realtime_tools.git
+	branch = humble

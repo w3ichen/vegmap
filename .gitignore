@@ -1,10 +1,11 @@
 .vscode/
-.vscode/
 build/
 install/
 log/
 .DS_Store
 **/*.pyc
+**/__pycache__/
+
 
 # David specific
 notes.md

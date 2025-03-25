@@ -27,7 +27,7 @@ def generate_launch_description():
                 {
                     'use_sim_time': True
                     ,
-                    'config_file': '/home/dseong/vegmap/src/setup_path/sensors/config/imu_0.yaml'
+                    'config_file': 'src/setup_path/sensors/config/imu_0.yaml'
                     ,
                 }
                 ,
