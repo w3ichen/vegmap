@@ -49,16 +49,25 @@ ros2 launch planner gz_bridge.launch.py
 
 # Validate
 ros2 topic echo
-
-
 ```
 
-# 4. Costmap
+# 4. Costmap (Doesn't work yet)
 
 ```bash
 ros2 launch my_costmap_config costmap.launch.py
-
 rviz2
+```
+
+# 5. After merging
+```bash
+ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path
+
+ros2 launch planner vegmap_planner.launch.py 
+# Timed out waiting for transform from base_link to odom to become available, tf error: Invalid frame ID "odom" passed to canTransform argument target_frame - frame does not exist
+
+# need map.yaml, following code converts map.sdf to map.yaml
+python3 sdf_to_map.py ~/vegmap/src/clearpath_simulator/clearpath_gz/worlds/warehouse.sdf ~/vegmap/src/planner/maps warehouse_map
+
 ```
 
 3. Navigation & Planning

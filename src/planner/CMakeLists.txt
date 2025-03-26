@@ -43,16 +43,13 @@ include_directories(
   include
 )
 
-# Set the library name
-set(library_name ${PROJECT_NAME}_plugin)
-
 # Define the planner plugin library
-add_library(${library_name} SHARED
+add_library(vegmap_planner_plugin SHARED
   src/vegmap_planner.cpp
 )
 
 # Define the vegetation costmap layer library
-add_library(veg_costmap SHARED
+add_library(veg_costmap_layer_plugin SHARED
   src/veg_costmap_layer.cpp
 )
 
@@ -87,12 +84,12 @@ ament_target_dependencies(planner_server rclcpp rclcpp_action std_msgs geometry_
 ament_target_dependencies(planner_client rclcpp rclcpp_action std_msgs geometry_msgs nav2_msgs)
 
 # Set dependencies for the planner plugin
-ament_target_dependencies(${library_name} ${dependencies})
-target_link_libraries(${library_name} "${cpp_typesupport_target}")
-target_compile_definitions(${library_name} PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
+ament_target_dependencies(vegmap_planner_plugin ${dependencies})
+target_link_libraries(vegmap_planner_plugin "${cpp_typesupport_target}")
+target_compile_definitions(vegmap_planner_plugin PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
 
 # Set dependencies for the vegetation costmap layer
-ament_target_dependencies(veg_costmap
+ament_target_dependencies(veg_costmap_layer_plugin
   rclcpp
   nav2_common
   nav2_costmap_2d
@@ -115,8 +112,8 @@ install(PROGRAMS
 
 # Install targets
 install(TARGETS 
-  ${library_name}
-  veg_costmap
+  vegmap_planner_plugin
+  veg_costmap_layer_plugin
   planner_server
   planner_client
   ARCHIVE DESTINATION lib
@@ -152,6 +149,6 @@ endif()
 
 # Export dependencies
 ament_export_include_directories(include)
-ament_export_libraries(${library_name} veg_costmap)
+ament_export_libraries(vegmap_planner_plugin veg_costmap_layer_plugin)
 ament_export_dependencies(${dependencies})
 ament_package()
