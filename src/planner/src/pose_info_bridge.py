@@ -15,7 +15,7 @@ class PoseInfoBridge(Node):
         super().__init__("pose_info_bridge")
 
         # Create publisher
-        self.pub = self.create_publisher(TFMessage, "/warehouse_tf", 10)
+        self.pub = self.create_publisher(TFMessage, "/outdoors_tf", 10)
 
         # Create timer for polling
         self.timer = self.create_timer(1.0, self.timer_callback)
