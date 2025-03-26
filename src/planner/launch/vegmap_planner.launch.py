@@ -8,7 +8,6 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    ld = LaunchDescription()
 
     # Get the launch directory
     package_dir = get_package_share_directory("planner")
@@ -60,11 +59,18 @@ def generate_launch_description():
         output="screen",
     )
 
+    # Include the gz_bridge launch file
+    gz_bridge_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            [os.path.join(package_dir, "launch", "gz_bridge.launch.py")]
+        ),
+        # You can pass arguments to the included launch file if needed
+        launch_arguments={"param1": "value1", "param2": "value2"}.items(),
+    )
+
     # Delay starting Nav2 to allow Gazebo and robot spawning to complete
     delayed_nav2 = TimerAction(period=1.0, actions=[nav2])
-    ld.add_action(delayed_nav2)
     # Delay starting RViz until everything else is running
     delayed_rviz = TimerAction(period=2.0, actions=[rviz])
-    ld.add_action(delayed_rviz)
 
-    return ld
+    return LaunchDescription([delayed_nav2, delayed_rviz, gz_bridge_launch])
