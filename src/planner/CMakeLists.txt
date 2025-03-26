@@ -25,51 +25,42 @@ find_package(nav2_core REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 find_package(tf2_msgs REQUIRED)
+find_package(nav2_common REQUIRED)
+find_package(tf2 REQUIRED)
 
 # First generate the interfaces
 rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/GetPoses.srv"
   DEPENDENCIES tf2_msgs
 )
+
 # Get typesupport target
 rosidl_get_typesupport_target(cpp_typesupport_target
   ${PROJECT_NAME} rosidl_typesupport_cpp)
 
-# Link with your existing library
-target_link_libraries(${library_name} "${cpp_typesupport_target}")
-
-
-# C++ executables
-add_executable(planner_server src/planner_server.cpp)
-add_executable(planner_client src/planner_client.cpp)
-ament_target_dependencies(planner_server rclcpp rclcpp_action std_msgs geometry_msgs nav2_msgs)
-ament_target_dependencies(planner_client rclcpp rclcpp_action std_msgs geometry_msgs nav2_msgs)
-
-# Python executables
-# ament_python_install_package(${PROJECT_NAME})
-install (PROGRAMS
-  src/pose_info_bridge.py
-  DESTINATION lib/${PROJECT_NAME}
-)
-
+# Define include directories
 include_directories(
   include
 )
 
+# Set the library name
 set(library_name ${PROJECT_NAME}_plugin)
 
+# Define the planner plugin library
 add_library(${library_name} SHARED
   src/vegmap_planner.cpp
 )
 
-install(TARGETS ${library_name}
-  planner_server
-  planner_client
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION lib/${PROJECT_NAME}
+# Define the vegetation costmap layer library
+add_library(veg_costmap SHARED
+  src/veg_costmap_layer.cpp
 )
 
+# C++ executables
+add_executable(planner_server src/planner_server.cpp)
+add_executable(planner_client src/planner_client.cpp)
+
+# Define dependencies
 set(dependencies
   rclcpp
   rclcpp_action
@@ -86,41 +77,81 @@ set(dependencies
   nav2_core
   pluginlib
   rosidl_default_runtime
+  nav2_common
+  tf2
+  tf2_msgs
 )
 
-ament_target_dependencies(${library_name}
-  ${dependencies}
-)
+# Set dependencies for executables
+ament_target_dependencies(planner_server rclcpp rclcpp_action std_msgs geometry_msgs nav2_msgs)
+ament_target_dependencies(planner_client rclcpp rclcpp_action std_msgs geometry_msgs nav2_msgs)
 
+# Set dependencies for the planner plugin
+ament_target_dependencies(${library_name} ${dependencies})
+target_link_libraries(${library_name} "${cpp_typesupport_target}")
 target_compile_definitions(${library_name} PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
 
+# Set dependencies for the vegetation costmap layer
+ament_target_dependencies(veg_costmap
+  rclcpp
+  nav2_common
+  nav2_costmap_2d
+  nav2_util
+  pluginlib
+  tf2
+  tf2_ros
+  tf2_msgs
+  geometry_msgs
+  nav_msgs
+  std_msgs
+)
 
-pluginlib_export_plugin_description_file(nav2_core global_planner_plugin.xml)
+# Python executables
+install(PROGRAMS
+  src/pose_info_bridge.py
+  src/veg_costmap_updater.py
+  DESTINATION lib/${PROJECT_NAME}
+)
 
+# Install targets
+install(TARGETS 
+  ${library_name}
+  veg_costmap
+  planner_server
+  planner_client
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
+)
+
+# Install plugin definitions
+pluginlib_export_plugin_description_file(nav2_core vegmap_planner_plugin.xml)
+pluginlib_export_plugin_description_file(nav2_costmap_2d veg_costmap_plugin.xml)
+
+# Install directories
 install(DIRECTORY
   config
   launch
+  include/
   DESTINATION share/${PROJECT_NAME}/
 )
 
-install(FILES global_planner_plugin.xml
+# Install files
+install(FILES 
+  vegmap_planner_plugin.xml
+  veg_costmap_plugin.xml
   DESTINATION share/${PROJECT_NAME}
 )
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # comment the line when a copyright and license is added to all source files
   set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # comment the line when this package is in a git repo and when
-  # a copyright and license is added to all source files
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-
+# Export dependencies
 ament_export_include_directories(include)
-ament_export_libraries(${library_name})
+ament_export_libraries(${library_name} veg_costmap)
 ament_export_dependencies(${dependencies})
 ament_package()

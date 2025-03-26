@@ -60,6 +60,11 @@ namespace vegmap_planner
                                  "interpolation_resolution = %.2f, heuristic_weight = %.2f",
             name_.c_str(), interpolation_resolution_, heuristic_weight_);
 
+        // Subscribe to costmap update notifications
+        costmap_update_sub_ = node_->create_subscription<std_msgs::msg::Empty>(
+            "/veg_costmap_updated", 1,
+            std::bind(&VegmapPlanner::costmapUpdateCallback, this, std::placeholders::_1));
+
         // Initialize D* lite data structures
         reset();
     }
@@ -74,6 +79,9 @@ namespace vegmap_planner
         RCLCPP_INFO(
             node_->get_logger(), "Activating plugin %s of type VegmapPlanner",
             name_.c_str());
+
+        // Reset the costmap change flag
+        costmap_changed_ = false;
     }
 
     /**
@@ -86,6 +94,9 @@ namespace vegmap_planner
         RCLCPP_INFO(
             node_->get_logger(), "Deactivating plugin %s of type VegmapPlanner",
             name_.c_str());
+
+        // Clear active goal state
+        has_active_goal_ = false;
     }
 
     /**
@@ -395,20 +406,38 @@ namespace vegmap_planner
         costmap_->mapToWorld(static_cast<unsigned int>(mx), static_cast<unsigned int>(my), wx, wy);
     }
 
+    void VegmapPlanner::costmapUpdateCallback(const std_msgs::msg::Empty::SharedPtr /*msg*/)
+    {
+        // Set the flag that costmap has changed
+        costmap_changed_ = true;
+
+        RCLCPP_DEBUG(
+            node_->get_logger(), "Received costmap update notification");
+    }
+
     /**
      * detectCostmapChanges()
      * Detects changes in the costmap since last planning
      */
     bool VegmapPlanner::detectCostmapChanges()
     {
-        // TODO: detect when costmap changes!
         if (!costmap_received_)
         {
             // First time we receive the costmap, we assume no changes
             costmap_received_ = true;
             return false;
         }
-        return true;
+
+        // Check if we've received a costmap update notification
+        bool changed = costmap_changed_.exchange(false);
+
+        if (changed)
+        {
+            RCLCPP_INFO(
+                node_->get_logger(), "Costmap changed, will recompute path");
+        }
+
+        return changed;
     }
 
     /**
@@ -458,6 +487,11 @@ namespace vegmap_planner
         CellIndex start_cell = {start_x, start_y};
         CellIndex goal_cell = {goal_x, goal_y};
 
+        // Store current start and goal
+        current_start_ = start;
+        current_goal_ = goal;
+        has_active_goal_ = true;
+
         // Check if we need to initialize or replan
         bool need_replan = false;
 
@@ -472,17 +506,33 @@ namespace vegmap_planner
             updateVertex(goal_cell);
             need_replan = true;
         }
-        else if (!(start_cell == last_start_) || detectCostmapChanges())
+        else if (!(start_cell == last_start_) || !(goal_cell == last_goal_) || detectCostmapChanges())
         {
-            // If start changed or costmap changed, update km and vertices
+            // If start changed, goal changed, or costmap changed, update km and vertices
             if (!(start_cell == last_start_))
             {
                 km_ += calculateHeuristic(last_start_, start_cell);
                 last_start_ = start_cell;
             }
 
-            // Update affected vertices due to costmap changes
-            // For simplicity, we'll just recompute the whole path
+            // If goal changed, reset rhs values at goal
+            if (!(goal_cell == last_goal_))
+            {
+                RCLCPP_INFO(
+                    node_->get_logger(), "Goal changed, resetting planner");
+
+                // Clear old goal
+                rhs_values_[last_goal_] = std::numeric_limits<double>::infinity();
+                g_values_[last_goal_] = std::numeric_limits<double>::infinity();
+
+                // Set new goal
+                last_goal_ = goal_cell;
+                g_values_[goal_cell] = std::numeric_limits<double>::infinity();
+                rhs_values_[goal_cell] = 0.0;
+                updateVertex(goal_cell);
+            }
+
+            // For costmap changes, we'll just recompute the path
             need_replan = true;
         }
 

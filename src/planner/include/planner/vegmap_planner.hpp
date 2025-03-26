@@ -6,6 +6,7 @@
 #include <queue>
 #include <vector>
 #include <unordered_map>
+#include <atomic>
 
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/point.hpp"
@@ -17,6 +18,7 @@
 #include "nav2_costmap_2d/costmap_2d_ros.hpp"
 #include "nav2_costmap_2d/costmap_subscriber.hpp"
 #include "tf2/utils.h"
+#include "std_msgs/msg/empty.hpp"
 
 namespace vegmap_planner
 {
@@ -75,6 +77,9 @@ namespace vegmap_planner
             const geometry_msgs::msg::PoseStamped &goal) override;
 
     private:
+        // Costmap update callback
+        void costmapUpdateCallback(const std_msgs::msg::Empty::SharedPtr msg);
+
         // D* Lite algorithm methods
         void reset();
         double calculateHeuristic(const CellIndex &a, const CellIndex &b);
@@ -103,7 +108,14 @@ namespace vegmap_planner
 
         // Costmap change detection
         std::unique_ptr<nav2_costmap_2d::CostmapSubscriber> costmap_subscriber_;
+        rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr costmap_update_sub_;
+        std::atomic<bool> costmap_changed_{false};
         bool costmap_received_{false};
+
+        // Current plan information
+        geometry_msgs::msg::PoseStamped current_start_;
+        geometry_msgs::msg::PoseStamped current_goal_;
+        bool has_active_goal_{false};
 
         // D* Lite parameters
         double interpolation_resolution_{0.1};
