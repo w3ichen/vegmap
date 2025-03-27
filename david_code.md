@@ -60,9 +60,16 @@ rviz2
 
 # 5. After merging
 ```bash
+# warehouse
 ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path
-
+# flat veggies
+ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path world:=/home/dseong/vegmap/src/planner/worlds/outdoors
+# spring world
+ros2 launch clearpath_gz simulation.launch.py world:=spring setup_path:=src/setup_path
+ 
+# run veggie planner
 ros2 launch planner vegmap_planner.launch.py 
+
 # Timed out waiting for transform from base_link to odom to become available, tf error: Invalid frame ID "odom" passed to canTransform argument target_frame - frame does not exist
 
 # need map.yaml, following code converts map.sdf to map.yaml
