@@ -21,9 +21,6 @@ def generate_launch_description():
     nav2_params_file = os.path.join(package_dir, "config", "nav2_params.yaml")
     rviz_config_file = os.path.join(package_dir, "config", "nav2.rviz")
 
-    map_file = os.path.join(os.path.expanduser("~"), "vegmap", "src", "planner", "maps", "warehouse_map.yaml")
-    map_yaml_file = LaunchConfiguration("map", default=map_file)
-
     # Launch configuration variables
     use_sim_time = LaunchConfiguration("use_sim_time", default="true")
     namespace = LaunchConfiguration('namespace')
