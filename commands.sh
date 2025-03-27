@@ -41,3 +41,6 @@ ros2 launch clearpath_control control.launch.py setup_path:=src/setup_path
 
 ros2 run topic_tools relay  /a200_0000/tf /tf
 ros2 run topic_tools relay  /a200_0000/tf_static /tf_static
+
+# View logs
+ros2 run rqt_console rqt_console

@@ -30,5 +30,34 @@ def generate_launch_description():
                 executable="pose_info_bridge.py",  # Note the .py extension when installed with install(PROGRAMS...)
                 name="pose_info_bridge",
             ),
+
+            # Relay /a200_0000/tf -> /tf
+            Node(
+                package='topic_tools',
+                executable='relay',
+                name='tf_relay',
+                output='log',
+                arguments=['/a200_0000/tf', '/tf'],
+                parameters=[
+                    # Optional: Set QoS parameters if needed
+                    {'qos_reliability': 'reliable'},
+                    {'qos_durability': 'volatile'},  # Use volatile to connect to all publishers
+                    {'logger_level': 'error'}
+                ]
+            ),
+            # Relay /a200_0000/tf_static -> /tf_static
+            Node(
+                package='topic_tools',
+                executable='relay',
+                name='tf_static_relay',
+                output='log',
+                arguments=['/a200_0000/tf_static', '/tf_static'],
+                parameters=[
+                    # TF static typically uses transient_local durability
+                    {'qos_reliability': 'reliable'},
+                    {'qos_durability': 'transient_local'},
+                    {'logger_level': 'error'}
+                ]
+            )
         ]
     )

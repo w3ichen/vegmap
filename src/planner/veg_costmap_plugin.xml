@@ -1,4 +1,4 @@
-<library path="lib/libveg_costmap_layer_plugin.so">
+<library path="veg_costmap_layer_plugin">
   <class name="veg_costmap::VegCostmapLayer" type="veg_costmap::VegCostmapLayer" base_class_type="nav2_costmap_2d::Layer">
     <description>This plugin creates a costmap layer for vegetation with varying traversability costs.</description>
   </class>

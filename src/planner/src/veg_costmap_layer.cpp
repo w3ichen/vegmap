@@ -1,11 +1,7 @@
 #include "planner/veg_costmap_layer.hpp"
-
-#include <pluginlib/class_list_macros.hpp>
 #include "nav2_costmap_2d/costmap_math.hpp"
 #include "nav2_costmap_2d/footprint.hpp"
 #include "rclcpp/parameter_events_filter.hpp"
-
-PLUGINLIB_EXPORT_CLASS(veg_costmap::VegCostmapLayer, nav2_costmap_2d::Layer)
 
 namespace veg_costmap
 {
@@ -453,3 +449,6 @@ namespace veg_costmap
     }
 
 } // namespace veg_costmap
+
+#include <pluginlib/class_list_macros.hpp>
+PLUGINLIB_EXPORT_CLASS(veg_costmap::VegCostmapLayer, nav2_costmap_2d::Layer)

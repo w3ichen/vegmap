@@ -6,10 +6,8 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /RobotModel1
-        - /RobotModel1/Status1
       Splitter Ratio: 0.5
-    Tree Height: 555
+    Tree Height: 549
   - Class: rviz_common/Selection
     Name: Selection
   - Class: rviz_common/Tool Properties
@@ -67,255 +65,6 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
-        base_footprint:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        default_mount:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        front_bumper_base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        front_bumper_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        front_bumper_mount:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        front_left_wheel:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        front_right_wheel:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        imu_0_base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        imu_0_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        inertial_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        lidar3d_0_laser:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        lidar3d_0_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        rear_bumper_base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        rear_bumper_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        rear_bumper_mount:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        rear_left_wheel:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        rear_right_wheel:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        sensor_arch_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        sensor_arch_mount:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_chassis_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        top_plate_adjust_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        top_plate_mount_a1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_a2:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_a3:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_a4:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_a5:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_a6:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_a7:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_a8:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_b1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_b2:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_b7:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_b8:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_c1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_c2:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_c7:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_c8:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_d1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_d2:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_d7:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_d8:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_e1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_e2:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_e7:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_e8:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_f1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_f2:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_f7:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_f8:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_g1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_g2:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_g3:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_g4:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_g5:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_g6:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_g7:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        top_plate_mount_g8:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
       Mass Properties:
         Inertia: false
         Mass: false
@@ -324,6 +73,27 @@ Visualization Manager:
       Update Interval: 0
       Value: true
       Visual Enabled: true
+    - Alpha: 0.699999988079071
+      Class: rviz_default_plugins/Map
+      Color Scheme: map
+      Draw Behind: false
+      Enabled: true
+      Name: Map
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /veg_updates
+      Update Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /veg_updates_updates
+      Use Timestamp: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -370,25 +140,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 3.2441787719726562
+      Distance: 11.244329452514648
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0
-        Y: 0
-        Z: 0
+        X: 0.2971969246864319
+        Y: 0.2670212686061859
+        Z: -0.3213382363319397
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.5997963547706604
+      Pitch: 0.9447960257530212
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 1.7203980684280396
+      Yaw: 1.485398292541504
     Saved: ~
 Window Geometry:
   Displays:
@@ -396,7 +166,7 @@ Window Geometry:
   Height: 846
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd000000040000000000000156000002b4fc0200000008fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003b000002b4000000c700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000010f000002b4fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073010000003b000002b4000000a000fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000006b40000003efc0100000002fb0000000800540069006d00650100000000000006b40000025300fffffffb0000000800540069006d0065010000000000000450000000000000000000000443000002b400000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd000000040000000000000156000002b0fc0200000008fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d000002b0000000c900fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000010f000002b0fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073010000003d000002b0000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000006b40000003efc0100000002fb0000000800540069006d00650100000000000006b4000002fb00fffffffb0000000800540069006d0065010000000000000450000000000000000000000443000002b000000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -406,5 +176,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1716
-  X: 28
+  X: 70
   Y: 28

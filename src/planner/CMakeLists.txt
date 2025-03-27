@@ -38,11 +38,6 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 rosidl_get_typesupport_target(cpp_typesupport_target
   ${PROJECT_NAME} rosidl_typesupport_cpp)
 
-# Define include directories
-include_directories(
-  include
-)
-
 # Define the planner plugin library
 add_library(vegmap_planner_plugin SHARED
   src/vegmap_planner.cpp
@@ -86,7 +81,12 @@ ament_target_dependencies(planner_client rclcpp rclcpp_action std_msgs geometry_
 # Set dependencies for the planner plugin
 ament_target_dependencies(vegmap_planner_plugin ${dependencies})
 target_link_libraries(vegmap_planner_plugin "${cpp_typesupport_target}")
-target_compile_definitions(vegmap_planner_plugin PUBLIC "PLUGINLIB__DISABLE_BOOST_FUNCTIONS")
+
+# Set proper include directories for plugins
+target_include_directories(vegmap_planner_plugin PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
 
 # Set dependencies for the vegetation costmap layer
 ament_target_dependencies(veg_costmap_layer_plugin
@@ -101,6 +101,11 @@ ament_target_dependencies(veg_costmap_layer_plugin
   geometry_msgs
   nav_msgs
   std_msgs
+)
+
+target_include_directories(veg_costmap_layer_plugin PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
 )
 
 # Python executables
@@ -126,14 +131,25 @@ pluginlib_export_plugin_description_file(nav2_core vegmap_planner_plugin.xml)
 pluginlib_export_plugin_description_file(nav2_costmap_2d veg_costmap_plugin.xml)
 
 # Install directories
-install(DIRECTORY
-  config
-  launch
-  include/
-  DESTINATION share/${PROJECT_NAME}/
+install(
+  DIRECTORY include/
+  DESTINATION include
 )
 
-# Install files
+# Ensure config and launch directories exist before installing
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/config)
+  install(DIRECTORY config
+    DESTINATION share/${PROJECT_NAME}/
+  )
+endif()
+
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/launch)
+  install(DIRECTORY launch
+    DESTINATION share/${PROJECT_NAME}/
+  )
+endif()
+
+# Install XML files
 install(FILES 
   vegmap_planner_plugin.xml
   veg_costmap_plugin.xml
