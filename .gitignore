@@ -5,7 +5,7 @@ log/
 .DS_Store
 **/*.pyc
 **/__pycache__/
-
+frames_*
 
 # David specific
 src/gz_ros2_control

@@ -44,3 +44,7 @@ ros2 run topic_tools relay  /a200_0000/tf_static /tf_static
 
 # View logs
 ros2 run rqt_console rqt_console
+# View tf frames
+ros2 run tf2_tools view_frames
+
+ros2 run nav2_map_server map_server --ros-args -p yaml_filename:=~/vegmap/src/planner/maps/warehouse_map.yaml  -p use_sim_time:=true

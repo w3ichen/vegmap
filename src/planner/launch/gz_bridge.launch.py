@@ -58,6 +58,24 @@ def generate_launch_description():
                     {'qos_durability': 'transient_local'},
                     {'logger_level': 'error'}
                 ]
+            ),
+
+            # tf transformation odom to base link
+            Node(
+                package='tf2_ros',
+                executable='static_transform_publisher',
+                name='odom_to_base_link',
+                arguments=['0', '0', '0', '0', '0', '0', 'odom', 'base_link'],
+                output='screen'
+            ),
+
+            # tf transformations map to odom
+            Node(
+                package='tf2_ros',
+                executable='static_transform_publisher',
+                name='odom_to_base_link',
+                arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom'],
+                output='screen'
             )
         ]
     )
