@@ -91,7 +91,7 @@
     <include>
       <uri>model://gazebo_vegetation/models/tree_1</uri>
       <name>tree_1</name>
-      <pose>0.4 -2 0 0 -0 0</pose>
+      <pose>4 -2 0 0 -0 0</pose>
     </include>
     <include>
       <uri>model://gazebo_vegetation/models/tree_2</uri>

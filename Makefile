@@ -18,8 +18,11 @@ build:
 	colcon build --symlink-install
 endif
 
+clearpath:
+	colcon build --symlink-install --packages-select clearpath_common clearpath_config clearpath_simulator
+
 rosdep:
-	rosdep install --from-paths src --ignore-src -y 
+	rosdep install --from-paths src --ignore-src -y --rosdistro humble
 
 clean:
 	rm -rf build install log
