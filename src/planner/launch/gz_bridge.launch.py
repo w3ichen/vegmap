@@ -27,21 +27,22 @@ def generate_launch_description():
             ),
             Node(
                 package="planner",
-                executable="pose_info_bridge.py",  # Note the .py extension when installed with install(PROGRAMS...)
+                executable="pose_info_bridge.py",
                 name="pose_info_bridge",
             ),
-
             # Relay /a200_0000/tf -> /tf
             Node(
                 package='topic_tools',
                 executable='relay',
                 name='tf_relay',
-                output='log',
+                output={
+                    'stdout': 'log',
+                    'stderr': 'log',
+                },
                 arguments=['/a200_0000/tf', '/tf'],
                 parameters=[
-                    # Optional: Set QoS parameters if needed
                     {'qos_reliability': 'reliable'},
-                    {'qos_durability': 'volatile'},  # Use volatile to connect to all publishers
+                    {'qos_durability': 'volatile'},
                     {'logger_level': 'error'}
                 ]
             ),
@@ -53,28 +54,25 @@ def generate_launch_description():
                 output='log',
                 arguments=['/a200_0000/tf_static', '/tf_static'],
                 parameters=[
-                    # TF static typically uses transient_local durability
                     {'qos_reliability': 'reliable'},
                     {'qos_durability': 'transient_local'},
-                    {'logger_level': 'error'}
+                    {'logger_level': 'error'},
                 ]
             ),
-
+            # TF Transforms
+            Node(
+                package='tf2_ros',
+                executable='static_transform_publisher',
+                name='map_to_odom',
+                arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom'],
+                output='screen'
+            ),
             # tf transformation odom to base link
             Node(
                 package='tf2_ros',
                 executable='static_transform_publisher',
                 name='odom_to_base_link',
                 arguments=['0', '0', '0', '0', '0', '0', 'odom', 'base_link'],
-                output='screen'
-            ),
-
-            # tf transformations map to odom
-            Node(
-                package='tf2_ros',
-                executable='static_transform_publisher',
-                name='odom_to_base_link',
-                arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom'],
                 output='screen'
             )
         ]

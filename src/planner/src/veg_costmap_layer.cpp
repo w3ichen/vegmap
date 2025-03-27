@@ -216,10 +216,10 @@ namespace veg_costmap
         auto msg_empty = std::make_unique<std_msgs::msg::Empty>();
         replan_pub_->publish(std::move(msg_empty));
 
-        RCLCPP_INFO(
-            node->get_logger(),
-            "Updated vegetation costmap with %zu obstacles",
-            obstacle_points_.size());
+        // RCLCPP_INFO(
+        //     node->get_logger(),
+        //     "Updated vegetation costmap with %zu obstacles",
+        //     obstacle_points_.size());
     }
 
     void VegCostmapLayer::updateVegetationCost(unsigned int mx, unsigned int my, unsigned char cost)
