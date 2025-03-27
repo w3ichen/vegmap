@@ -26,3 +26,9 @@ rosdep:
 
 clean:
 	rm -rf build install log
+
+frames:
+	ros2 run tf2_tools view_frames
+
+clean_frames:
+	rm -r frames_*

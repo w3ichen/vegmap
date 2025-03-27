@@ -49,6 +49,7 @@ def generate_launch_description():
         launch_arguments={
             "use_sim_time": use_sim_time,
             "params_file": nav2_params_file,
+            "namespace": namespace
         }.items(),
     )
 
@@ -96,18 +97,18 @@ def generate_launch_description():
     push_namespace = PushRosNamespace(namespace=namespace)
     
     # Delay starting Nav2 to allow Gazebo and robot spawning to complete
-    delayed_nav2 = TimerAction(period=3.0, actions=[nav2])
+    delayed_nav2 = TimerAction(period=2.0, actions=[nav2])
 
     # Delay starting RViz (outside namespace)
-    delayed_rviz = TimerAction(period=5.0, actions=[rviz])
+    delayed_rviz = TimerAction(period=3.0, actions=[rviz])
 
     return LaunchDescription(
         [
             declare_namespace,
             push_namespace,
             delayed_nav2, 
-            gz_bridge_launch,
             veg_costmap_updater,
             delayed_rviz,
+            gz_bridge_launch,
         ]
     )
