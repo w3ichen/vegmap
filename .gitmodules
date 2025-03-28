@@ -46,3 +46,7 @@
 	path = src/gazebo/realtime_tools
 	url = https://github.com/ros-controls/realtime_tools.git
 	branch = humble
+[submodule "src/clearpath_nav2_demos"]
+	path = src/clearpath_nav2_demos
+	url = https://github.com/clearpathrobotics/clearpath_nav2_demos/
+	branch = humble

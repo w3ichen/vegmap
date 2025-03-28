@@ -14,8 +14,6 @@ ros2 launch planner vegmap_planner.launch.py
 conda activate ros2
 source install/setup.bash
 
-ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path world:=outdoors
-
 
 gz sim -v 4 -s src/planner/worlds/outdoors.sdf 
 gz sim -g -v 4 --gui-config src/clearpath_simulator/clearpath_gz/config/gui.config
@@ -25,7 +23,6 @@ ros2 launch clearpath_gz robot_spawn.launch.py setup_path:=src/setup_path
 
 
 ros2 launch planner vegmap_planner.launch.py
-
 
 
 ros2 run planner veg_costmap_updater.py 
@@ -48,3 +45,11 @@ ros2 run rqt_console rqt_console
 ros2 run tf2_tools view_frames
 
 ros2 run nav2_map_server map_server --ros-args -p yaml_filename:=~/vegmap/src/planner/maps/warehouse_map.yaml  -p use_sim_time:=true
+
+
+
+# Clearpath nav2 tutorial commands
+ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path 
+ros2 launch clearpath_viz view_navigation.launch.py namespace:=a200_0000
+ros2 launch clearpath_nav2_demos localization.launch.py setup_path:=src/setup_path/ use_sim_time:=true
+ros2 launch clearpath_nav2_demos nav2.launch.py setup_path:=src/setup_path/ use_sim_time:=true

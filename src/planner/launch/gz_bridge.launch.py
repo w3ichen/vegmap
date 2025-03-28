@@ -1,14 +1,16 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
-
+from launch.substitutions import LaunchConfiguration
 
 def generate_launch_description():
+    namespace = LaunchConfiguration('namespace', default='a200_0000')
     return LaunchDescription(
         [
             Node(
                 package="ros_gz_bridge",
                 executable="parameter_bridge",
                 name="model_pose_bridge",
+                namespace=namespace,  
                 output="screen",
                 parameters=[
                     {
@@ -29,12 +31,14 @@ def generate_launch_description():
                 package="planner",
                 executable="pose_info_bridge.py",
                 name="pose_info_bridge",
+                namespace=namespace,  
             ),
             # Relay /a200_0000/tf -> /tf
             Node(
                 package='topic_tools',
                 executable='relay',
                 name='tf_relay',
+                namespace=namespace,  
                 output={
                     'stdout': 'log',
                     'stderr': 'log',
@@ -51,6 +55,7 @@ def generate_launch_description():
                 package='topic_tools',
                 executable='relay',
                 name='tf_static_relay',
+                namespace=namespace,  
                 output='log',
                 arguments=['/a200_0000/tf_static', '/tf_static'],
                 parameters=[
@@ -64,16 +69,20 @@ def generate_launch_description():
                 package='tf2_ros',
                 executable='static_transform_publisher',
                 name='map_to_odom',
+                namespace=namespace,  
                 arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom'],
-                output='screen'
-            ),
-            # tf transformation odom to base link
-            Node(
-                package='tf2_ros',
-                executable='static_transform_publisher',
-                name='odom_to_base_link',
-                arguments=['0', '0', '0', '0', '0', '0', 'odom', 'base_link'],
-                output='screen'
+                output='screen',
+                remappings=[('tf', '/tf'), ('tf_static', '/tf_static')]
             )
+            # # tf transformation odom to base link
+            # Node(
+            # package='tf2_ros',
+            # executable='static_transform_publisher',
+            # name='odom_to_base_link',
+            # namespace=namespace,  # Would add namespace here too
+            # arguments=['0', '0', '0', '0', '0', '0', 'odom', 'base_link'],
+            # output='screen',
+            # remappings=[('tf', '/tf'), ('tf_static', '/tf_static')]
+            # )
         ]
     )

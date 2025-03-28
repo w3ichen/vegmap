@@ -67,6 +67,8 @@ ros2 action send_goal /move_robot nav2_msgs/action/NavigateToPose <msg>
 - [Clearpath docs](https://docs.clearpathrobotics.com/docs/ros/)
 - [Custom planer plugin in ROS2 Nav](https://docs.nav2.org/plugin_tutorials/docs/writing_new_nav2planner_plugin.html#)
   - [ROS Nav2 Sample code](https://github.com/ros-navigation/navigation2_tutorials/tree/humble)
+- [Clearpath Nav2 Tutorial](https://docs.clearpathrobotics.com/docs/ros/tutorials/navigation_demos/nav2/)
+  - [Clearpath nav2 demos github](https://github.com/clearpathrobotics/clearpath_nav2_demos)
 
 ## ROS Troubleshooting
 
@@ -148,3 +150,8 @@ git rm --cached "**/*.pyc"
   Run `conda install -c robostack-staging -c conda-forge --no-deps ros-humble-controller-manager ros-humble-ros2-control`
   Remove the conda install: `conda uninstall --force ros-humble-controller-manager ros-humble-controller-interface ros-humble-hardware-interface ros-humble-controller-manager-msgs ros-humble-ros2-control`
   Build ros2_control from source: `colcon build --cmake-args -DBUILD_TESTING=OFF -DPython3_FIND_VIRTUALENV=ONLY --packages-select controller_interface hardware_interface controller_manager_msgs controller_manager`
+
+
+- `Original error: parameter 'yaml_filename' is not initialized`
+Known bug with map_server yaml_filename: https://github.com/ros-navigation/navigation2/issues/3644
+Patch is not in binaries, need to build from source (didn't work) or write your own bringup nodes

@@ -19,7 +19,7 @@ build:
 endif
 
 clearpath:
-	colcon build --symlink-install --packages-select clearpath_common clearpath_config clearpath_simulator
+	colcon build --symlink-install --packages-select clearpath_common clearpath_config clearpath_simulator clearpath_nav2_demos
 
 rosdep:
 	rosdep install --from-paths src --ignore-src -y --rosdistro humble

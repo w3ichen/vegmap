@@ -142,9 +142,13 @@ if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/config)
     DESTINATION share/${PROJECT_NAME}/
   )
 endif()
-
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/launch)
   install(DIRECTORY launch
+    DESTINATION share/${PROJECT_NAME}/
+  )
+endif()
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/maps)
+  install(DIRECTORY maps
     DESTINATION share/${PROJECT_NAME}/
   )
 endif()

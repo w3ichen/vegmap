@@ -25,10 +25,10 @@ class PoseInfoBridge(Node):
     def timer_callback(self):
         world = "outdoors"
         # Get pose info using subprocess
-        if shutil.which("gz") is not None:
-            cmd = f"gz topic -e -t /world/{world}/pose/info -n1"
-        else:
+        if shutil.which("ign") is not None:
             cmd = f"ign topic -e -t /world/{world}/pose/info -n1"
+        else:
+            cmd = f"gz topic -e -t /world/{world}/pose/info -n1"
         process = subprocess.Popen([cmd], shell=True, stdout=PIPE)
         output = process.communicate()[0].decode("utf-8")
 
