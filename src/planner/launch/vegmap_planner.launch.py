@@ -1,9 +1,18 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription, TimerAction, DeclareLaunchArgument, GroupAction
+from launch.actions import (
+    IncludeLaunchDescription,
+    TimerAction,
+    DeclareLaunchArgument,
+    GroupAction,
+)
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, PythonExpression, PathJoinSubstitution
+from launch.substitutions import (
+    LaunchConfiguration,
+    PythonExpression,
+    PathJoinSubstitution,
+)
 from launch_ros.actions import Node, PushRosNamespace, SetRemap
 from clearpath_config.common.utils.yaml import read_yaml
 from clearpath_config.clearpath_config import ClearpathConfig
@@ -11,25 +20,26 @@ from clearpath_config.clearpath_config import ClearpathConfig
 
 def generate_launch_description():
     # Packages
-    pkg_planner = get_package_share_directory('planner')
-    pkg_nav2_bringup = get_package_share_directory('nav2_bringup')
-
+    pkg_planner = get_package_share_directory("planner")
+    pkg_nav2_bringup = get_package_share_directory("nav2_bringup")
 
     # Read robot YAML
-    config = 'src/setup_path/robot.yaml'
+    config = "src/setup_path/robot.yaml"
     # Parse robot YAML into config
     clearpath_config = ClearpathConfig(config)
 
     namespace = clearpath_config.system.namespace
     platform_model = clearpath_config.platform.get_platform_model()
-    
+
     # Get the launch directory
     package_dir = get_package_share_directory("planner")
     pkg_nav2_bringup = get_package_share_directory("nav2_bringup")
 
     # Paths to files and directories
     rviz_config_file = os.path.join(package_dir, "config", "nav2.rviz")
-    map_yaml_file = os.path.join(os.path.expanduser("~"), "vegmap", "src", "planner", "maps", "empty_map.yaml")
+    map_yaml_file = os.path.join(
+        os.path.expanduser("~"), "vegmap", "src", "planner", "maps", "empty_map.yaml"
+    )
 
     if not os.path.exists(map_yaml_file):
         print(f"WARNING: Map file does not exist at: {map_yaml_file}")
@@ -45,13 +55,15 @@ def generate_launch_description():
         ("sensors/lidar3d_0/scan", "/scan"),
         ("platform/odom/filtered", "/odom"),
         # For cmd_vel, we want the opposite direction
-        ("/cmd_vel", PythonExpression(["'/", namespace, "/cmd_vel'"]))
+        ("/cmd_vel", PythonExpression(["'/", namespace, "/cmd_vel'"])),
     ]
 
     # Instead of including the standard nav2 launch files, include your custom one
     custom_nav_bringup = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(pkg_planner, "launch", "nav2_bringup.launch.py")]),
-        launch_arguments=[('use_sim_time', use_sim_time)]
+        PythonLaunchDescriptionSource(
+            [os.path.join(pkg_planner, "launch", "nav2_bringup.launch.py")]
+        ),
+        launch_arguments=[("use_sim_time", use_sim_time)],
     )
 
     # Launch RViz (outside the namespace)
@@ -60,9 +72,11 @@ def generate_launch_description():
         executable="rviz2",
         name="rviz2",
         arguments=["-d", rviz_config_file],
-        parameters=[{
-            "use_sim_time": use_sim_time,
-        }],
+        parameters=[
+            {
+                "use_sim_time": use_sim_time,
+            }
+        ],
         remappings=remappings,
         namespace=namespace,
         output="screen",
@@ -73,7 +87,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(
             [os.path.join(package_dir, "launch", "gz_bridge.launch.py")]
         ),
-        launch_arguments=[('namespace', namespace)]  
+        launch_arguments=[("namespace", namespace)],
     )
 
     # Start the Vegetation Costmap Updater
@@ -91,7 +105,7 @@ def generate_launch_description():
             {"update_frequency": 2.0},
             {"tf_topic": "/outdoors_tf"},
             {"use_sim_time": use_sim_time},
-            ("namespace", namespace)
+            ("namespace", namespace),
         ],
     )
 
@@ -103,8 +117,6 @@ def generate_launch_description():
         [
             # push_namespace,
             custom_nav_bringup,
-            # delayed_nav2, 
-            # delayed_nav2_localization,
             veg_costmap_updater,
             delayed_rviz,
             gz_bridge_launch,
