@@ -173,7 +173,7 @@ local_costmap:
         enabled: True
         observation_sources: scan
         scan:
-          topic: /scan  
+          topic: /a200_0000/sensors/lidar3d_0/scan  
           max_obstacle_height: 2.0
           clearing: True
           marking: True
