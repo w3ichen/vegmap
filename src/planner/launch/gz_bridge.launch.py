@@ -74,15 +74,5 @@ def generate_launch_description():
                 output='screen',
                 remappings=[('tf', '/tf'), ('tf_static', '/tf_static')]
             )
-            # # tf transformation odom to base link
-            # Node(
-            # package='tf2_ros',
-            # executable='static_transform_publisher',
-            # name='odom_to_base_link',
-            # namespace=namespace,  # Would add namespace here too
-            # arguments=['0', '0', '0', '0', '0', '0', 'odom', 'base_link'],
-            # output='screen',
-            # remappings=[('tf', '/tf'), ('tf_static', '/tf_static')]
-            # )
         ]
     )
