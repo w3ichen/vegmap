@@ -105,6 +105,7 @@ namespace vegmap_planner
         std::shared_ptr<nav2_costmap_2d::Costmap2DROS> costmap_ros_;
         std::string global_frame_;
         std::string name_;
+        std::string costmap_updated_topic_;
 
         // Costmap change detection
         std::unique_ptr<nav2_costmap_2d::CostmapSubscriber> costmap_subscriber_;

@@ -430,7 +430,7 @@ Visualization Manager:
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /veg_costmap_updated
+        Value: /veg_costmap/updated
       Use Timestamp: false
       Value: true
   Enabled: true

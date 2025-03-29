@@ -19,6 +19,7 @@
 #include "nav_msgs/msg/occupancy_grid.hpp"
 #include "std_msgs/msg/empty.hpp"
 #include "planner_msgs/srv/update_cost.hpp"
+#include "planner_msgs/srv/get_transforms.hpp"
 
 namespace veg_costmap
 {
@@ -27,6 +28,44 @@ namespace veg_costmap
     public:
         // Constructor
         VegCostmapLayer();
+
+        // Define ObstaclePoint first, before using it in containers
+        struct ObstaclePoint
+        {
+            double x{0.0};
+            double y{0.0};
+            std::string name{""};
+            mutable unsigned char cost{0};
+            mutable unsigned char cost_stddev{0};
+
+            // Default constructor
+            ObstaclePoint() = default;
+
+            // Custom equality operator that only compares x and y
+            bool operator==(const ObstaclePoint &other) const
+            {
+                return (x == other.x && y == other.y);
+            }
+        };
+
+        // Required for std::unordered_set to work with ObstaclePoint
+        struct ObstaclePointHash
+        {
+            std::size_t operator()(const ObstaclePoint &p) const
+            {
+                std::size_t h1 = std::hash<double>{}(p.x);
+                std::size_t h2 = std::hash<double>{}(p.y);
+                return h1 ^ (h2 << 1);
+            }
+        };
+
+        struct ObstacleData
+        {
+            // Use the custom hash function in the unordered_set definition
+            std::unordered_set<ObstaclePoint, ObstaclePointHash> others;
+            unsigned char cost{0};
+            unsigned char cost_stddev{5};
+        };
 
         // Required costmap layer methods
         virtual void onInitialize() override;
@@ -43,22 +82,11 @@ namespace veg_costmap
 
         // Obstacle
         double getSavedObstacleCost(std::string obstacle_name);
-        struct ObstaclePoint
-        {
-            double x;
-            double y;
-            std::string name;
-            unsigned char cost; // Allow variable cost based on vegetation type
-            unsigned char cost_stddev;
-        };
-        struct ObstacleData
-        {
-            std::unordered_set<ObstaclePoint> others; // List of other similar obstacles
-            unsigned char cost;                       // Allow variable cost based on vegetation type
-            unsigned char cost_stddev;
-        };
 
     private:
+        // Use Layer's parameter methods
+        using nav2_costmap_2d::Layer::declareParameter;
+
         // Obstacles considered as vegetation
         std::vector<std::string> veg_names_ = {"tree", "bush"};
         bool getWorldTransforms(void);
@@ -67,7 +95,7 @@ namespace veg_costmap
         void updateCostCallback(
             const std::shared_ptr<planner_msgs::srv::UpdateCost::Request> request,
             std::shared_ptr<planner_msgs::srv::UpdateCost::Response> response);
-        bool VegCostmapLayer::updateCostValue_(nav2_costmap_2d::Costmap2D *costmap, unsigned int mx, unsigned int my, unsigned char cost);
+        bool updateCostValue_(nav2_costmap_2d::Costmap2D *costmap, unsigned int mx, unsigned int my, unsigned char cost);
         void publishCostmapCallback();
 
         // Data structures
@@ -86,7 +114,7 @@ namespace veg_costmap
 
         // Parameters
         std::mutex mutex_;
-        bool costmap_updated_;
+        bool costmap_updated_{false};
         std::string world_tf_service_;
         std::string update_topic_;
         std::string updated_topic_;
@@ -97,14 +125,20 @@ namespace veg_costmap
         int lethal_cost_;
         bool use_gradient_costs_;
         double gradient_factor_;
-        int map_width_;
-        int map_height_;
+        unsigned int map_width_;
+        unsigned int map_height_;
         double map_resolution_;
         double map_origin_x_;
         double map_origin_y_;
 
         // Random generators
         std::mt19937 gen;
+
+        // Helper Functions
+        void bayesian_update_gaussian(
+            double prior_mean, double prior_stddev,
+            double obs_mean, double obs_stddev,
+            unsigned char *posterior_mean, unsigned char *posterior_stddev);
     };
 
     namespace defaults
@@ -126,8 +160,8 @@ namespace veg_costmap
             {"bush_4", {{}, 150, 10}},
         };
 
-        uint8_t UNKNOWN_COST = 120;
-        uint8_t UNKNOWN_COVARIANCE = 20;
+        const uint8_t UNKNOWN_COST = 120;
+        const uint8_t UNKNOWN_COVARIANCE = 20;
     } // namespace defaults
 
 } // namespace veg_costmap

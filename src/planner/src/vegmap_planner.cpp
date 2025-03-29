@@ -16,7 +16,6 @@
  */
 namespace vegmap_planner
 {
-
     /**
      * configure()
      * Method is called at when planner server enters on_configure state.
@@ -56,6 +55,12 @@ namespace vegmap_planner
             node_, name_ + ".obstacle_range", rclcpp::ParameterValue(254));
         node_->get_parameter(name_ + ".obstacle_range", obstacle_range_);
 
+        nav2_util::declare_parameter_if_not_declared(
+            node_, name_ + ".costmap_updated_topic", rclcpp::ParameterValue("/veg_costmap/updated"));
+
+        node_->get_parameter(name_ + ".obstacle_range", obstacle_range_);
+        node_->get_parameter(name_ + ".obstacle_range", costmap_updated_topic_);
+
         RCLCPP_INFO(
             node_->get_logger(), "Configured plugin %s of type VegmapPlanner with parameters: "
                                  "interpolation_resolution = %.2f, heuristic_weight = %.2f",
@@ -63,7 +68,7 @@ namespace vegmap_planner
 
         // Subscribe to costmap update notifications
         costmap_update_sub_ = node_->create_subscription<std_msgs::msg::Empty>(
-            "/veg_costmap_updated", 1,
+            costmap_updated_topic_, 1,
             std::bind(&VegmapPlanner::costmapUpdateCallback, this, std::placeholders::_1));
 
         // Initialize D* lite data structures

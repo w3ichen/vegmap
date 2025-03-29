@@ -58,6 +58,7 @@ namespace veg_costmap
         declareParameter("map_origin_y", rclcpp::ParameterValue(-25.0));
 
         // Get parameters
+        int temp_width = 0, temp_height = 0;
         node->get_parameter(name_ + ".enabled", enabled_);
         node->get_parameter(name_ + ".world_tf_service", world_tf_service_);
         node->get_parameter(name_ + ".update_topic", update_topic_);
@@ -68,11 +69,14 @@ namespace veg_costmap
         node->get_parameter(name_ + ".lethal_cost", lethal_cost_);
         node->get_parameter(name_ + ".use_gradient_costs", use_gradient_costs_);
         node->get_parameter(name_ + ".gradient_factor", gradient_factor_);
-        node->get_parameter(name_ + ".map_width", map_width_);
-        node->get_parameter(name_ + ".map_height", map_height_);
+        node->get_parameter(name_ + ".map_width", temp_width);
+        node->get_parameter(name_ + ".map_height", temp_height);
         node->get_parameter(name_ + ".map_resolution", map_resolution_);
         node->get_parameter(name_ + ".map_origin_x", map_origin_x_);
         node->get_parameter(name_ + ".map_origin_y", map_origin_y_);
+
+        map_width_ = static_cast<unsigned int>(temp_width);
+        map_height_ = static_cast<unsigned int>(temp_height);
 
         global_frame_ = layered_costmap_->getGlobalFrameID();
 
@@ -125,10 +129,10 @@ namespace veg_costmap
         }
 
         // Check if the cell is within the map bounds
-        if (mx < 0 || mx >= map_width_ || my < 0 || my >= map_height_)
+        if (mx >= map_width_ || my >= map_height_)
         {
             RCLCPP_ERROR(
-                rclcpp::get_logger(),
+                node->get_logger(),
                 "Cannot update cost at (%u, %u): out of bounds",
                 mx, my);
             return false;
@@ -159,8 +163,8 @@ namespace veg_costmap
                 unsigned int cur_my = my + j;
 
                 // Check if cell is within map bounds
-                if (cur_mx < 0 || cur_mx >= costmap->getSizeInCellsX() ||
-                    cur_my < 0 || cur_my >= costmap->getSizeInCellsY())
+                if (cur_mx >= costmap->getSizeInCellsX() ||
+                    cur_my >= costmap->getSizeInCellsY())
                 {
                     continue;
                 }
@@ -219,13 +223,12 @@ namespace veg_costmap
             // Iterate through all the other similar obstacles and update their cost
             for (auto &obstacle : obstacle_data.others)
             {
-                ObstaclePoint &obstacle_point = obstacle_grid_[mx][my];
                 // If stddev is not 0 (ie. not sampled), update cost from a normal distribution to account for uncertainty
-                if (obstacle_point.cost_stddev != 0)
+                if (obstacle.cost_stddev != 0)
                 {
                     std::normal_distribution<double> normal_dist(obstacle_data.cost, obstacle_data.cost_stddev);
                     // Sample from normal distribution
-                    obstacle_point.cost = normal_dist(gen);
+                    obstacle_grid_[obstacle.x][obstacle.y].cost = normal_dist(gen);
                 }
             }
         }
@@ -298,6 +301,11 @@ namespace veg_costmap
         double robot_x, double robot_y, double robot_yaw,
         double *min_x, double *min_y, double *max_x, double *max_y)
     {
+        // Unused parameters
+        (void)robot_x;
+        (void)robot_y;
+        (void)robot_yaw;
+
         if (!enabled_)
             return;
 
@@ -385,12 +393,10 @@ namespace veg_costmap
                 if (obstacle.cost > 0)
                 { // Only consider cells with obstacles
                     // Update the costmap layer with the new cost
-                    updateCostValue_(costmap_, i, j, obstacle.cost);
+                    updateCostValue_(&master_grid, i, j, obstacle.cost);
                 }
             }
         }
-        // Apply to master grid with overwrite
-        updateWithOverwrite(master_grid, min_i, min_j, max_i, max_j);
     }
 
     /**
@@ -434,9 +440,9 @@ namespace veg_costmap
             return;
         }
 
-        // Update the obstacle radius based on the new footprint
-        double footprint_radius = nav2_costmap_2d::getFootprintRadius(layered_costmap_->getFootprint());
-        obstacle_radius_ = std::max(obstacle_radius_, footprint_radius);
+        // // Update the obstacle radius based on the new footprint
+        // double footprint_radius = nav2_costmap_2d::getFootprintRadius(layered_costmap_->getFootprint());
+        // obstacle_radius_ = std::max(obstacle_radius_, footprint_radius);
     }
 
     /**
@@ -500,11 +506,11 @@ namespace veg_costmap
         grid_msg->header.frame_id = global_frame_;
 
         // Set map metadata
-        grid_msg->info.width = costmap_->getSizeInCellsX();
-        grid_msg->info.height = costmap_->getSizeInCellsY();
-        grid_msg->info.resolution = costmap_->getResolution();
-        grid_msg->info.origin.position.x = costmap_->getOriginX();
-        grid_msg->info.origin.position.y = costmap_->getOriginY();
+        grid_msg->info.width = map_width_;
+        grid_msg->info.height = map_height_;
+        grid_msg->info.resolution = map_resolution_;
+        grid_msg->info.origin.position.x = map_origin_x_;
+        grid_msg->info.origin.position.y = map_origin_y_;
         grid_msg->info.origin.position.z = 0.0;
         grid_msg->info.origin.orientation.w = 1.0;
 
@@ -512,7 +518,7 @@ namespace veg_costmap
         grid_msg->data.resize(grid_msg->info.width * grid_msg->info.height);
 
         // Convert from costmap (0-255) to occupancy grid (-1 to 100)
-        unsigned char *costmap_data = costmap_->getCharMap();
+        unsigned char *costmap_data = layered_costmap_->getCostmap()->getCharMap();
         for (unsigned int i = 0; i < grid_msg->data.size(); ++i)
         {
             unsigned char cost = costmap_data[i];
@@ -649,7 +655,7 @@ namespace veg_costmap
      * @param posterior_mean Pointer to store the updated mean
      * @param posterior_stddev Pointer to store the updated standard deviation
      */
-    void bayesian_update_gaussian(
+    void VegCostmapLayer::bayesian_update_gaussian(
         double prior_mean, double prior_stddev,
         double obs_mean, double obs_stddev,
         unsigned char *posterior_mean, unsigned char *posterior_stddev)
@@ -668,10 +674,6 @@ namespace veg_costmap
 
         // Calculate posterior standard deviation
         *posterior_stddev = sqrt(1.0 / posterior_precision);
-    }
-    double euclidean_distance(double x1, double y1, double x2, double y2)
-    {
-        return std::hypot(x2 - x1, y2 - y1);
     }
 
 } // namespace veg_costmap
