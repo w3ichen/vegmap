@@ -28,6 +28,7 @@
   <depend>ros_gz_bridge</depend>
   <depend>tf2_msgs</depend>
   <depend>rclpy</depend>
+  <depend>planner_msgs</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

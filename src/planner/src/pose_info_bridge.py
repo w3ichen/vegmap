@@ -7,33 +7,38 @@ from geometry_msgs.msg import TransformStamped
 import subprocess
 from subprocess import PIPE
 import re
-import shutil
+import os
+from planner_msgs.srv import GetTransforms
 
 
-class PoseInfoBridge(Node):
+class PoseInfoService(Node):
     def __init__(self):
-        super().__init__("pose_info_bridge")
+        super().__init__("pose_info_service")
 
-        # Create publisher
-        self.pub = self.create_publisher(TFMessage, "/outdoors_tf", 10)
+        # Create the service
+        self.srv = self.create_service(
+            GetTransforms, "/world/get_tf", self.get_tf_callback
+        )
 
-        # Create timer for polling
-        self.timer = self.create_timer(1.0, self.timer_callback)
+        self.get_logger().info("Pose info service initialized")
 
-        self.get_logger().info("Pose info bridge initialized")
+    def get_tf_callback(self, request, response):
+        world = request.world_name
 
-    def timer_callback(self):
-        world = "outdoors"
+        self.get_logger().info(f"Getting transforms for world: {world}")
+
         # Get pose info using subprocess
-        if shutil.which("ign") is not None:
-            cmd = f"ign topic -e -t /world/{world}/pose/info -n1"
+        if os.environ.get("GZ_VERSION") == "garden":
+            gz_exec = "gz"
         else:
-            cmd = f"gz topic -e -t /world/{world}/pose/info -n1"
+            gz_exec = "ign"
+
+        cmd = f"{gz_exec} topic -e -t /world/{world}/pose/info -n1"
         process = subprocess.Popen([cmd], shell=True, stdout=PIPE)
         output = process.communicate()[0].decode("utf-8")
 
         # Create TF message
-        tf_msg = TFMessage()
+        response.transforms = TFMessage()
 
         # Parse output and extract poses
         poses = re.findall(
@@ -99,17 +104,18 @@ class PoseInfoBridge(Node):
             transform.transform.rotation.z = quat_z
             transform.transform.rotation.w = quat_w
 
-            tf_msg.transforms.append(transform)
+            response.transforms.transforms.append(transform)
 
-        # Publish if we have transforms
-        if tf_msg.transforms:
-            self.pub.publish(tf_msg)
-            self.get_logger().debug(f"Published {len(tf_msg.transforms)} transforms")
+        transform_count = len(response.transforms.transforms)
+        self.get_logger().info(
+            f"Returning {transform_count} transforms for world '{world}'"
+        )
+        return response
 
 
 def main():
     rclpy.init()
-    node = PoseInfoBridge()
+    node = PoseInfoService()
     rclpy.spin(node)
     rclpy.shutdown()
 

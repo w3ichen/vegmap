@@ -6,6 +6,8 @@
 #include <memory>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
+#include <random>
 
 #include "rclcpp/rclcpp.hpp"
 #include "nav2_costmap_2d/layer.hpp"
@@ -16,15 +18,17 @@
 #include "tf2/utils.h"
 #include "nav_msgs/msg/occupancy_grid.hpp"
 #include "std_msgs/msg/empty.hpp"
+#include "planner_msgs/srv/update_cost.hpp"
 
 namespace veg_costmap
 {
-
     class VegCostmapLayer : public nav2_costmap_2d::CostmapLayer
     {
     public:
+        // Constructor
         VegCostmapLayer();
 
+        // Required costmap layer methods
         virtual void onInitialize() override;
         virtual void updateBounds(
             double robot_x, double robot_y, double robot_yaw,
@@ -32,54 +36,99 @@ namespace veg_costmap
         virtual void updateCosts(
             nav2_costmap_2d::Costmap2D &master_grid,
             int min_i, int min_j, int max_i, int max_j) override;
-
-        virtual void reset() override { obstacle_points_.clear(); }
+        virtual void matchSize() override;
+        virtual void onFootprintChanged(void) override;
+        virtual void reset() override;
         virtual bool isClearable() override { return true; }
 
-        // Method to update the costmap from an external source
-        void updateVegetationCost(unsigned int mx, unsigned int my, unsigned char cost);
-
-    private:
-        void tfCallback(const tf2_msgs::msg::TFMessage::SharedPtr msg);
-        void costmapCallback(const nav_msgs::msg::OccupancyGrid::SharedPtr msg);
-
+        // Obstacle
+        double getSavedObstacleCost(std::string obstacle_name);
         struct ObstaclePoint
         {
             double x;
             double y;
             std::string name;
             unsigned char cost; // Allow variable cost based on vegetation type
+            unsigned char cost_stddev;
+        };
+        struct ObstacleData
+        {
+            std::unordered_set<ObstaclePoint> others; // List of other similar obstacles
+            unsigned char cost;                       // Allow variable cost based on vegetation type
+            unsigned char cost_stddev;
         };
 
-        std::vector<ObstaclePoint> obstacle_points_;
-        std::mutex mutex_;
-        bool costmap_updated_;
+    private:
+        // Obstacles considered as vegetation
+        std::vector<std::string> veg_names_ = {"tree", "bush"};
+        bool getWorldTransforms(void);
 
-        // Subscription for TF messages
-        rclcpp::Subscription<tf2_msgs::msg::TFMessage>::SharedPtr tf_sub_;
+        // Callbacks
+        void updateCostCallback(
+            const std::shared_ptr<planner_msgs::srv::UpdateCost::Request> request,
+            std::shared_ptr<planner_msgs::srv::UpdateCost::Response> response);
+        bool VegCostmapLayer::updateCostValue_(nav2_costmap_2d::Costmap2D *costmap, unsigned int mx, unsigned int my, unsigned char cost);
+        void publishCostmapCallback();
 
-        // Subscription for external costmap updates
-        rclcpp::Subscription<nav_msgs::msg::OccupancyGrid>::SharedPtr costmap_sub_;
+        // Data structures
+        std::vector<std::vector<ObstaclePoint>> obstacle_grid_;
+        std::unordered_map<std::string, ObstacleData> obstacle_database_;
 
-        // Service to trigger replanning
+        // Publishers
         rclcpp::Publisher<std_msgs::msg::Empty>::SharedPtr replan_pub_;
+        rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr costmap_pub_;
+
+        // Services
+        rclcpp::Service<planner_msgs::srv::UpdateCost>::SharedPtr update_cost_srv_;
+
+        // Timers
+        rclcpp::TimerBase::SharedPtr costmap_pub_timer_;
 
         // Parameters
-        std::string tf_topic_;
-        std::string veg_update_topic_;
+        std::mutex mutex_;
+        bool costmap_updated_;
+        std::string world_tf_service_;
+        std::string update_topic_;
+        std::string updated_topic_;
+        std::string costmap_pub_topic_;
         std::string global_frame_;
         double obstacle_range_;
         double obstacle_radius_;
-        bool clearing_enabled_;
-        std::string tf_prefix_filter_;
-        unsigned char lethal_cost_;
-        unsigned char medium_cost_;
-        unsigned char low_cost_;
+        int lethal_cost_;
         bool use_gradient_costs_;
         double gradient_factor_;
+        int map_width_;
+        int map_height_;
+        double map_resolution_;
+        double map_origin_x_;
+        double map_origin_y_;
+
+        // Random generators
+        std::mt19937 gen;
     };
 
-    double distance(double x1, double y1, double x2, double y2);
+    namespace defaults
+    {
+        // Prior knowledge base of vegetation obstacles
+        static const std::initializer_list<std::pair<const std::string, VegCostmapLayer::ObstacleData>> SAVED_OBSTACLE_DATABASE = {
+            {"tree_1", {{}, 250, 2}},
+            {"tree_2", {{}, 250, 2}},
+            {"tree_3", {{}, 250, 2}},
+            {"tree_4", {{}, 250, 2}},
+            {"tree_5", {{}, 250, 2}},
+            {"tree_6", {{}, 250, 2}},
+            {"tree_7", {{}, 250, 2}},
+            {"tree_8", {{}, 250, 2}},
+            {"palm_tree", {{}, 254, 2}},
+            {"bush_1", {{}, 150, 10}},
+            {"bush_2", {{}, 150, 10}},
+            {"bush_3", {{}, 150, 10}},
+            {"bush_4", {{}, 150, 10}},
+        };
+
+        uint8_t UNKNOWN_COST = 120;
+        uint8_t UNKNOWN_COVARIANCE = 20;
+    } // namespace defaults
 
 } // namespace veg_costmap
 

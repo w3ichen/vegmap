@@ -42,25 +42,6 @@ git submodule update --init --recursive
 ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path world:=outdoors
 ```
 
-2. Running planner server
-
-```bash
-ros2 launch planner planner_server.launch.py
-```
-
-3. Start the planner
-   Either start the planner client or send commands via terminal:
-
-```bash
-ros2 launch planner planner_client.launch.py
-```
-
-or
-
-```bash
-ros2 action send_goal /move_robot nav2_msgs/action/NavigateToPose <msg>
-```
-
 ## Links
 
 - [Clearpath_common Github](https://github.com/clearpathrobotics/clearpath_common/tree/humble)
@@ -151,7 +132,6 @@ git rm --cached "**/*.pyc"
   Remove the conda install: `conda uninstall --force ros-humble-controller-manager ros-humble-controller-interface ros-humble-hardware-interface ros-humble-controller-manager-msgs ros-humble-ros2-control`
   Build ros2_control from source: `colcon build --cmake-args -DBUILD_TESTING=OFF -DPython3_FIND_VIRTUALENV=ONLY --packages-select controller_interface hardware_interface controller_manager_msgs controller_manager`
 
-
 - `Original error: parameter 'yaml_filename' is not initialized`
-Known bug with map_server yaml_filename: https://github.com/ros-navigation/navigation2/issues/3644
-Patch is not in binaries, need to build from source (didn't work) or write your own bringup nodes
+  Known bug with map_server yaml_filename: https://github.com/ros-navigation/navigation2/issues/3644
+  Patch is not in binaries, need to build from source (didn't work) or write your own bringup nodes

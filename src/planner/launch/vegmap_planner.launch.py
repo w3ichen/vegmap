@@ -90,25 +90,6 @@ def generate_launch_description():
         launch_arguments=[("namespace", namespace)],
     )
 
-    # Start the Vegetation Costmap Updater
-    veg_costmap_updater = Node(
-        package="planner",
-        executable="veg_costmap_updater.py",
-        name="veg_costmap_updater",
-        output="screen",
-        parameters=[
-            {"map_width": 100},
-            {"map_height": 100},
-            {"map_resolution": 0.1},
-            {"map_origin_x": -5.0},
-            {"map_origin_y": -5.0},
-            {"update_frequency": 2.0},
-            {"tf_topic": "/outdoors_tf"},
-            {"use_sim_time": use_sim_time},
-            ("namespace", namespace),
-        ],
-    )
-
     # Create push_namespace action
     # push_namespace = PushRosNamespace(namespace=namespace)
     delayed_rviz = TimerAction(period=0.0, actions=[rviz])
@@ -117,7 +98,6 @@ def generate_launch_description():
         [
             # push_namespace,
             custom_nav_bringup,
-            veg_costmap_updater,
             delayed_rviz,
             gz_bridge_launch,
         ]

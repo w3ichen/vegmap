@@ -23,20 +23,10 @@ find_package(tf2_ros REQUIRED)
 find_package(nav2_costmap_2d REQUIRED)
 find_package(nav2_core REQUIRED)
 find_package(pluginlib REQUIRED)
-find_package(rosidl_default_generators REQUIRED)
 find_package(tf2_msgs REQUIRED)
 find_package(nav2_common REQUIRED)
 find_package(tf2 REQUIRED)
-
-# First generate the interfaces
-rosidl_generate_interfaces(${PROJECT_NAME}
-  "srv/GetPoses.srv"
-  DEPENDENCIES tf2_msgs
-)
-
-# Get typesupport target
-rosidl_get_typesupport_target(cpp_typesupport_target
-  ${PROJECT_NAME} rosidl_typesupport_cpp)
+find_package(planner_msgs REQUIRED)
 
 # Define the planner plugin library
 add_library(vegmap_planner_plugin SHARED
@@ -48,9 +38,6 @@ add_library(veg_costmap_layer_plugin SHARED
   src/veg_costmap_layer.cpp
 )
 
-# C++ executables
-add_executable(planner_server src/planner_server.cpp)
-add_executable(planner_client src/planner_client.cpp)
 
 # Define dependencies
 set(dependencies
@@ -72,16 +59,20 @@ set(dependencies
   nav2_common
   tf2
   tf2_msgs
+  planner_msgs
 )
 
-# Set dependencies for executables
-ament_target_dependencies(planner_server rclcpp rclcpp_action std_msgs geometry_msgs nav2_msgs)
-ament_target_dependencies(planner_client rclcpp rclcpp_action std_msgs geometry_msgs nav2_msgs)
 
 # Set dependencies for the planner plugin
 ament_target_dependencies(vegmap_planner_plugin ${dependencies})
-target_link_libraries(vegmap_planner_plugin "${cpp_typesupport_target}")
 
+# Link plugins with the planner_msgs library
+target_link_libraries(vegmap_planner_plugin
+  ${planner_msgs_TARGETS}
+)
+target_link_libraries(veg_costmap_layer_plugin
+  ${planner_msgs_TARGETS}
+)
 # Set proper include directories for plugins
 target_include_directories(vegmap_planner_plugin PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -111,7 +102,6 @@ target_include_directories(veg_costmap_layer_plugin PUBLIC
 # Python executables
 install(PROGRAMS
   src/pose_info_bridge.py
-  src/veg_costmap_updater.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -119,8 +109,6 @@ install(PROGRAMS
 install(TARGETS 
   vegmap_planner_plugin
   veg_costmap_layer_plugin
-  planner_server
-  planner_client
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}

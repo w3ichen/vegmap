@@ -1,0 +1,8 @@
+# Request
+float64 x      # x coordinate in world frame
+float64 y      # y coordinate in world frame
+uint8 cost     # cost value to set (0-255)
+---
+# Response
+bool success           # whether the update was successful
+string message         # error message if not successful

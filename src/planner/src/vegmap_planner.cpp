@@ -12,6 +12,7 @@
 /**
  * @file vegmap_planner.cpp
  * @brief Adaption of the D* Lite global planner for dynamic vegetation environments.
+ * Custom Nav2 Planner: https://docs.nav2.org/plugin_tutorials/docs/writing_new_nav2planner_plugin.html
  */
 namespace vegmap_planner
 {
