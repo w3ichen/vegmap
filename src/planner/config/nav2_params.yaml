@@ -142,7 +142,7 @@ local_costmap:
     ros__parameters:
       update_frequency: 5.0
       publish_frequency: 2.0
-      global_frame: odom
+      global_frame: platform/odom/filtered
       robot_base_frame: base_link
       enable_stamped_cmd_vel: True
       rolling_window: true
@@ -241,7 +241,7 @@ behavior_server:
       plugin: "nav2_behaviors/Wait"
     assisted_teleop:
       plugin: "nav2_behaviors/AssistedTeleop"
-    global_frame: odom
+    global_frame: platform/odom/filtered
     robot_base_frame: base_link
     transform_tolerance: 0.1
     enable_stamped_cmd_vel: True
@@ -271,7 +271,7 @@ velocity_smoother:
     min_velocity: [-1.0, 0.0, -1.0]
     max_accel: [0.5, 0.0, 0.5]
     max_decel: [-0.5, 0.0, -0.5]
-    odom_topic: "platform/odom/filtered"
+    odom_topic: platform/odom/filtered
     odom_duration: 0.1
     deadband_velocity: [0.0, 0.0, 0.0]
     velocity_timeout: 1.0
