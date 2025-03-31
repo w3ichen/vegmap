@@ -55,7 +55,7 @@
       </link>
     </model>
 
-    <!-- Resistance Zone 1 - Visual only, no collision -->
+    <!-- Resistance Zone 1 - 50% resistance (original) -->
     <model name="resistance_zone_1">
       <static>true</static>
       <pose>3 2 0.01 0 0 0</pose>
@@ -67,17 +67,18 @@
             </box>
           </geometry>
           <material>
-            <ambient>1.0 0.0 0.0 0.3</ambient>
-            <diffuse>1.0 0.0 0.0 0.3</diffuse>
-            <specular>1.0 1.0 1.0 0.3</specular>
+            <ambient>0.0 0.3 0.0 0.7</ambient>
+            <diffuse>0.0 0.3 0.0 0.7</diffuse>
+            <specular>0.0 0.2 0.0 0.7</specular>
+            <emissive>0.0 0.05 0.0 1.0</emissive>
           </material>
-          <transparency>0.7</transparency>
+          <transparency>0.5</transparency>
         </visual>
         <!-- No collision element -->
       </link>
     </model>
 
-    <!-- Resistance Zone 2 - Visual only, no collision -->
+    <!-- Resistance Zone 2 - 70% resistance -->
     <model name="resistance_zone_2">
       <static>true</static>
       <pose>-4 5 0.01 0 0 0</pose>
@@ -89,17 +90,18 @@
             </box>
           </geometry>
           <material>
-            <ambient>1.0 0.0 0.0 0.3</ambient>
-            <diffuse>1.0 0.0 0.0 0.3</diffuse>
-            <specular>1.0 1.0 1.0 0.3</specular>
+            <ambient>0.0 0.18 0.0 0.7</ambient>
+            <diffuse>0.0 0.18 0.0 0.7</diffuse>
+            <specular>0.0 0.12 0.0 0.7</specular>
+            <emissive>0.0 0.09 0.0 1.0</emissive>
           </material>
-          <transparency>0.7</transparency>
+          <transparency>0.3</transparency>
         </visual>
         <!-- No collision element -->
       </link>
     </model>
 
-    <!-- Resistance Zone 3 - Visual only, no collision -->
+    <!-- Resistance Zone 3 - 30% resistance -->
     <model name="resistance_zone_3">
       <static>true</static>
       <pose>6 -3 0.01 0 0 0</pose>
@@ -111,9 +113,10 @@
             </box>
           </geometry>
           <material>
-            <ambient>1.0 0.0 0.0 0.3</ambient>
-            <diffuse>1.0 0.0 0.0 0.3</diffuse>
-            <specular>1.0 1.0 1.0 0.3</specular>
+            <ambient>0.0 0.42 0.0 0.7</ambient>
+            <diffuse>0.0 0.42 0.0 0.7</diffuse>
+            <specular>0.0 0.28 0.0 0.7</specular>
+            <emissive>0.0 0.03 0.0 1.0</emissive>
           </material>
           <transparency>0.7</transparency>
         </visual>
@@ -121,7 +124,7 @@
       </link>
     </model>
 
-    <!-- Resistance Zone 4 - Visual only, no collision -->
+    <!-- Resistance Zone 4 - 80% resistance -->
     <model name="resistance_zone_4">
       <static>true</static>
       <pose>-2 -6 0.01 0 0 0</pose>
@@ -133,17 +136,18 @@
             </box>
           </geometry>
           <material>
-            <ambient>1.0 0.0 0.0 0.3</ambient>
-            <diffuse>1.0 0.0 0.0 0.3</diffuse>
-            <specular>1.0 1.0 1.0 0.3</specular>
+            <ambient>0.0 0.12 0.0 0.7</ambient>
+            <diffuse>0.0 0.12 0.0 0.7</diffuse>
+            <specular>0.0 0.08 0.0 0.7</specular>
+            <emissive>0.0 0.12 0.0 1.0</emissive>
           </material>
-          <transparency>0.7</transparency>
+          <transparency>0.2</transparency>
         </visual>
         <!-- No collision element -->
       </link>
     </model>
 
-    <!-- Resistance Zone 5 - Visual only, no collision -->
+    <!-- Resistance Zone 5 - 60% resistance -->
     <model name="resistance_zone_5">
       <static>true</static>
       <pose>8 7 0.01 0 0 0</pose>
@@ -155,11 +159,127 @@
             </box>
           </geometry>
           <material>
-            <ambient>1.0 0.0 0.0 0.3</ambient>
-            <diffuse>1.0 0.0 0.0 0.3</diffuse>
-            <specular>1.0 1.0 1.0 0.3</specular>
+            <ambient>0.0 0.24 0.0 0.7</ambient>
+            <diffuse>0.0 0.24 0.0 0.7</diffuse>
+            <specular>0.0 0.16 0.0 0.7</specular>
+            <emissive>0.0 0.06 0.0 1.0</emissive>
           </material>
-          <transparency>0.7</transparency>
+          <transparency>0.4</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- New Zone 6 - 40% resistance (center, larger) -->
+    <model name="resistance_zone_6">
+      <static>true</static>
+      <pose>0 0 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>2 2 2</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.6</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- New Zone 7 - 90% resistance (very high) -->
+    <model name="resistance_zone_7">
+      <static>true</static>
+      <pose>5 5 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.5 1.5 1.5</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.0 0.06 0.0 0.7</ambient>
+            <diffuse>0.0 0.06 0.0 0.7</diffuse>
+            <specular>0.0 0.04 0.0 0.7</specular>
+            <emissive>0.0 0.15 0.0 1.0</emissive>
+          </material>
+          <transparency>0.1</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- New Zone 8 - 20% resistance (light) -->
+    <model name="resistance_zone_8">
+      <static>true</static>
+      <pose>-5 -5 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.5 1.5 1.5</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.0 0.48 0.0 0.7</ambient>
+            <diffuse>0.0 0.48 0.0 0.7</diffuse>
+            <specular>0.0 0.32 0.0 0.7</specular>
+            <emissive>0.0 0.02 0.0 1.0</emissive>
+          </material>
+          <transparency>0.8</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- New Zone 9 - 75% resistance -->
+    <model name="resistance_zone_9">
+      <static>true</static>
+      <pose>-6 2 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.2 1.2 1.2</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.0 0.15 0.0 0.7</ambient>
+            <diffuse>0.0 0.15 0.0 0.7</diffuse>
+            <specular>0.0 0.10 0.0 0.7</specular>
+            <emissive>0.0 0.10 0.0 1.0</emissive>
+          </material>
+          <transparency>0.25</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- New Zone 10 - 85% resistance -->
+    <model name="resistance_zone_10">
+      <static>true</static>
+      <pose>7 -7 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.8 1.8 1.8</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.0 0.09 0.0 0.7</ambient>
+            <diffuse>0.0 0.09 0.0 0.7</diffuse>
+            <specular>0.0 0.06 0.0 0.7</specular>
+            <emissive>0.0 0.13 0.0 1.0</emissive>
+          </material>
+          <transparency>0.15</transparency>
         </visual>
         <!-- No collision element -->
       </link>

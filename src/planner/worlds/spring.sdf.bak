@@ -145,7 +145,7 @@
     <!-- Original Springy Bush Model -->
     <model name="bush_spring">
       <static>false</static>
-      <pose>-6 0 0.5 1.57 1.57 1.57</pose>
+      <pose>-6 0 0.5 0 0 0</pose>
       <link name="bush_link">
         <collision name="collision">
           <geometry>
@@ -211,7 +211,7 @@
     Soft Pliable Cylinder with Multiple Joints
     <model name="soft_cylinder">
       <static>false</static>
-      <pose>-3 0 0.5 1.57 0 1.57</pose>
+      <pose>-3 0 0.5 0 0 0</pose>
       <link name="base_link">
         <collision name="collision">
           <geometry>
@@ -380,11 +380,188 @@
       </joint>
     </model>
 
-   
+    <!-- Bendable Cylinder with Revolute Joints -->
+    <model name="bendable_cylinder">
+      <static>false</static>
+      <pose>0 0 0.5 0 0 0</pose>
+      <link name="base_link">
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.5</radius>
+              <length>0.25</length>
+            </cylinder>
+          </geometry>
+          <surface>
+            <contact>
+              <ode>
+                <kp>1000.0</kp>
+                <kd>100.0</kd>
+              </ode>
+            </contact>
+          </surface>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.5</radius>
+              <length>0.25</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.2 0.5 0.7 1</ambient>
+            <diffuse>0.2 0.5 0.7 1</diffuse>
+          </material>
+        </visual>
+        <inertial>
+          <mass>1.0</mass>
+        </inertial>
+      </link>
+      
+      <link name="section_1">
+        <pose>0 0 0.25 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.45</radius>
+              <length>0.25</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.45</radius>
+              <length>0.25</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.3 0.5 0.7 1</ambient>
+            <diffuse>0.3 0.5 0.7 1</diffuse>
+          </material>
+        </visual>
+        <inertial>
+          <mass>0.8</mass>
+        </inertial>
+      </link>
+      
+      <link name="section_2">
+        <pose>0 0 0.5 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.4</radius>
+              <length>0.25</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.4</radius>
+              <length>0.25</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.4 0.5 0.7 1</ambient>
+            <diffuse>0.4 0.5 0.7 1</diffuse>
+          </material>
+        </visual>
+        <inertial>
+          <mass>0.6</mass>
+        </inertial>
+      </link>
+      
+      <link name="section_3">
+        <pose>0 0 0.75 0 0 0</pose>
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.35</radius>
+              <length>0.25</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.35</radius>
+              <length>0.25</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.5 0.5 0.7 1</ambient>
+            <diffuse>0.5 0.5 0.7 1</diffuse>
+          </material>
+        </visual>
+        <inertial>
+          <mass>0.4</mass>
+        </inertial>
+      </link>
+      
+      <!-- Fixed joint to world -->
+      <joint name="world_joint" type="fixed">
+        <parent>world</parent>
+        <child>base_link</child>
+      </joint>
+      
+      <!-- Revolute joints between sections -->
+      <joint name="joint_1" type="revolute">
+        <parent>base_link</parent>
+        <child>section_1</child>
+        <pose>0 0 0.125 0 0 0</pose>
+        <axis>
+          <xyz>1 0 0</xyz>
+          <limit>
+            <lower>-0.4</lower>
+            <upper>0.4</upper>
+          </limit>
+          <dynamics>
+            <spring_stiffness>50</spring_stiffness>
+            <damping>5.0</damping>
+          </dynamics>
+        </axis>
+      </joint>
+      
+      <joint name="joint_2" type="revolute">
+        <parent>section_1</parent>
+        <child>section_2</child>
+        <pose>0 0 0.125 0 0 0</pose>
+        <axis>
+          <xyz>0 1 0</xyz>
+          <limit>
+            <lower>-0.4</lower>
+            <upper>0.4</upper>
+          </limit>
+          <dynamics>
+            <spring_stiffness>40</spring_stiffness>
+            <damping>4.0</damping>
+          </dynamics>
+        </axis>
+      </joint>
+      
+      <joint name="joint_3" type="revolute">
+        <parent>section_2</parent>
+        <child>section_3</child>
+        <pose>0 0 0.125 0 0 0</pose>
+        <axis>
+          <xyz>1 0 0</xyz>
+          <limit>
+            <lower>-0.4</lower>
+            <upper>0.4</upper>
+          </limit>
+          <dynamics>
+            <spring_stiffness>30</spring_stiffness>
+            <damping>3.0</damping>
+          </dynamics>
+        </axis>
+      </joint>
+    </model>
+    
     <!-- Bendy Tree with Soft and Hard Sections -->
     <model name="bendy_tree">
       <static>false</static>
-      <pose>3 0 0 5 0 3</pose>
+      <pose>3 0 0 0 0 0</pose>
       
       <!-- Trunk base - fixed to ground -->
       <link name="trunk_base">
