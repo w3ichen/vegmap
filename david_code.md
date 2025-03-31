@@ -98,3 +98,8 @@ ros2 launch planner gz_bridge.launch.py
 python3 src/planner/sensors/wheel_slip_monitor.py # shows realtime imu and pose stuf
 python3 src/planner/sensors/ground_truth.py # show ground truth 
 ```
+
+```bash
+# check twist values or linear velocity
+ros2 topic echo /a200_0000/platform/odom --field twist.twist.linear
+```
