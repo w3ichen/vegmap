@@ -2,7 +2,7 @@
     <world name="default">
     <!-- Rubicon model -->
     <include>
-        <uri>model://rubicon</uri>
+        <uri>file://home/patrick/vegmap/src/planner/worlds/rubicon/model.sdf</uri>
         <pose>0 0 0 0 0 0</pose>
         <scale>0.1 0.1 0.1</scale> 
     </include>
