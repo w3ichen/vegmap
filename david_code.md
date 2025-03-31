@@ -103,3 +103,12 @@ python3 src/planner/sensors/ground_truth.py # show ground truth
 # check twist values or linear velocity
 ros2 topic echo /a200_0000/platform/odom --field twist.twist.linear
 ```
+
+# 5. Creating Resistance Zeons
+```bash
+ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path world:=~/vegmap/src/planner/worlds/resistance_zone
+
+ros2 launch planner gz_bridge.launch.py # robot ground truth position bridge from gazebo to ROS2
+python3 ~/vegmap/src/planner/resistance/resistance_monitor.py # applies resistance to obstacles
+
+```
