@@ -51,33 +51,50 @@ ros2 launch planner gz_bridge.launch.py
 ros2 topic echo
 ```
 
-# 4. Costmap (Doesn't work yet)
 
-```bash
-ros2 launch my_costmap_config costmap.launch.py
-rviz2
-```
-
-# 5. After merging
+# 4. After merging
 ```bash
 # warehouse
 ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path
-# flat veggies
-ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path world:=/home/dseong/vegmap/src/planner/worlds/outdoors
-# spring world
-ros2 launch clearpath_gz simulation.launch.py world:=spring setup_path:=src/setup_path
- 
-# run veggie planner
-ros2 launch planner vegmap_planner.launch.py 
 
-# Timed out waiting for transform from base_link to odom to become available, tf error: Invalid frame ID "odom" passed to canTransform argument target_frame - frame does not exist
+# flat veggies - weichen's testing environment
+ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path world:=~/vegmap/src/planner/worlds/outdoors
+# replace outdoors with
+## grass world - artificial natural environment
+## terrains - varying friction terrains
+
+#rubicon world
+ros2 launch clearpath_gz simulation.launch.py \
+  setup_path:=src/setup_path \
+  world:=~/vegmap/src/planner/worlds/rubicon/rubicon_world \
+  z:=15
+
+# run veggie planner
+ros2 launch planner vegmap_planner.launch.py
 
 # need map.yaml, following code converts map.sdf to map.yaml
 python3 sdf_to_map.py ~/vegmap/src/clearpath_simulator/clearpath_gz/worlds/warehouse.sdf ~/vegmap/src/planner/maps warehouse_map
 
 ```
 
-3. Navigation & Planning
-3.1 Configure Nav2 stack parameters
-3.2 Implement traversability cost function based on vegetation
-3.3 Create custom behavior tree nodes if needed
+
+# 4. IMU and odometry analysis for determining mobility state
+
+```bash
+/a200_0000/platform/joint_states # encoder data
+/a200_0000/sensors/imu_0/data # imu
+/a200_0000/platform/odom # odometry calculated from wheel encoders
+/a200_0000/platform/odom/filtered # filtered odometry, likely fused with IMU
+
+/model/a200_0000/robot_pose # ground truth poistion of the robot
+```
+
+
+```bash
+ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path world:=~/vegmap/src/planner/worlds/terrains
+
+ros2 launch planner gz_bridge.launch.py
+
+python3 src/planner/sensors/wheel_slip_monitor.py # shows realtime imu and pose stuf
+python3 src/planner/sensors/ground_truth.py # show ground truth 
+```
