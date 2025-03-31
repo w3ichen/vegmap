@@ -23,7 +23,7 @@ class PoseInfoService(Node):
         self.get_logger().info("Pose info service initialized")
 
     def get_tf_callback(self, request, response):
-        world = request.world_name
+        world = request.world
 
         self.get_logger().info(f"Getting transforms for world: {world}")
 
@@ -107,6 +107,14 @@ class PoseInfoService(Node):
             response.transforms.transforms.append(transform)
 
         transform_count = len(response.transforms.transforms)
+
+        response.success = transform_count > 0
+        response.message = (
+            f"Found {transform_count} transforms for world '{world}'"
+            if transform_count > 0
+            else f"No transforms found for world '{world}'"
+        )
+
         self.get_logger().info(
             f"Returning {transform_count} transforms for world '{world}'"
         )

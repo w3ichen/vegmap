@@ -99,9 +99,8 @@ namespace veg_costmap
             std::bind(&VegCostmapLayer::publishCostmapCallback, this));
 
         // Init obstacle grid 2D to map size
-        std::vector<std::vector<ObstaclePoint>> obstacle_grid_(
-            static_cast<int>(map_width_),
-            std::vector<ObstaclePoint>(static_cast<int>(map_height_)));
+        obstacle_grid_.resize(static_cast<int>(map_width_),
+                              std::vector<ObstaclePoint>(static_cast<int>(map_height_)));
 
         // Init the obstacle_database_ unordered_map with prior knowledge
         std::unordered_map<std::string, ObstacleData> obstacle_database_ = veg_costmap::defaults::SAVED_OBSTACLE_DATABASE;
@@ -414,17 +413,25 @@ namespace veg_costmap
         // Call the parent method to resize the internal costmap
         CostmapLayer::matchSize();
 
+        // Get the current size of the master costmap
+        unsigned int costmap_width = layered_costmap_->getCostmap()->getSizeInCellsX();
+        unsigned int costmap_height = layered_costmap_->getCostmap()->getSizeInCellsY();
+
+        // Update our member variables to reflect the current costmap size
+        map_width_ = costmap_width;
+        map_height_ = costmap_height;
+
         // Resize the obstacle_grid_ 2D vector to match the new dimensions
-        obstacle_grid_.resize(map_width_);
+        obstacle_grid_.resize(costmap_width);
         for (auto &row : obstacle_grid_)
         {
-            row.resize(map_height_);
+            row.resize(costmap_height);
         }
 
         RCLCPP_INFO(
             node->get_logger(),
             "Resized VegCostmapLayer to width: %u, height: %u",
-            map_width_, map_height_);
+            costmap_width, costmap_height);
     }
 
     /**
@@ -562,11 +569,12 @@ namespace veg_costmap
         }
 
         // Create client for the world TF service
-        auto client = node->create_client<planner_msgs::srv::GetTransforms>("world_tf_service");
+        auto client = node->create_client<planner_msgs::srv::GetTransforms>(world_tf_service_);
 
         // Wait for service to be available with timeout
-        RCLCPP_INFO(node->get_logger(), "Waiting for world_tf_service to be available...");
-        if (!client->wait_for_service(std::chrono::seconds(30)))
+        RCLCPP_INFO(node->get_logger(), "Waiting for world_tf_service to be available at topic: %s",
+                    world_tf_service_.c_str());
+        if (!client->wait_for_service(std::chrono::seconds(10)))
         {
             RCLCPP_ERROR(node->get_logger(), "Timed out waiting for world_tf_service");
             return false;
@@ -581,7 +589,7 @@ namespace veg_costmap
         auto future = client->async_send_request(request);
 
         // Wait for response with timeout
-        if (rclcpp::spin_until_future_complete(node, future, std::chrono::seconds(10)) !=
+        if (rclcpp::spin_until_future_complete(node, future, std::chrono::seconds(20)) !=
             rclcpp::FutureReturnCode::SUCCESS)
         {
             RCLCPP_ERROR(node->get_logger(), "Failed to receive response from world_tf_service");
@@ -596,6 +604,8 @@ namespace veg_costmap
         }
 
         auto transforms = response->transforms.transforms;
+
+        RCLCPP_INFO(node->get_logger(), "Received %zu transforms", transforms.size());
 
         std::lock_guard<std::mutex> lock(mutex_);
 

@@ -64,15 +64,5 @@ def generate_launch_description():
                     {'logger_level': 'error'},
                 ]
             ),
-            # TF Transforms
-            Node(
-                package='tf2_ros',
-                executable='static_transform_publisher',
-                name='map_to_odom',
-                namespace=namespace,  
-                arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom'],
-                output='screen',
-                remappings=[('tf', '/tf'), ('tf_static', '/tf_static')]
-            )
         ]
     )

@@ -57,9 +57,7 @@ namespace vegmap_planner
 
         nav2_util::declare_parameter_if_not_declared(
             node_, name_ + ".costmap_updated_topic", rclcpp::ParameterValue("/veg_costmap/updated"));
-
-        node_->get_parameter(name_ + ".obstacle_range", obstacle_range_);
-        node_->get_parameter(name_ + ".obstacle_range", costmap_updated_topic_);
+        node_->get_parameter(name_ + ".costmap_updated_topic", costmap_updated_topic_);
 
         RCLCPP_INFO(
             node_->get_logger(), "Configured plugin %s of type VegmapPlanner with parameters: "

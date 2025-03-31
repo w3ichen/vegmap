@@ -4,12 +4,31 @@ from launch import LaunchDescription
 from launch.actions import GroupAction
 from launch_ros.actions import Node
 from launch.substitutions import LaunchConfiguration
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import GroupAction
+from launch_ros.descriptions import ParameterFile
+from nav2_common.launch import RewrittenYaml
 
 def generate_launch_description():
     namespace = 'a200_0000'
     use_sim_time = LaunchConfiguration('use_sim_time', default='True')
     map_yaml_file = os.path.join(os.path.expanduser("~"), "vegmap", "src", "planner", "maps", "empty_map.yaml")
     nav2_params_file = os.path.join(get_package_share_directory('planner'), 'config', 'nav2_params.yaml')
+
+
+    param_substitutions = {'autostart': "True"}
+    nav2_params = ParameterFile(
+        RewrittenYaml(
+            source_file=nav2_params_file,
+            root_key=namespace,
+            param_rewrites=param_substitutions,
+            convert_types=True,
+        ),
+        allow_substs=True,
+    )
+
+    print("Nav2 bringup with file:", nav2_params_file, nav2_params)
 
     # Create the map server node
     map_server = Node(
@@ -31,7 +50,7 @@ def generate_launch_description():
         name='amcl',
         namespace=namespace,
         output='screen',
-        parameters=[nav2_params_file]
+        parameters=[nav2_params]
     )
 
     # Create localization lifecycle manager
@@ -56,7 +75,7 @@ def generate_launch_description():
         namespace=namespace,
         output='screen',
         parameters=[
-            nav2_params_file,
+            nav2_params,
             {
                 'use_sim_time': use_sim_time,
                 # Override controller plugin to use RPP instead of DWB
@@ -82,7 +101,7 @@ def generate_launch_description():
         name='planner_server',
         namespace=namespace,
         output='screen',
-        parameters=[nav2_params_file]
+        parameters=[nav2_params]
     )
 
     behavior_server = Node(
@@ -91,7 +110,7 @@ def generate_launch_description():
         name='behavior_server',
         namespace=namespace,
         output='screen',
-        parameters=[nav2_params_file]
+        parameters=[nav2_params]
     )
 
     bt_navigator = Node(
@@ -100,16 +119,23 @@ def generate_launch_description():
         name='bt_navigator',
         namespace=namespace,
         output='screen',
-        parameters=[nav2_params_file]
+        parameters=[nav2_params]
     )
 
     # Create the map->odom transform publisher
-    tf_publisher = Node(
+    map_to_odom = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
         name='map_to_odom_publisher',
         namespace=namespace,
         arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom']
+    )
+    odom_to_base_link = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='odom_to_base_link_publisher',
+        namespace=namespace,
+        arguments=['0', '0', '0', '0', '0', '0', 'odom', 'base_link']
     )
 
     # Navigation lifecycle manager
@@ -135,7 +161,8 @@ def generate_launch_description():
         planner_server,
         behavior_server,
         bt_navigator,
-        tf_publisher,
+        map_to_odom,
+        odom_to_base_link,
         lifecycle_manager_navigation
     ])
 

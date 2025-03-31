@@ -50,3 +50,7 @@ ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path
 ros2 launch clearpath_viz view_navigation.launch.py namespace:=a200_0000
 ros2 launch clearpath_nav2_demos localization.launch.py setup_path:=src/setup_path/ use_sim_time:=true
 ros2 launch clearpath_nav2_demos nav2.launch.py setup_path:=src/setup_path/ use_sim_time:=true
+
+
+# Test service
+ros2 service call /world/get_tf planner_msgs/srv/GetTransforms "{world: 'outdoors'}"
