@@ -2,9 +2,11 @@
 
 import rclpy
 from rclpy.node import Node
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, TransformStamped
 from nav_msgs.msg import Odometry
 import std_msgs.msg
+from tf2_msgs.msg import TFMessage
+import math
 
 class ResistanceMonitor(Node):
     """
@@ -23,25 +25,33 @@ class ResistanceMonitor(Node):
         # Higher resistance_factor = stronger resistance (more reduction)
         self.resistance_zones = [
             # Original zones with variable resistance
-            {'x': 3.0, 'y': 2.0, 'width': 1.0, 'height': 1.0, 'resistance_factor': 0.5},  # 50% reduction
-            {'x': -4.0, 'y': 5.0, 'width': 1.0, 'height': 1.0, 'resistance_factor': 0.7}, # 70% reduction
-            {'x': 6.0, 'y': -3.0, 'width': 1.0, 'height': 1.0, 'resistance_factor': 0.3}, # 30% reduction
-            {'x': -2.0, 'y': -6.0, 'width': 1.0, 'height': 1.0, 'resistance_factor': 0.8}, # 80% reduction
-            {'x': 8.0, 'y': 7.0, 'width': 1.0, 'height': 1.0, 'resistance_factor': 0.6},  # 60% reduction
-            
-            # New zones with different sizes and resistance factors
-            {'x': 0.0, 'y': 0.0, 'width': 2.0, 'height': 2.0, 'resistance_factor': 0.4},  # 40% reduction (center)
-            {'x': 5.0, 'y': 5.0, 'width': 1.5, 'height': 1.5, 'resistance_factor': 0.9},  # 90% reduction (very high)
-            {'x': -5.0, 'y': -5.0, 'width': 1.5, 'height': 1.5, 'resistance_factor': 0.2}, # 20% reduction (light)
-            {'x': -6.0, 'y': 2.0, 'width': 1.2, 'height': 1.2, 'resistance_factor': 0.75}, # 75% reduction
-            {'x': 7.0, 'y': -7.0, 'width': 1.8, 'height': 1.8, 'resistance_factor': 0.85}  # 85% reduction
+            {'x': 3.0, 'y': 2.0, 'radius': 2.0, 'resistance_factor': 0.5},  # 50% reduction
+            {'x': -4.0, 'y': 5.0, 'radius': 1.0, 'resistance_factor': 0.7}, # 70% reduction
+            {'x': 6.0, 'y': -3.0, 'radius': 1.0, 'resistance_factor': 0.3}, # 30% reduction
+            {'x': 1.0, 'y': -6.0, 'radius': 3.0, 'resistance_factor': 0.8}, # 80% reduction
+            {'x': 8.0, 'y': 7.0, 'radius': 1.0, 'resistance_factor': 0.6},  # 60% reduction
+            {'x': 0.0, 'y': 0.0, 'radius': 1.0, 'resistance_factor': 0.4},  # 40% reduction (center)
+            {'x': 5.0, 'y': 5.0, 'radius': 1.0, 'resistance_factor': 0.9},  # 90% reduction (very high)
+            {'x': -5.0, 'y': -5.0, 'radius': 2.0, 'resistance_factor': 0.2}, # 20% reduction (light)
+            {'x': -6.0, 'y': 2.0, 'radius': 1.0, 'resistance_factor': 0.75}, # 75% reduction
+            {'x': 7.0, 'y': -7.0, 'radius': 1.0, 'resistance_factor': 0.85}, # 85% reduction
         ]
         
-        # Subscribe to robot position and velocity command
+
+        # Using odometry for position and velocity
+        # # Subscribe to robot position and velocity command
+        # self.pos_sub = self.create_subscription(
+        #     Odometry, 
+        #     'a200_0000/platform/odom/filtered', 
+        #     self.position_callback, 
+        #     10
+        # )
+
+        # using ground truth position for position
         self.pos_sub = self.create_subscription(
-            Odometry, 
-            'a200_0000/platform/odom/filtered', 
-            self.position_callback, 
+            TFMessage,
+            '/model/a200_0000/robot/pose',
+            self.position_callback,
             10
         )
         
@@ -64,32 +74,53 @@ class ResistanceMonitor(Node):
         self.last_cmd_vel = Twist()
         self.active_zone_index = -1
         self.active_resistance_factor = self.default_resistance_factor
+
+        # keeping track of robot position
+        self.robot_x = 0.0
+        self.robot_y = 0.0
     
-        self.get_logger().info('Enhanced Resistance Monitor started')
-        self.get_logger().info(f'Monitoring {len(self.resistance_zones)} resistance zones')
-    
-    def position_callback(self, msg):
-        """Process robot position data"""
-        x = msg.pose.pose.position.x
-        y = msg.pose.pose.position.y
-        
-        self.get_logger().debug(f'Robot at x={x:.2f}, y={y:.2f}')
-        
-        # Check if robot is in a resistance zone
+        self.get_logger().info('Circular Resistance Monitor started')
+        self.get_logger().info(f'Monitoring {len(self.resistance_zones)} circular resistance zones')
+
+    def position_callback(self,msg):
+        """process robot position from /model/a200_0000/robot/pose"""
+        found_transform = False
+
+        for transform in msg.transforms:
+            if (transform.header.frame_id == 'resistance_zones' and
+                transform.child_frame_id == 'a200_0000/robot'):
+
+                # set robot position
+                self.robot_x = transform.transform.translation.x
+                self.robot_y = transform.transform.translation.y
+
+                self.get_logger().debug(f'Robot at x={self.robot_x:.2f}, y={self.robot_y:.2f}')
+                found_transform = True
+                break
+
+        if found_transform:
+            self.check_zones()
+
+
+    def check_zones(self):
+        """checking if robot is in a circular resistance zone"""
         in_zone = False
         active_index = -1
         active_factor = self.default_resistance_factor
         
         for i, zone in enumerate(self.resistance_zones):
-            if (abs(x - zone['x']) <= zone['width']/2 and 
-                abs(y - zone['y']) <= zone['height']/2):
+            # Calculate distance from robot to zone center
+            distance = math.sqrt((self.robot_x - zone['x'])**2 + (self.robot_y - zone['y'])**2)
+            
+            # Check if robot is within the circle radius
+            if distance <= zone['radius']:
                 in_zone = True
                 active_index = i
                 active_factor = zone['resistance_factor']
                 break
         
         # Update state if changed
-        if (in_zone != self.robot_in_zone or 
+        if (in_zone != self.robot_in_zone or
             active_index != self.active_zone_index or
             active_factor != self.active_resistance_factor):
             
@@ -98,7 +129,7 @@ class ResistanceMonitor(Node):
             self.active_resistance_factor = active_factor
             
             if in_zone:
-                self.get_logger().info(f'Robot entered resistance zone {active_index} ' +
+                self.get_logger().info(f'Robot entered circular resistance zone {active_index} ' +
                                      f'(factor: {active_factor:.2f})')
             else:
                 self.get_logger().info('Robot left resistance zone')

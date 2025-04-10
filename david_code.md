@@ -62,6 +62,7 @@ ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path world:=
 # replace outdoors with
 ## grass world - artificial natural environment
 ## terrains - varying friction terrains
+## resistance_zones
 
 #rubicon world
 ros2 launch clearpath_gz simulation.launch.py \
@@ -106,9 +107,10 @@ ros2 topic echo /a200_0000/platform/odom --field twist.twist.linear
 
 # 5. Creating Resistance Zeons
 ```bash
-ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path world:=~/vegmap/src/planner/worlds/resistance_zone
+ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path world:=~/vegmap/src/planner/worlds/resistance_zone x:=9.0 y:=-9.0 yaw:=2.325
 
 ros2 launch planner gz_bridge.launch.py # robot ground truth position bridge from gazebo to ROS2
+
 python3 ~/vegmap/src/planner/resistance/resistance_monitor.py # applies resistance to obstacles
 
 ```

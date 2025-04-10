@@ -47,14 +47,24 @@
             </plane>
           </geometry>
           <material>
-            <ambient>0.8 0.8 0.8 1</ambient>
-            <diffuse>0.8 0.8 0.8 1</diffuse>
-            <specular>0.8 0.8 0.8 1</specular>
+            <ambient>0.4 0.4 0.4 1</ambient>
+            <diffuse>0.4 0.4 0.4 1</diffuse>
+            <specular>0.4 0.4 0.4 1</specular>
           </material>
         </visual>
       </link>
     </model>
 
+
+
+    <!-- RESISTANCE ZONES
+    ==========================================================
+    ==========================================================
+    ==========================================================
+    -->
+
+    <!-- Transparency - 0.2 -->
+    
     <!-- Resistance Zone 1 - 50% resistance (original) -->
     <model name="resistance_zone_1">
       <static>true</static>
@@ -62,17 +72,19 @@
       <link name="link">
         <visual name="visual">
           <geometry>
-            <box>
-              <size>1 1 1</size>
-            </box>
+            <cylinder>
+              <radius>2.0</radius>
+              <length>4.0</length>
+            </cylinder>
           </geometry>
           <material>
-            <ambient>0.0 0.3 0.0 0.7</ambient>
-            <diffuse>0.0 0.3 0.0 0.7</diffuse>
-            <specular>0.0 0.2 0.0 0.7</specular>
-            <emissive>0.0 0.05 0.0 1.0</emissive>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.36 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
           </material>
-          <transparency>0.5</transparency>
+          <!-- transparency = 0.5 - 0.2 -->
+          <transparency>0.3</transparency>
         </visual>
         <!-- No collision element -->
       </link>
@@ -85,17 +97,18 @@
       <link name="link">
         <visual name="visual">
           <geometry>
-            <box>
-              <size>1 1 1</size>
-            </box>
+            <cylinder>
+              <radius>1.0</radius>
+              <length>2.0</length>
+            </cylinder>
           </geometry>
           <material>
-            <ambient>0.0 0.18 0.0 0.7</ambient>
-            <diffuse>0.0 0.18 0.0 0.7</diffuse>
-            <specular>0.0 0.12 0.0 0.7</specular>
-            <emissive>0.0 0.09 0.0 1.0</emissive>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
           </material>
-          <transparency>0.3</transparency>
+          <transparency>0.5</transparency>
         </visual>
         <!-- No collision element -->
       </link>
@@ -108,17 +121,18 @@
       <link name="link">
         <visual name="visual">
           <geometry>
-            <box>
-              <size>1 1 1</size>
-            </box>
+            <cylinder>
+              <radius>1.0</radius>
+              <length>2.0</length>
+            </cylinder>
           </geometry>
           <material>
-            <ambient>0.0 0.42 0.0 0.7</ambient>
-            <diffuse>0.0 0.42 0.0 0.7</diffuse>
-            <specular>0.0 0.28 0.0 0.7</specular>
-            <emissive>0.0 0.03 0.0 1.0</emissive>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
           </material>
-          <transparency>0.7</transparency>
+          <transparency>0.1</transparency>
         </visual>
         <!-- No collision element -->
       </link>
@@ -127,21 +141,22 @@
     <!-- Resistance Zone 4 - 80% resistance -->
     <model name="resistance_zone_4">
       <static>true</static>
-      <pose>-2 -6 0.01 0 0 0</pose>
+      <pose>1 -6 0.01 0 0 0</pose>
       <link name="link">
         <visual name="visual">
           <geometry>
-            <box>
-              <size>1 1 1</size>
-            </box>
+            <cylinder>
+              <radius>3.0</radius>
+              <length>6.0</length>
+            </cylinder>
           </geometry>
           <material>
-            <ambient>0.0 0.12 0.0 0.7</ambient>
-            <diffuse>0.0 0.12 0.0 0.7</diffuse>
-            <specular>0.0 0.08 0.0 0.7</specular>
-            <emissive>0.0 0.12 0.0 1.0</emissive>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
           </material>
-          <transparency>0.2</transparency>
+          <transparency>0.6</transparency>
         </visual>
         <!-- No collision element -->
       </link>
@@ -154,15 +169,16 @@
       <link name="link">
         <visual name="visual">
           <geometry>
-            <box>
-              <size>1 1 1</size>
-            </box>
+            <cylinder>
+              <radius>1.0</radius>
+              <length>2.0</length>
+            </cylinder>
           </geometry>
           <material>
-            <ambient>0.0 0.24 0.0 0.7</ambient>
-            <diffuse>0.0 0.24 0.0 0.7</diffuse>
-            <specular>0.0 0.16 0.0 0.7</specular>
-            <emissive>0.0 0.06 0.0 1.0</emissive>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
           </material>
           <transparency>0.4</transparency>
         </visual>
@@ -177,9 +193,10 @@
       <link name="link">
         <visual name="visual">
           <geometry>
-            <box>
-              <size>2 2 2</size>
-            </box>
+            <cylinder>
+              <radius>1.0</radius>
+              <length>2.0</length>
+            </cylinder>
           </geometry>
           <material>
             <ambient>0.0 0.36 0.0 0.7</ambient>
@@ -187,7 +204,7 @@
             <specular>0.0 0.24 0.0 0.7</specular>
             <emissive>0.0 0.04 0.0 1.0</emissive>
           </material>
-          <transparency>0.6</transparency>
+          <transparency>0.2</transparency>
         </visual>
         <!-- No collision element -->
       </link>
@@ -200,17 +217,18 @@
       <link name="link">
         <visual name="visual">
           <geometry>
-            <box>
-              <size>1.5 1.5 1.5</size>
-            </box>
+            <cylinder>
+              <radius>1.0</radius>
+              <length>2.0</length>
+            </cylinder>
           </geometry>
           <material>
-            <ambient>0.0 0.06 0.0 0.7</ambient>
-            <diffuse>0.0 0.06 0.0 0.7</diffuse>
-            <specular>0.0 0.04 0.0 0.7</specular>
-            <emissive>0.0 0.15 0.0 1.0</emissive>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
           </material>
-          <transparency>0.1</transparency>
+          <transparency>0.7</transparency>
         </visual>
         <!-- No collision element -->
       </link>
@@ -223,17 +241,18 @@
       <link name="link">
         <visual name="visual">
           <geometry>
-            <box>
-              <size>1.5 1.5 1.5</size>
-            </box>
+            <cylinder>
+              <radius>2.0</radius>
+              <length>4.0</length>
+            </cylinder>
           </geometry>
           <material>
-            <ambient>0.0 0.48 0.0 0.7</ambient>
-            <diffuse>0.0 0.48 0.0 0.7</diffuse>
-            <specular>0.0 0.32 0.0 0.7</specular>
-            <emissive>0.0 0.02 0.0 1.0</emissive>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
           </material>
-          <transparency>0.8</transparency>
+          <transparency>0.01</transparency>
         </visual>
         <!-- No collision element -->
       </link>
@@ -246,17 +265,18 @@
       <link name="link">
         <visual name="visual">
           <geometry>
-            <box>
-              <size>1.2 1.2 1.2</size>
-            </box>
+            <cylinder>
+              <radius>1.0</radius>
+              <length>2.0</length>
+            </cylinder>
           </geometry>
           <material>
-            <ambient>0.0 0.15 0.0 0.7</ambient>
-            <diffuse>0.0 0.15 0.0 0.7</diffuse>
-            <specular>0.0 0.10 0.0 0.7</specular>
-            <emissive>0.0 0.10 0.0 1.0</emissive>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
           </material>
-          <transparency>0.25</transparency>
+          <transparency>0.55</transparency>
         </visual>
         <!-- No collision element -->
       </link>
@@ -269,20 +289,283 @@
       <link name="link">
         <visual name="visual">
           <geometry>
-            <box>
-              <size>1.8 1.8 1.8</size>
-            </box>
+            <cylinder>
+              <radius>1.0</radius>
+              <length>2.0</length>
+            </cylinder>
           </geometry>
           <material>
-            <ambient>0.0 0.09 0.0 0.7</ambient>
-            <diffuse>0.0 0.09 0.0 0.7</diffuse>
-            <specular>0.0 0.06 0.0 0.7</specular>
-            <emissive>0.0 0.13 0.0 1.0</emissive>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
           </material>
-          <transparency>0.15</transparency>
+          <transparency>0.65</transparency>
         </visual>
         <!-- No collision element -->
       </link>
     </model>
+
+
+    <!-- RESISTANCE ZONES
+    ==========================================================
+    ==========================================================
+    ==========================================================
+    -->
+    
+
+
+    <!-- Rigid Obstacles - Trees & Rocks
+    ==========================================================
+    ==========================================================
+    ==========================================================
+    -->
+    <!-- Tree 1 -->
+    <model name="tree_1">
+      <static>true</static>
+      <pose>0 6 0.5 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.5</radius>
+              <length>5.0</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.4 0.2 0.1 1</ambient>
+            <diffuse>0.4 0.2 0.1 1</diffuse>
+            <specular>0.4 0.2 0.1 1</specular>
+          </material>
+        </visual>
+      <collision name="collision">
+        <geometry>
+          <cylinder>
+            <radius>0.5</radius>
+            <length>5.0</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      </link>
+    </model>
+
+    <!-- Tree 2 -->
+    <model name="tree_2">
+      <static>true</static>
+      <pose>-7 -1 0.5 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.5</radius>
+              <length>5.0</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.4 0.2 0.1 1</ambient>
+            <diffuse>0.4 0.2 0.1 1</diffuse>
+            <specular>0.4 0.2 0.1 1</specular>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.5</radius>
+              <length>5.0</length>
+            </cylinder>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- Tree 3 -->
+    <model name="tree_3">
+      <static>true</static>
+      <pose>3 -2 0.5 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>1.0</radius>
+              <length>5.0</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.4 0.2 0.1 1</ambient>
+            <diffuse>0.4 0.2 0.1 1</diffuse>
+            <specular>0.4 0.2 0.1 1</specular>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>1.0</radius>
+              <length>5.0</length>
+            </cylinder>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- Rock 1 -->
+    <model name="rock_1">
+      <static>true</static>
+      <pose>-3 -8 0.5 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.2 0.2 0.2 1</ambient>
+            <diffuse>0.2 0.2 0.2 1</diffuse>
+            <specular>0.2 0.2 0.2 1</specular>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- Rock 2 -->
+    <model name="rock_2">
+      <static>true</static>
+      <pose>-7 6 0.5 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>2 2 2</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.2 0.2 0.2 1</ambient>
+            <diffuse>0.2 0.2 0.2 1</diffuse>
+            <specular>0.2 0.2 0.2 1</specular>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>2 2 2</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+
+
+    <!-- Rigid Obstacles - Trees & Rocks
+    ==========================================================
+    ==========================================================
+    ==========================================================
+    -->
+
+    <!-- Boundary Wall -->
+    <model name="boundary_wall">
+      <static>true</static>
+      <link name="wall_link">
+        <!-- North wall -->
+        <collision name="north_collision">
+          <pose>0 10 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.2 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="north_visual">
+          <pose>0 10 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.2 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.1 0.1 0.1 1</ambient>
+            <diffuse>0.1 0.1 0.1 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+        
+        <!-- South wall -->
+        <collision name="south_collision">
+          <pose>0 -10 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.2 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="south_visual">
+          <pose>0 -10 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.2 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.1 0.1 0.1 1</ambient>
+            <diffuse>0.1 0.1 0.1 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+        
+        <!-- East wall -->
+        <collision name="east_collision">
+          <pose>10 0 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.2 20 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="east_visual">
+          <pose>10 0 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.2 20 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.1 0.1 0.1 1</ambient>
+            <diffuse>0.1 0.1 0.1 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+        
+        <!-- West wall -->
+        <collision name="west_collision">
+          <pose>-10 0 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.2 20 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="west_visual">
+          <pose>-10 0 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.2 20 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.1 0.1 0.1 1</ambient>
+            <diffuse>0.1 0.1 0.1 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+         </material>
+        </visual>
+      </link>
+    </model>
+
   </world>
 </sdf>
