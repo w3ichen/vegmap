@@ -40,6 +40,9 @@ namespace veg_costmap
 
         RCLCPP_INFO(node->get_logger(), "Initializing VegCostmapLayer...");
 
+        // Restart with a reset
+        reset();
+
         // Declare parameters - using Layer's inherited methods
         declareParameter("enabled", rclcpp::ParameterValue(true));
         declareParameter("world_tf_service", rclcpp::ParameterValue("/world/get_tf"));
@@ -105,7 +108,7 @@ namespace veg_costmap
         // Init the obstacle_database_ unordered_map with prior knowledge
         std::unordered_map<std::string, ObstacleData> obstacle_database_ = veg_costmap::defaults::SAVED_OBSTACLE_DATABASE;
 
-        // Get and set world obstacles
+        // Get world vegetated obstacles
         VegCostmapLayer::getWorldTransforms();
 
         RCLCPP_INFO(node->get_logger(), "VegCostmapLayer initialized");
@@ -117,10 +120,11 @@ namespace veg_costmap
      * @param mx The x coordinate in the costmap
      * @param my The y coordinate in the costmap
      * @param cost The cost value to set
-     * @return True if the cost was updated successfully
+     * @return true if the cost was updated successfully
      */
     bool VegCostmapLayer::updateCostValue_(nav2_costmap_2d::Costmap2D *costmap, unsigned int mx, unsigned int my, unsigned char cost)
     {
+        return false;
         auto node = node_.lock();
         if (!node)
         {
@@ -609,6 +613,7 @@ namespace veg_costmap
 
         std::lock_guard<std::mutex> lock(mutex_);
 
+        int num_obstacles = 0;
         for (const auto &transform : transforms)
         {
             const std::string &child_frame = transform.child_frame_id;
@@ -635,13 +640,24 @@ namespace veg_costmap
             // Default to lethal cost for now
             obstacle.cost = VegCostmapLayer::getSavedObstacleCost(obstacle.name);
 
+            // Set it in the costmap
+            unsigned int mx, my;
+            if (!layered_costmap_->getCostmap()->worldToMap(obstacle.x, obstacle.y, mx, my))
+            {
+                RCLCPP_ERROR(node->get_logger(), "Failed to convert world coordinates to map coordinates");
+                continue;
+            }
+            // Update the costmap with the new obstacle
+            updateCostValue_(layered_costmap_->getCostmap(), mx, my, obstacle.cost);
+
             // Add to the obstacles database
             obstacle_database_[obstacle.name].others.insert(obstacle);
 
-            RCLCPP_DEBUG(
+            RCLCPP_INFO(
                 node->get_logger(),
                 "Added vegetation obstacle %s at (%.2f, %.2f) with cost %d",
                 obstacle.name.c_str(), obstacle.x, obstacle.y, static_cast<int>(obstacle.cost));
+            num_obstacles++;
         }
 
         costmap_updated_ = true;
@@ -649,6 +665,11 @@ namespace veg_costmap
         // Publish notification that costmap was updated
         auto msg_empty = std::make_unique<std_msgs::msg::Empty>();
         replan_pub_->publish(std::move(msg_empty));
+
+        RCLCPP_INFO(
+            node->get_logger(),
+            "Saved %d vegetation obstacles from world_tf_service",
+            num_obstacles);
 
         return true;
     }

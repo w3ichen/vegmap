@@ -105,7 +105,7 @@ python3 src/planner/sensors/ground_truth.py # show ground truth
 ros2 topic echo /a200_0000/platform/odom --field twist.twist.linear
 ```
 
-# 5. Creating Resistance Zeons
+# 5. Creating Resistance Zones
 ```bash
 ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path world:=~/vegmap/src/planner/worlds/resistance_zone x:=9.0 y:=-9.0 yaw:=2.325
 
