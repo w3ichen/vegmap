@@ -105,12 +105,13 @@ python3 src/planner/sensors/ground_truth.py # show ground truth
 ros2 topic echo /a200_0000/platform/odom --field twist.twist.linear
 ```
 
-# 5. Creating Resistance Zones
+# 5. traverse_cost.launch.py
 ```bash
 ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path world:=~/vegmap/src/planner/worlds/resistance_zone x:=9.0 y:=-9.0 yaw:=2.325
 
-ros2 launch planner gz_bridge.launch.py # robot ground truth position bridge from gazebo to ROS2
-
-python3 ~/vegmap/src/planner/resistance/resistance_monitor.py # applies resistance to obstacles
-
+ros2 launch planner traverse_cost.launch.py
+# launch file that launches
+- gz_bridge.launch.py
+- python3 ~/vegmap/src/planner/resistance/resistance_monitor.py # applies resistance to obstacles
+- python3 ~/vegmap/src/planner/resistance/cost_traverse.py # compares cmd_vel with actual speed from /model/a200_0000/robot_pose to publish traverse cost
 ```
