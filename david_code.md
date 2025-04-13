@@ -15,7 +15,6 @@ rosdep install -r --from-paths . --ignore-src --rosdistro humble -y
 
 # 2. Robot Movement
 ```bash
-# debugging robot movement
 ## change topic to
 /a200_0000/cmd_vel
 ## from
@@ -38,17 +37,9 @@ ros2 run rviz2 rviz2
  # add > pose > /robot/pose
 ```
 
-
 ```bash
 # Runs simulation
 ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path
-# Bridges /world/warehouse/pose/info ground truth coordinates of objects
-python3 ~/vegmap/src/planner/launch/pose_info_bridge.py
-# Bridges /model/a200_0000/robot/pose
-ros2 launch planner gz_bridge.launch.py
-
-# Validate
-ros2 topic echo
 ```
 
 
@@ -114,4 +105,6 @@ ros2 launch planner traverse_cost.launch.py
 - gz_bridge.launch.py
 - python3 ~/vegmap/src/planner/resistance/resistance_monitor.py # applies resistance to obstacles
 - python3 ~/vegmap/src/planner/resistance/cost_traverse.py # compares cmd_vel with actual speed from /model/a200_0000/robot_pose to publish traverse cost
+
+ros2 topic echo /cost_traverse # monitor real time published cost
 ```
