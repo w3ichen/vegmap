@@ -40,5 +40,6 @@
   <export>
     <build_type>ament_cmake</build_type>
     <nav2_core plugin="${prefix}/vegmap_planner_plugin.xml" />
+    <nav2_core plugin="${prefix}/straight_line_planner_plugin.xml" />
   </export>
 </package>

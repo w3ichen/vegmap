@@ -220,7 +220,9 @@ planner_server:
     plugins: ["GridBased"]
     use_sim_time: True
     GridBased:
-      plugin: "vegmap_planner::VegmapPlanner"
+      # plugin: "vegmap_planner::VegmapPlanner"
+      plugin: "nav2_straight_line_planner::StraightLine"
+
 
 smoother_server:
   ros__parameters:

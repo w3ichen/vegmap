@@ -38,6 +38,12 @@ add_library(veg_costmap_layer_plugin SHARED
   src/veg_costmap_layer.cpp
 )
 
+# Define the straight line planner library
+add_library(straight_line_planner_plugin SHARED
+  src/straight_line_planner.cpp
+)
+
+
 
 # Define dependencies
 set(dependencies
@@ -66,6 +72,8 @@ set(dependencies
 # Set dependencies for the planner plugin
 ament_target_dependencies(vegmap_planner_plugin ${dependencies})
 
+ament_target_dependencies(straight_line_planner_plugin ${dependencies})
+
 # Link plugins with the planner_msgs library
 target_link_libraries(vegmap_planner_plugin
   ${planner_msgs_TARGETS}
@@ -73,11 +81,19 @@ target_link_libraries(vegmap_planner_plugin
 target_link_libraries(veg_costmap_layer_plugin
   ${planner_msgs_TARGETS}
 )
+target_link_libraries(straight_line_planner_plugin
+  ${planner_msgs_TARGETS}
+)
 # Set proper include directories for plugins
 target_include_directories(vegmap_planner_plugin PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
+target_include_directories(straight_line_planner_plugin PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+
 
 # Set dependencies for the vegetation costmap layer
 ament_target_dependencies(veg_costmap_layer_plugin
@@ -109,6 +125,7 @@ install(PROGRAMS
 install(TARGETS 
   vegmap_planner_plugin
   veg_costmap_layer_plugin
+  straight_line_planner_plugin
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
@@ -117,6 +134,7 @@ install(TARGETS
 # Install plugin definitions
 pluginlib_export_plugin_description_file(nav2_core vegmap_planner_plugin.xml)
 pluginlib_export_plugin_description_file(nav2_costmap_2d veg_costmap_plugin.xml)
+pluginlib_export_plugin_description_file(nav2_core straight_line_planner_plugin.xml)
 
 # Install directories
 install(
