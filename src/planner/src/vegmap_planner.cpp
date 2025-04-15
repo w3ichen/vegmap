@@ -13,6 +13,7 @@
  * @file vegmap_planner.cpp
  * @brief Adaption of the D* Lite global planner for dynamic vegetation environments.
  * Custom Nav2 Planner: https://docs.nav2.org/plugin_tutorials/docs/writing_new_nav2planner_plugin.html
+ * Custom plugin sample code: https://github.com/ros-navigation/navigation2_tutorials/blob/humble/nav2_straightline_planner/src/straight_line_planner.cpp
  */
 namespace vegmap_planner
 {
@@ -27,16 +28,18 @@ namespace vegmap_planner
      */
     void VegmapPlanner::configure(
         const rclcpp_lifecycle::LifecycleNode::WeakPtr &parent,
-        std::string name,
-        std::shared_ptr<tf2_ros::Buffer> tf,
+        std::string name, std::shared_ptr<tf2_ros::Buffer> tf,
         std::shared_ptr<nav2_costmap_2d::Costmap2DROS> costmap_ros)
     {
         node_ = parent.lock();
         name_ = name;
         tf_ = tf;
-        costmap_ros_ = costmap_ros;
         costmap_ = costmap_ros->getCostmap();
         global_frame_ = costmap_ros->getGlobalFrameID();
+
+        RCLCPP_INFO(
+            node_->get_logger(), "Configuring plugin %s of type VegmapPlanner...",
+            name.c_str());
 
         // D* Lite specific parameters
         nav2_util::declare_parameter_if_not_declared(
@@ -59,11 +62,6 @@ namespace vegmap_planner
             node_, name_ + ".costmap_updated_topic", rclcpp::ParameterValue("/veg_costmap/updated"));
         node_->get_parameter(name_ + ".costmap_updated_topic", costmap_updated_topic_);
 
-        RCLCPP_INFO(
-            node_->get_logger(), "Configured plugin %s of type VegmapPlanner with parameters: "
-                                 "interpolation_resolution = %.2f, heuristic_weight = %.2f",
-            name_.c_str(), interpolation_resolution_, heuristic_weight_);
-
         // Subscribe to costmap update notifications
         costmap_update_sub_ = node_->create_subscription<std_msgs::msg::Empty>(
             costmap_updated_topic_, 1,
@@ -71,6 +69,9 @@ namespace vegmap_planner
 
         // Initialize D* lite data structures
         reset();
+
+        RCLCPP_INFO(
+            node_->get_logger(), "Configured plugin %s of type VegmapPlanner", name_.c_str());
     }
 
     /**
@@ -455,13 +456,23 @@ namespace vegmap_planner
         const geometry_msgs::msg::PoseStamped &start,
         const geometry_msgs::msg::PoseStamped &goal)
     {
+        RCLCPP_INFO(node_->get_logger(), "VegmapPlanner::createPlan called");
+        RCLCPP_INFO(
+            node_->get_logger(), "Received planning request from: %s to: %s",
+            start.header.frame_id.c_str(), goal.header.frame_id.c_str());
+
+        RCLCPP_INFO(
+            node_->get_logger(), "Start: (%.2f, %.2f), Goal: (%.2f, %.2f)",
+            start.pose.position.x, start.pose.position.y,
+            goal.pose.position.x, goal.pose.position.y);
+
         nav_msgs::msg::Path global_path;
 
         // Checking if the goal and start state is in the global frame
         if (start.header.frame_id != global_frame_)
         {
             RCLCPP_ERROR(
-                node_->get_logger(), "Planner will only accept start position from %s frame",
+                node_->get_logger(), "Planner will only except start position from %s frame",
                 global_frame_.c_str());
             return global_path;
         }
@@ -469,7 +480,7 @@ namespace vegmap_planner
         if (goal.header.frame_id != global_frame_)
         {
             RCLCPP_INFO(
-                node_->get_logger(), "Planner will only accept goal position from %s frame",
+                node_->get_logger(), "Planner will only except goal position from %s frame",
                 global_frame_.c_str());
             return global_path;
         }
