@@ -13,9 +13,7 @@ from nav2_common.launch import RewrittenYaml
 def generate_launch_description():
     namespace = 'a200_0000'
     use_sim_time = LaunchConfiguration('use_sim_time', default='True')
-    map_yaml_file = os.path.join(os.path.expanduser("~"), "vegmap", "src", "planner", "maps", "empty_map.yaml")
     nav2_params_file = os.path.join(get_package_share_directory('planner'), 'config', 'nav2_params.yaml')
-
 
     param_substitutions = {'autostart': "True"}
     nav2_params = ParameterFile(
@@ -37,10 +35,7 @@ def generate_launch_description():
         name='map_server',
         namespace=namespace,
         output='screen',
-        parameters=[
-            {'yaml_filename': map_yaml_file},
-            {'use_sim_time': use_sim_time}
-        ]
+        parameters=[nav2_params]
     )
 
     # # Create AMCL node
@@ -148,7 +143,7 @@ def generate_launch_description():
         parameters=[
             {'use_sim_time': use_sim_time},
             {'autostart': True},
-            {'node_names': ['controller_server', 'planner_server', 'behavior_server', 'bt_navigator']}
+            {'node_names': ['map_server', 'controller_server', 'planner_server', 'behavior_server', 'bt_navigator']}
         ]
     )
 

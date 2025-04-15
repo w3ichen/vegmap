@@ -87,6 +87,13 @@ namespace vegmap_planner
 
         // Reset the costmap change flag
         costmap_changed_ = false;
+
+        // Mark costmap as received since we're being activated
+        costmap_received_ = true;
+
+        RCLCPP_INFO(
+            node_->get_logger(), "Costmap initialized with size: %d x %d cells",
+            costmap_->getSizeInCellsX(), costmap_->getSizeInCellsY());
     }
 
     /**
@@ -124,10 +131,17 @@ namespace vegmap_planner
     {
         g_values_.clear();
         rhs_values_.clear();
-        open_list_ = std::priority_queue<StateKey>();
+
+        // Completely clear the open_list
+        while (!open_list_.empty())
+        {
+            open_list_.pop();
+        }
+
         km_ = 0.0;
         last_start_ = {-1, -1};
         last_goal_ = {-1, -1};
+        costmap_received_ = false; // Reset costmap status
     }
 
     /**
@@ -213,18 +227,23 @@ namespace vegmap_planner
 
         // Update open list
         std::priority_queue<StateKey> new_queue;
+        bool found = false;
         while (!open_list_.empty())
         {
             StateKey current = open_list_.top();
             open_list_.pop();
 
-            if (!(current.cell == cell))
+            // Skip the cell we're updating
+            if (current.cell == cell)
             {
-                new_queue.push(current);
+                found = true;
+                continue;
             }
+            new_queue.push(current);
         }
         open_list_ = new_queue;
 
+        // Add the cell with updated key if needed
         if (getGValue(cell) != getRhsValue(cell))
         {
             StateKey key = calculateKey(cell);
@@ -239,10 +258,61 @@ namespace vegmap_planner
      */
     void VegmapPlanner::computeShortestPath()
     {
-        while (!open_list_.empty() &&
-               (open_list_.top().k1 < calculateKey(last_start_).k1 ||
-                getRhsValue(last_start_) != getGValue(last_start_)))
+        // Set a maximum iteration count to prevent infinite loops
+        const int MAX_ITERATIONS = 10000;
+        int iterations = 0;
+
+        RCLCPP_INFO(
+            node_->get_logger(), "Starting path computation with open list size: %zu",
+            open_list_.size());
+
+        // Print start and goal values before computing
+        double start_g = getGValue(last_start_);
+        double start_rhs = getRhsValue(last_start_);
+        double goal_g = getGValue(last_goal_);
+        double goal_rhs = getRhsValue(last_goal_);
+
+        RCLCPP_INFO(
+            node_->get_logger(), "Start g=%f, rhs=%f; Goal g=%f, rhs=%f",
+            start_g, start_rhs, goal_g, goal_rhs);
+
+        // If open list is empty but the goal was set, something's wrong
+        if (open_list_.empty() && last_goal_.x >= 0)
         {
+            RCLCPP_ERROR(node_->get_logger(), "Open list is empty but goal is set, reinitializing goal");
+
+            // Reinitialize goal
+            g_values_[last_goal_] = std::numeric_limits<double>::infinity();
+            rhs_values_[last_goal_] = 0.0;
+
+            // Add goal to open list
+            StateKey goal_key = calculateKey(last_goal_);
+            goal_key.cell = last_goal_;
+            open_list_.push(goal_key);
+        }
+
+        while (!open_list_.empty() &&
+               ((iterations == 0) || // Always do at least one iteration
+                (open_list_.top().k1 < calculateKey(last_start_).k1 ||
+                 getRhsValue(last_start_) != getGValue(last_start_))))
+        {
+            iterations++;
+
+            if (iterations % 1000 == 0)
+            {
+                RCLCPP_INFO(
+                    node_->get_logger(), "Path computation iteration %d, open list size: %zu",
+                    iterations, open_list_.size());
+            }
+
+            // Break if we've hit the maximum number of iterations
+            if (iterations > MAX_ITERATIONS)
+            {
+                RCLCPP_WARN(
+                    node_->get_logger(), "Maximum iterations reached (%d), stopping computation",
+                    MAX_ITERATIONS);
+                break;
+            }
 
             StateKey current = open_list_.top();
             open_list_.pop();
@@ -250,13 +320,23 @@ namespace vegmap_planner
             CellIndex cell = current.cell;
             StateKey new_key = calculateKey(cell);
 
+            // Debug key values
+            if (iterations <= 10 || iterations % 1000 == 0)
+            {
+                RCLCPP_DEBUG(
+                    node_->get_logger(), "Cell (%d, %d) with keys (%f, %f), new key (%f, %f)",
+                    cell.x, cell.y, current.k1, current.k2, new_key.k1, new_key.k2);
+            }
+
             if (current.k1 < new_key.k1)
             {
+                // Key outdated, reinsert with new key
                 new_key.cell = cell;
                 open_list_.push(new_key);
             }
             else if (getGValue(cell) > getRhsValue(cell))
             {
+                // Underconsistent state
                 g_values_[cell] = getRhsValue(cell);
                 for (const auto &pred : getNeighbors(cell))
                 {
@@ -265,6 +345,7 @@ namespace vegmap_planner
             }
             else
             {
+                // Overconsistent state
                 g_values_[cell] = std::numeric_limits<double>::infinity();
                 updateVertex(cell);
                 for (const auto &pred : getNeighbors(cell))
@@ -273,6 +354,16 @@ namespace vegmap_planner
                 }
             }
         }
+
+        // Show final values
+        start_g = getGValue(last_start_);
+        start_rhs = getRhsValue(last_start_);
+        goal_g = getGValue(last_goal_);
+        goal_rhs = getRhsValue(last_goal_);
+
+        RCLCPP_INFO(
+            node_->get_logger(), "After %d iterations: Start g=%f, rhs=%f; Goal g=%f, rhs=%f",
+            iterations, start_g, start_rhs, goal_g, goal_rhs);
     }
 
     /**
@@ -347,17 +438,26 @@ namespace vegmap_planner
         std::vector<CellIndex> path;
         CellIndex current = last_start_;
 
-        // If start cell has infinite g-value, no path exists
-        if (std::isinf(getGValue(current)))
-        {
-            return path;
-        }
+        RCLCPP_INFO(
+            node_->get_logger(), "Extracting path from (%d, %d) to (%d, %d)",
+            last_start_.x, last_start_.y, last_goal_.x, last_goal_.y);
 
+        // Add start cell to path regardless of g-value
         path.push_back(current);
 
-        // Follow lowest cost neighbor until goal is reached
-        while (!(current == last_goal_))
+        // Check if start g-value is infinity (likely unreachable goal)
+        double start_g = getGValue(current);
+        RCLCPP_INFO(node_->get_logger(), "Start g-value: %f", start_g);
+
+        // Set a maximum iteration count to prevent infinite loops
+        const int MAX_ITERATIONS = 1000;
+        int iterations = 0;
+
+        // Try to reach the goal even if g-value is infinity - we might get a partial path
+        while (!(current == last_goal_) && iterations < MAX_ITERATIONS)
         {
+            iterations++;
+
             double min_cost = std::numeric_limits<double>::infinity();
             CellIndex next_cell = current; // Default to current in case no better cell is found
 
@@ -373,14 +473,40 @@ namespace vegmap_planner
                 }
             }
 
-            // If we can't make progress, break
+            // If we can't make progress, break - but we'll still return the partial path
             if (next_cell == current || std::isinf(min_cost))
             {
+                RCLCPP_WARN(
+                    node_->get_logger(), "Path extraction stuck at (%d, %d), min_cost=%f",
+                    current.x, current.y, min_cost);
                 break;
             }
 
             current = next_cell;
             path.push_back(current);
+        }
+
+        // Check if we hit the maximum iteration count
+        if (iterations >= MAX_ITERATIONS)
+        {
+            RCLCPP_WARN(
+                node_->get_logger(), "Path extraction reached maximum iterations, returning partial path");
+        }
+
+        // Check if we actually reached the goal
+        if (!path.empty() && path.back() == last_goal_)
+        {
+            RCLCPP_INFO(node_->get_logger(), "Successfully found path to goal with %zu cells", path.size());
+        }
+        else if (!path.empty())
+        {
+            RCLCPP_INFO(
+                node_->get_logger(), "Returning partial path with %zu cells, ended at (%d, %d)",
+                path.size(), path.back().x, path.back().y);
+        }
+        else
+        {
+            RCLCPP_ERROR(node_->get_logger(), "Path extraction failed completely");
         }
 
         return path;
@@ -430,6 +556,11 @@ namespace vegmap_planner
         {
             // First time we receive the costmap, we assume no changes
             costmap_received_ = true;
+
+            RCLCPP_INFO(
+                node_->get_logger(), "First costmap received, size: %d x %d cells",
+                costmap_->getSizeInCellsX(), costmap_->getSizeInCellsY());
+
             return false;
         }
 
@@ -467,27 +598,17 @@ namespace vegmap_planner
             goal.pose.position.x, goal.pose.position.y);
 
         nav_msgs::msg::Path global_path;
-
-        // Checking if the goal and start state is in the global frame
-        if (start.header.frame_id != global_frame_)
-        {
-            RCLCPP_ERROR(
-                node_->get_logger(), "Planner will only except start position from %s frame",
-                global_frame_.c_str());
-            return global_path;
-        }
-
-        if (goal.header.frame_id != global_frame_)
-        {
-            RCLCPP_INFO(
-                node_->get_logger(), "Planner will only except goal position from %s frame",
-                global_frame_.c_str());
-            return global_path;
-        }
-
-        global_path.poses.clear();
         global_path.header.stamp = node_->now();
         global_path.header.frame_id = global_frame_;
+
+        // Check frame compatibility
+        if (start.header.frame_id != global_frame_ || goal.header.frame_id != global_frame_)
+        {
+            RCLCPP_ERROR(
+                node_->get_logger(), "Planner requires positions in %s frame",
+                global_frame_.c_str());
+            return global_path;
+        }
 
         // Convert start and goal positions to grid cell coordinates
         int start_x, start_y, goal_x, goal_y;
@@ -507,62 +628,100 @@ namespace vegmap_planner
         current_goal_ = goal;
         has_active_goal_ = true;
 
-        // Check if we need to initialize or replan
-        bool need_replan = false;
-
-        if (last_start_.x < 0 || last_goal_.x < 0)
+        // CRITICAL FIX: Force costmap to be considered as received if it has valid dimensions
+        if (!costmap_received_)
         {
-            // First planning, initialize D* Lite
+            if (costmap_->getSizeInCellsX() > 0 && costmap_->getSizeInCellsY() > 0)
+            {
+                RCLCPP_WARN(
+                    node_->get_logger(), "Forcing costmap to be considered as received. Size: %d x %d cells",
+                    costmap_->getSizeInCellsX(), costmap_->getSizeInCellsY());
+                costmap_received_ = true;
+            }
+            else
+            {
+                RCLCPP_ERROR(node_->get_logger(), "Costmap not yet received and has invalid dimensions");
+                return global_path;
+            }
+        }
+
+        // CRITICAL FIX: When both start and goal change, do a full reset
+        bool start_changed = !(start_cell == last_start_);
+        bool goal_changed = !(goal_cell == last_goal_);
+
+        if (goal_changed && (last_goal_.x >= 0 || last_start_.x >= 0))
+        {
+            // If this is a new goal and we've planned before, do a full reset
+            RCLCPP_INFO(node_->get_logger(), "New goal, doing a full reset of planner state");
             reset();
             last_start_ = start_cell;
             last_goal_ = goal_cell;
             g_values_[goal_cell] = std::numeric_limits<double>::infinity();
             rhs_values_[goal_cell] = 0.0;
-            updateVertex(goal_cell);
-            need_replan = true;
-        }
-        else if (!(start_cell == last_start_) || !(goal_cell == last_goal_) || detectCostmapChanges())
-        {
-            // If start changed, goal changed, or costmap changed, update km and vertices
-            if (!(start_cell == last_start_))
-            {
-                km_ += calculateHeuristic(last_start_, start_cell);
-                last_start_ = start_cell;
-            }
 
-            // If goal changed, reset rhs values at goal
-            if (!(goal_cell == last_goal_))
-            {
-                RCLCPP_INFO(
-                    node_->get_logger(), "Goal changed, resetting planner");
+            // Goal key must be in open list
+            StateKey goal_key = calculateKey(goal_cell);
+            goal_key.cell = goal_cell;
+            open_list_.push(goal_key);
 
-                // Clear old goal
-                rhs_values_[last_goal_] = std::numeric_limits<double>::infinity();
-                g_values_[last_goal_] = std::numeric_limits<double>::infinity();
-
-                // Set new goal
-                last_goal_ = goal_cell;
-                g_values_[goal_cell] = std::numeric_limits<double>::infinity();
-                rhs_values_[goal_cell] = 0.0;
-                updateVertex(goal_cell);
-            }
-
-            // For costmap changes, we'll just recompute the path
-            need_replan = true;
-        }
-
-        if (need_replan)
-        {
+            // Compute the shortest path
+            RCLCPP_INFO(node_->get_logger(), "Computing shortest path after reset...");
             computeShortestPath();
+            RCLCPP_INFO(node_->get_logger(), "Path computation complete");
+        }
+        else if (last_start_.x < 0 || last_goal_.x < 0)
+        {
+            // First planning ever, initialize D* Lite
+            RCLCPP_INFO(node_->get_logger(), "First planning, initializing D* Lite");
+            reset();
+            last_start_ = start_cell;
+            last_goal_ = goal_cell;
+            g_values_[goal_cell] = std::numeric_limits<double>::infinity();
+            rhs_values_[goal_cell] = 0.0;
+
+            // Goal key must be in open list
+            StateKey goal_key = calculateKey(goal_cell);
+            goal_key.cell = goal_cell;
+            open_list_.push(goal_key);
+
+            // Compute the shortest path
+            RCLCPP_INFO(node_->get_logger(), "Computing shortest path...");
+            computeShortestPath();
+            RCLCPP_INFO(node_->get_logger(), "Path computation complete");
+        }
+        else
+        {
+            // Normal case: only start changed or costmap changed
+            bool costmap_changed = detectCostmapChanges();
+
+            if (start_changed || costmap_changed)
+            {
+                if (start_changed)
+                {
+                    RCLCPP_INFO(node_->get_logger(), "Start changed, updating km");
+                    km_ += calculateHeuristic(last_start_, start_cell);
+                    last_start_ = start_cell;
+                }
+
+                if (costmap_changed)
+                {
+                    RCLCPP_INFO(node_->get_logger(), "Costmap changed, replanning");
+                }
+
+                // Compute the shortest path
+                RCLCPP_INFO(node_->get_logger(), "Computing shortest path...");
+                computeShortestPath();
+                RCLCPP_INFO(node_->get_logger(), "Path computation complete");
+            }
         }
 
         // Extract path
         auto path_cells = extractPath();
 
+        // Ensure we have a valid path
         if (path_cells.empty())
         {
-            RCLCPP_WARN(
-                node_->get_logger(), "Could not find a path from start to goal");
+            RCLCPP_WARN(node_->get_logger(), "Could not find any path from start to goal");
             return global_path;
         }
 
@@ -611,10 +770,15 @@ namespace vegmap_planner
         }
 
         // If interpolation is requested, perform path smoothing
-        if (interpolation_resolution_ > 0.0 && !global_path.poses.empty())
+        if (interpolation_resolution_ > 0.0 && global_path.poses.size() > 1)
         {
             global_path = smoothPath(global_path);
         }
+
+        // Log success
+        RCLCPP_INFO(
+            node_->get_logger(), "Successfully created plan with %zu poses",
+            global_path.poses.size());
 
         return global_path;
     }
