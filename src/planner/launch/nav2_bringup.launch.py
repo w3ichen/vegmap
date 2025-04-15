@@ -43,29 +43,29 @@ def generate_launch_description():
         ]
     )
 
-    # Create AMCL node
-    amcl = Node(
-        package='nav2_amcl',
-        executable='amcl',
-        name='amcl',
-        namespace=namespace,
-        output='screen',
-        parameters=[nav2_params]
-    )
+    # # Create AMCL node
+    # amcl = Node(
+    #     package='nav2_amcl',
+    #     executable='amcl',
+    #     name='amcl',
+    #     namespace=namespace,
+    #     output='screen',
+    #     parameters=[nav2_params]
+    # )
 
-    # Create localization lifecycle manager
-    lifecycle_manager_localization = Node(
-        package='nav2_lifecycle_manager',
-        executable='lifecycle_manager',
-        name='lifecycle_manager_localization',
-        namespace=namespace,
-        output='screen',
-        parameters=[
-            {'use_sim_time': use_sim_time},
-            {'autostart': True},
-            {'node_names': ['map_server', 'amcl']}
-        ]
-    )
+    # # Create localization lifecycle manager
+    # lifecycle_manager_localization = Node(
+    #     package='nav2_lifecycle_manager',
+    #     executable='lifecycle_manager',
+    #     name='lifecycle_manager_localization',
+    #     namespace=namespace,
+    #     output='screen',
+    #     parameters=[
+    #         {'use_sim_time': use_sim_time},
+    #         {'autostart': True},
+    #         {'node_names': ['map_server', 'amcl']}
+    #     ]
+    # )
 
     # Create a regulated pure pursuit controller instead of DWB
     controller_server = Node(
@@ -155,8 +155,8 @@ def generate_launch_description():
     # Group all nodes
     nav_nodes = GroupAction([
         map_server,
-        amcl,
-        lifecycle_manager_localization,
+        # amcl, # Don't want external sensors (lidar) and its localization
+        # lifecycle_manager_localization, # Don't want external sensors (lidar) and its localization
         controller_server,
         planner_server,
         behavior_server,

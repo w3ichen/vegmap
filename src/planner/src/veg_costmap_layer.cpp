@@ -54,14 +54,8 @@ namespace veg_costmap
         declareParameter("lethal_cost", rclcpp::ParameterValue(254));
         declareParameter("use_gradient_costs", rclcpp::ParameterValue(true));
         declareParameter("gradient_factor", rclcpp::ParameterValue(0.8));
-        declareParameter("map_width", rclcpp::ParameterValue(1000));
-        declareParameter("map_height", rclcpp::ParameterValue(1000));
-        declareParameter("map_resolution", rclcpp::ParameterValue(0.05));
-        declareParameter("map_origin_x", rclcpp::ParameterValue(-25.0));
-        declareParameter("map_origin_y", rclcpp::ParameterValue(-25.0));
 
         // Get parameters
-        int temp_width = 0, temp_height = 0;
         node->get_parameter(name_ + ".enabled", enabled_);
         node->get_parameter(name_ + ".world_tf_service", world_tf_service_);
         node->get_parameter(name_ + ".update_topic", update_topic_);
@@ -72,14 +66,17 @@ namespace veg_costmap
         node->get_parameter(name_ + ".lethal_cost", lethal_cost_);
         node->get_parameter(name_ + ".use_gradient_costs", use_gradient_costs_);
         node->get_parameter(name_ + ".gradient_factor", gradient_factor_);
-        node->get_parameter(name_ + ".map_width", temp_width);
-        node->get_parameter(name_ + ".map_height", temp_height);
-        node->get_parameter(name_ + ".map_resolution", map_resolution_);
-        node->get_parameter(name_ + ".map_origin_x", map_origin_x_);
-        node->get_parameter(name_ + ".map_origin_y", map_origin_y_);
 
-        map_width_ = static_cast<unsigned int>(temp_width);
-        map_height_ = static_cast<unsigned int>(temp_height);
+        // Set map attributes
+        map_width_ = layered_costmap_->getCostmap()->getSizeInCellsX();    // in cells
+        map_height_ = layered_costmap_->getCostmap()->getSizeInCellsY();   // in cells
+        map_resolution_ = layered_costmap_->getCostmap()->getResolution(); // in meters
+        map_origin_x_ = layered_costmap_->getCostmap()->getOriginX();      // in meters
+        map_origin_y_ = layered_costmap_->getCostmap()->getOriginY();      // in meters
+        RCLCPP_INFO(
+            node->get_logger(),
+            "Costmap size: %u x %u cells, resolution: %.2f m, origin: (%.2f, %.2f)",
+            map_width_, map_height_, map_resolution_, map_origin_x_, map_origin_y_);
 
         global_frame_ = layered_costmap_->getGlobalFrameID();
 
@@ -124,7 +121,6 @@ namespace veg_costmap
      */
     bool VegCostmapLayer::updateCostValue_(nav2_costmap_2d::Costmap2D *costmap, unsigned int mx, unsigned int my, unsigned char cost)
     {
-        return false;
         auto node = node_.lock();
         if (!node)
         {
@@ -166,8 +162,8 @@ namespace veg_costmap
                 unsigned int cur_my = my + j;
 
                 // Check if cell is within map bounds
-                if (cur_mx >= costmap->getSizeInCellsX() ||
-                    cur_my >= costmap->getSizeInCellsY())
+                if (cur_mx >= map_width_ ||
+                    cur_my >= map_height_)
                 {
                     continue;
                 }
@@ -611,12 +607,24 @@ namespace veg_costmap
 
         RCLCPP_INFO(node->get_logger(), "Received %zu transforms", transforms.size());
 
-        std::lock_guard<std::mutex> lock(mutex_);
+        // Create a temporary structure to store obstacle data
+        struct ObstacleInfo
+        {
+            unsigned int mx;
+            unsigned int my;
+            unsigned char cost;
+            std::string name;
+            double x;
+            double y;
+        };
+        std::vector<ObstacleInfo> obstacles_to_add;
 
-        int num_obstacles = 0;
+        // Process transforms outside of the locked section
         for (const auto &transform : transforms)
         {
             const std::string &child_frame = transform.child_frame_id;
+
+            RCLCPP_INFO(node->get_logger(), "Processing transform for: %s", child_frame.c_str());
 
             // Skip if not vegetation - check if any vegetation name is in the child_frame
             bool is_vegetation = false;
@@ -628,43 +636,143 @@ namespace veg_costmap
                     break;
                 }
             }
+
             if (!is_vegetation)
-                continue;
-
-            // Store obstacle position from TF
-            ObstaclePoint obstacle;
-            obstacle.x = transform.transform.translation.x;
-            obstacle.y = transform.transform.translation.y;
-            obstacle.name = transform.child_frame_id;
-
-            // Default to lethal cost for now
-            obstacle.cost = VegCostmapLayer::getSavedObstacleCost(obstacle.name);
-
-            // Set it in the costmap
-            unsigned int mx, my;
-            if (!layered_costmap_->getCostmap()->worldToMap(obstacle.x, obstacle.y, mx, my))
             {
-                RCLCPP_ERROR(node->get_logger(), "Failed to convert world coordinates to map coordinates");
+                RCLCPP_INFO(node->get_logger(), "Skipping non-vegetation transform: %s", child_frame.c_str());
                 continue;
             }
-            // Update the costmap with the new obstacle
-            updateCostValue_(layered_costmap_->getCostmap(), mx, my, obstacle.cost);
 
-            // Add to the obstacles database
-            obstacle_database_[obstacle.name].others.insert(obstacle);
+            RCLCPP_INFO(node->get_logger(), "Found vegetation transform: %s", child_frame.c_str());
+
+            // Calculate obstacle cost (no need for mutex here)
+            double obstacle_cost = 0.0;
+            {
+                // Check if in the database - this needs a small scoped lock
+                std::lock_guard<std::mutex> small_lock(mutex_);
+                if (obstacle_database_.find(child_frame) == obstacle_database_.end())
+                {
+                    // Use unknown values if obstacle not found
+                    obstacle_database_[child_frame] = {{}, veg_costmap::defaults::UNKNOWN_COST, veg_costmap::defaults::UNKNOWN_COVARIANCE};
+                }
+
+                // Get the obstacle data from the database
+                ObstacleData obstacle_data = obstacle_database_[child_frame];
+                std::normal_distribution<double> normal_dist(obstacle_data.cost, obstacle_data.cost_stddev);
+                // Sample from normal distribution
+                obstacle_cost = normal_dist(gen);
+                // Bound cost to lethal cost
+                obstacle_cost = std::min(obstacle_cost, static_cast<double>(lethal_cost_));
+            }
+
+            double x = transform.transform.translation.x;
+            double y = transform.transform.translation.y;
+
+            RCLCPP_INFO(node->get_logger(), "Vegetation at (%.2f, %.2f) with cost %f", x, y, obstacle_cost);
+
+            // Convert world coordinates to map coordinates
+            unsigned int mx, my;
+            if (!layered_costmap_->getCostmap()->worldToMap(x, y, mx, my))
+            {
+                RCLCPP_ERROR(node->get_logger(), "Failed to convert world coordinates to map coordinates: (%.2f, %.2f)",
+                             x, y);
+                continue;
+            }
+
+            // Store the obstacle info for later processing
+            ObstacleInfo info;
+            info.mx = mx;
+            info.my = my;
+            info.cost = static_cast<unsigned char>(obstacle_cost);
+            info.name = child_frame;
+            info.x = x;
+            info.y = y;
+            obstacles_to_add.push_back(info);
+        }
+
+        // Now acquire the mutex once and update all obstacles at once
+        std::lock_guard<std::mutex> lock(mutex_);
+
+        int num_obstacles = 0;
+
+        // Process all obstacles while holding the lock
+        for (const auto &info : obstacles_to_add)
+        {
+            // Calculate the bounds of the obstacle
+            unsigned int radius_cells = std::max(1u, static_cast<unsigned int>(obstacle_radius_ / map_resolution_));
+
+            for (int i = -static_cast<int>(radius_cells); i <= static_cast<int>(radius_cells); i++)
+            {
+                for (int j = -static_cast<int>(radius_cells); j <= static_cast<int>(radius_cells); j++)
+                {
+                    double distance_sq = i * i + j * j;
+                    double radius_sq = radius_cells * radius_cells;
+
+                    // Skip cells outside the circle
+                    if (distance_sq > radius_sq)
+                        continue;
+
+                    unsigned int cur_mx = info.mx + i;
+                    unsigned int cur_my = info.my + j;
+
+                    // Check if cell is within map bounds
+                    if (cur_mx >= map_width_ || cur_my >= map_height_)
+                        continue;
+
+                    ObstaclePoint &obstacle = obstacle_grid_[cur_mx][cur_my];
+
+                    // Update the obstacle data
+                    obstacle.name = info.name;
+
+                    unsigned char new_cost = info.cost; // Default fixed cost
+                    // Apply gradient cost if enabled, otherwise use fixed cost
+                    if (use_gradient_costs_)
+                    {
+                        // Gradient cost
+                        // Calculate cost based on distance from center (higher at center, lower at edges)
+                        double distance_factor = 1.0 - (std::sqrt(distance_sq) / radius_cells);
+                        new_cost = static_cast<unsigned char>(
+                            info.cost * (distance_factor * gradient_factor_ + (1.0 - gradient_factor_)));
+                    }
+                    // Bound cost to lethal cost
+                    new_cost = std::min(new_cost, static_cast<unsigned char>(lethal_cost_));
+
+                    // Update the costmap with the new cost
+                    layered_costmap_->getCostmap()->setCost(cur_mx, cur_my, new_cost);
+
+                    // Update the obstacle grid
+                    obstacle.cost = info.cost;
+                    obstacle.cost_stddev = 0; // Mark as already sampled!
+                }
+            }
+
+            // Add the obstacle to the database
+            ObstaclePoint obstacle_point;
+            obstacle_point.x = info.x;
+            obstacle_point.y = info.y;
+            obstacle_point.name = info.name;
+            obstacle_point.cost = info.cost;
+            obstacle_point.cost_stddev = 0;
+
+            // Add to obstacles database
+            obstacle_database_[info.name].others.insert(obstacle_point);
 
             RCLCPP_INFO(
                 node->get_logger(),
                 "Added vegetation obstacle %s at (%.2f, %.2f) with cost %d",
-                obstacle.name.c_str(), obstacle.x, obstacle.y, static_cast<int>(obstacle.cost));
+                info.name.c_str(), info.x, info.y, static_cast<int>(info.cost));
+
             num_obstacles++;
         }
 
-        costmap_updated_ = true;
+        if (num_obstacles > 0)
+        {
+            costmap_updated_ = true;
 
-        // Publish notification that costmap was updated
-        auto msg_empty = std::make_unique<std_msgs::msg::Empty>();
-        replan_pub_->publish(std::move(msg_empty));
+            // Publish notification that costmap was updated
+            auto msg_empty = std::make_unique<std_msgs::msg::Empty>();
+            replan_pub_->publish(std::move(msg_empty));
+        }
 
         RCLCPP_INFO(
             node->get_logger(),
