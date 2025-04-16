@@ -227,7 +227,6 @@ namespace vegmap_planner
 
         // Update open list
         std::priority_queue<StateKey> new_queue;
-        bool found = false;
         while (!open_list_.empty())
         {
             StateKey current = open_list_.top();
@@ -236,7 +235,6 @@ namespace vegmap_planner
             // Skip the cell we're updating
             if (current.cell == cell)
             {
-                found = true;
                 continue;
             }
             new_queue.push(current);

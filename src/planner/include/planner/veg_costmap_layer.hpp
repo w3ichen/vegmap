@@ -75,8 +75,6 @@ namespace veg_costmap
         virtual void updateCosts(
             nav2_costmap_2d::Costmap2D &master_grid,
             int min_i, int min_j, int max_i, int max_j) override;
-        virtual void matchSize() override;
-        virtual void onFootprintChanged(void) override;
         virtual void reset() override;
         virtual bool isClearable() override { return true; }
 
@@ -135,7 +133,7 @@ namespace veg_costmap
         std::mt19937 gen;
 
         // Helper Functions
-        void bayesian_update_gaussian(
+        void bayesianUpdateGaussian(
             double prior_mean, double prior_stddev,
             double obs_mean, double obs_stddev,
             unsigned char *posterior_mean, unsigned char *posterior_stddev);
