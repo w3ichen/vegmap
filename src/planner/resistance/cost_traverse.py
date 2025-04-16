@@ -95,7 +95,7 @@ class cost_calculator(Node):
 
     def publish_cost(self):
         """ Publish current grid cost """
-        if hasattr(self, 'actual_speed') and self.commanded_speed > 0:
+        if hasattr(self, 'actual_speed') and self.commanded_speed > 0: 
             # calculate cost
             # cost = 1.0 - (self.actual_speed / self.commanded_speed)
             # cost = max(0.0, cost)

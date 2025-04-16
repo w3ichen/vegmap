@@ -36,16 +36,6 @@ class ResistanceMonitor(Node):
             {'x': -6.0, 'y': 2.0, 'radius': 1.0, 'resistance_factor': 0.75}, # 75% reduction
             {'x': 7.0, 'y': -7.0, 'radius': 1.0, 'resistance_factor': 0.85}, # 85% reduction
         ]
-        
-
-        # Using odometry for position and velocity
-        # # Subscribe to robot position and velocity command
-        # self.pos_sub = self.create_subscription(
-        #     Odometry, 
-        #     'a200_0000/platform/odom/filtered', 
-        #     self.position_callback, 
-        #     10
-        # )
 
         # using ground truth position for position
         self.pos_sub = self.create_subscription(
@@ -63,7 +53,7 @@ class ResistanceMonitor(Node):
         )
         
         # Publisher for adjusted velocity
-        self.cmd_vel_pub = self.create_publisher(
+        self.cmd_vel_pub = self.create_publisher( 
             Twist,
             'a200_0000/platform/cmd_vel_unstamped',
             10

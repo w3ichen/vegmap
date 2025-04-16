@@ -68,6 +68,17 @@ def generate_launch_description():
     )
     ld.add_action(costmap_visualizer)
 
+
+    # # robot_pose_tf_publisher.py
+    # robot_pose_tf_node = Node(
+    #     package='planner',
+    #     executable='robot_pose_tf_publisher',
+    #     name='robot_pose_tf_publisher',
+    #     output='screen',
+    #     parameters=[{'use_sim_time': True}],
+    # )
+    # ld.add_action(robot_pose_tf_node)
+
     # transform resistance_zones to map frame
     tf_static_publisher = Node(
         package='tf2_ros',
@@ -90,6 +101,8 @@ def generate_launch_description():
         name='rviz2',
         output='screen',
         arguments=['-d', rviz_config_path],
+
+        parameters=[{'use_sim_time': True}],
     )
     ld.add_action(rviz_node)
 
