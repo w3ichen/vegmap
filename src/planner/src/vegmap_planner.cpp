@@ -445,7 +445,6 @@ namespace vegmap_planner
 
         // Check if start g-value is infinity (likely unreachable goal)
         double start_g = getGValue(current);
-        RCLCPP_INFO(node_->get_logger(), "Start g-value: %f", start_g);
 
         // Set a maximum iteration count to prevent infinite loops
         const int MAX_ITERATIONS = 1000;
@@ -585,13 +584,8 @@ namespace vegmap_planner
         const geometry_msgs::msg::PoseStamped &start,
         const geometry_msgs::msg::PoseStamped &goal)
     {
-        RCLCPP_INFO(node_->get_logger(), "VegmapPlanner::createPlan called");
         RCLCPP_INFO(
-            node_->get_logger(), "Received planning request from: %s to: %s",
-            start.header.frame_id.c_str(), goal.header.frame_id.c_str());
-
-        RCLCPP_INFO(
-            node_->get_logger(), "Start: (%.2f, %.2f), Goal: (%.2f, %.2f)",
+            node_->get_logger(), "VegmapPlanner::createPlan called Start: (%.2f, %.2f), Goal: (%.2f, %.2f)",
             start.pose.position.x, start.pose.position.y,
             goal.pose.position.x, goal.pose.position.y);
 
@@ -772,11 +766,6 @@ namespace vegmap_planner
         {
             global_path = smoothPath(global_path);
         }
-
-        // Log success
-        RCLCPP_INFO(
-            node_->get_logger(), "Successfully created plan with %zu poses",
-            global_path.poses.size());
 
         return global_path;
     }

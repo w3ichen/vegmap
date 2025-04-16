@@ -69,7 +69,7 @@ bt_navigator_navigate_to_pose_rclcpp_node:
 controller_server:
   ros__parameters:
     enable_stamped_cmd_vel: True
-    controller_frequency: 20.0
+    controller_frequency: 5.0
     min_x_velocity_threshold: 0.001
     min_y_velocity_threshold: 0.5
     min_theta_velocity_threshold: 0.001
@@ -117,7 +117,7 @@ controller_server:
       vx_samples: 20
       vy_samples: 5
       vtheta_samples: 20
-      sim_time: 1.7acc_lim_x
+      sim_time: 1.7
       linear_granularity: 0.05
       angular_granularity: 0.025
       transform_tolerance: 0.2
@@ -170,93 +170,93 @@ local_costmap:
       #   map_subscribe_transient_local: True
       always_send_full_costmap: True
 
-global_costmap:
-  global_costmap:
-    ros__parameters:
-      resolution: 0.05
-      width: 50     # meters, 50/0.05 = 1000 cells
-      height: 50    # meters, 50/0.05 = 1000 cells
-      origin_x: -25.0
-      origin_y: -25.0
-      track_unknown_space: True
-      update_frequency: 1.0
-      publish_frequency: 1.0
-      global_frame: map
-      robot_base_frame: base_link
-      enable_stamped_cmd_vel: True
-      footprint: "[ [0.55, 0.45], [0.55, -0.45], [-0.55, -0.45], [-0.55, 0.45] ]"
-      plugins: ["gradient_layer"] # ["veg_costmap_layer"] #, "static_layer", "obstacle_layer", "inflation_layer"]
-      veg_costmap_layer:
-        plugin: "veg_costmap::VegCostmapLayer"
-        enabled: True
-      gradient_layer:
-        plugin: "nav2_gradient_costmap_plugin::GradientLayer"
-        enabled: True
-      # static_layer:
-      #   plugin: "nav2_costmap_2d::StaticLayer"
-      #   map_subscribe_transient_local: True
-      # obstacle_layer:
-      #   plugin: "nav2_costmap_2d::ObstacleLayer"
-      #   enabled: True
-      #   observation_sources: scan
-      #   scan:
-      #     topic: sensors/lidar2d_0/scan
-      #     max_obstacle_height: 2.0
-      #     clearing: True
-      #     marking: True
-      #     data_type: "LaserScan"
-      #     raytrace_max_range: 3.0
-      #     raytrace_min_range: 0.0
-      #     obstacle_max_range: 2.5
-      #     obstacle_min_range: 0.0
-      # static_layer:
-      #   plugin: "nav2_costmap_2d::StaticLayer"
-      #   map_subscribe_transient_local: True
-      # inflation_layer:
-      #   plugin: "nav2_costmap_2d::InflationLayer"
-      #   cost_scaling_factor: 4.0
-      #   inflation_radius: 0.8
-      always_send_full_costmap: True
-
 # global_costmap:
 #   global_costmap:
 #     ros__parameters:
-#       update_frequency: 1.0
-#       publish_frequency: 1.0
-#       global_frame: map
-#       robot_base_frame: base_link
-#       use_sim_time: True
-#       robot_radius: 0.3
 #       resolution: 0.05
 #       width: 50     # meters, 50/0.05 = 1000 cells
 #       height: 50    # meters, 50/0.05 = 1000 cells
 #       origin_x: -25.0
 #       origin_y: -25.0
 #       track_unknown_space: True
-#       track_unknown_space: true
-#       plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
-#       obstacle_layer:
-#         plugin: "nav2_costmap_2d::ObstacleLayer"
+#       update_frequency: 1.0
+#       publish_frequency: 1.0
+#       global_frame: map
+#       robot_base_frame: base_link
+#       enable_stamped_cmd_vel: True
+#       footprint: "[ [0.55, 0.45], [0.55, -0.45], [-0.55, -0.45], [-0.55, 0.45] ]"
+#       plugins: ["gradient_layer"] # ["veg_costmap_layer"] #, "static_layer", "obstacle_layer", "inflation_layer"]
+#       veg_costmap_layer:
+#         plugin: "veg_costmap::VegCostmapLayer"
 #         enabled: True
-#         observation_sources: scan
-#         scan:
-#           topic: /scan
-#           max_obstacle_height: 2.0
-#           clearing: True
-#           marking: True
-#           data_type: "LaserScan"
-#           raytrace_max_range: 3.0
-#           raytrace_min_range: 0.0
-#           obstacle_max_range: 2.5
-#           obstacle_min_range: 0.0
-#       static_layer:
-#         plugin: "nav2_costmap_2d::StaticLayer"
-#         map_subscribe_transient_local: True
-#       inflation_layer:
-#         plugin: "nav2_costmap_2d::InflationLayer"
-#         cost_scaling_factor: 3.0
-#         inflation_radius: 0.55
+#       gradient_layer:
+#         plugin: "nav2_gradient_costmap_plugin::GradientLayer"
+#         enabled: True
+#       # static_layer:
+#       #   plugin: "nav2_costmap_2d::StaticLayer"
+#       #   map_subscribe_transient_local: True
+#       # obstacle_layer:
+#       #   plugin: "nav2_costmap_2d::ObstacleLayer"
+#       #   enabled: True
+#       #   observation_sources: scan
+#       #   scan:
+#       #     topic: sensors/lidar2d_0/scan
+#       #     max_obstacle_height: 2.0
+#       #     clearing: True
+#       #     marking: True
+#       #     data_type: "LaserScan"
+#       #     raytrace_max_range: 3.0
+#       #     raytrace_min_range: 0.0
+#       #     obstacle_max_range: 2.5
+#       #     obstacle_min_range: 0.0
+#       # static_layer:
+#       #   plugin: "nav2_costmap_2d::StaticLayer"
+#       #   map_subscribe_transient_local: True
+#       # inflation_layer:
+#       #   plugin: "nav2_costmap_2d::InflationLayer"
+#       #   cost_scaling_factor: 4.0
+#       #   inflation_radius: 0.8
 #       always_send_full_costmap: True
+
+global_costmap:
+  global_costmap:
+    ros__parameters:
+      update_frequency: 1.0
+      publish_frequency: 1.0
+      global_frame: map
+      robot_base_frame: base_link
+      use_sim_time: True
+      robot_radius: 0.3
+      resolution: 0.05
+      width: 50     # meters, 50/0.05 = 1000 cells
+      height: 50    # meters, 50/0.05 = 1000 cells
+      origin_x: -25.0
+      origin_y: -25.0
+      track_unknown_space: True
+      track_unknown_space: true
+      plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
+      obstacle_layer:
+        plugin: "nav2_costmap_2d::ObstacleLayer"
+        enabled: True
+        observation_sources: scan
+        scan:
+          topic: /scan
+          max_obstacle_height: 2.0
+          clearing: True
+          marking: True
+          data_type: "LaserScan"
+          raytrace_max_range: 3.0
+          raytrace_min_range: 0.0
+          obstacle_max_range: 2.5
+          obstacle_min_range: 0.0
+      static_layer:
+        plugin: "nav2_costmap_2d::StaticLayer"
+        map_subscribe_transient_local: True
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        cost_scaling_factor: 3.0
+        inflation_radius: 0.55
+      always_send_full_costmap: True
 
 planner_server:
   ros__parameters:
@@ -295,7 +295,7 @@ behavior_server:
       plugin: "nav2_behaviors/AssistedTeleop"
     global_frame: odom
     robot_base_frame: base_link
-    transform_tolerance: 0.1
+    transform_tolerance: 0.2
     enable_stamped_cmd_vel: True
     simulate_ahead_time: 2.0
     max_rotational_vel: 2.0
