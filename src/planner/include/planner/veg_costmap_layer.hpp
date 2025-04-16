@@ -32,8 +32,12 @@ namespace veg_costmap
         // Define ObstaclePoint first, before using it in containers
         struct ObstaclePoint
         {
-            double x{0.0};
-            double y{0.0};
+            // World coords from gazebo are floats
+            float x{0.0};
+            float y{0.0};
+            // Costmap coords are in ints
+            uint16_t mx{0};
+            uint16_t my{0};
             std::string name{""};
             mutable unsigned char cost{0};
             mutable unsigned char cost_stddev{0};
@@ -44,7 +48,7 @@ namespace veg_costmap
             // Custom equality operator that only compares x and y
             bool operator==(const ObstaclePoint &other) const
             {
-                return (x == other.x && y == other.y);
+                return (mx == other.mx && my == other.my);
             }
         };
 
@@ -53,8 +57,8 @@ namespace veg_costmap
         {
             std::size_t operator()(const ObstaclePoint &p) const
             {
-                std::size_t h1 = std::hash<double>{}(p.x);
-                std::size_t h2 = std::hash<double>{}(p.y);
+                std::size_t h1 = std::hash<uint16_t>{}(p.mx);
+                std::size_t h2 = std::hash<uint16_t>{}(p.my);
                 return h1 ^ (h2 << 1);
             }
         };
