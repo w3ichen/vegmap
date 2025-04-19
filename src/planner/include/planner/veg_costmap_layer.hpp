@@ -21,6 +21,9 @@
 #include "planner_msgs/srv/update_cost.hpp"
 #include "planner_msgs/srv/get_transforms.hpp"
 
+#define UNKNOWN_COST 120
+#define UNKNOWN_STDDEV 20
+
 namespace veg_costmap
 {
     class VegCostmapLayer : public nav2_costmap_2d::CostmapLayer
@@ -67,8 +70,8 @@ namespace veg_costmap
         {
             // Use the custom hash function in the unordered_set definition
             std::unordered_set<ObstaclePoint, ObstaclePointHash> others;
-            unsigned char cost{0};
-            unsigned char cost_stddev{5};
+            unsigned char cost{UNKNOWN_COST};          // Default cost
+            unsigned char cost_stddev{UNKNOWN_STDDEV}; // Default stddev
         };
 
         // Required costmap layer methods
@@ -81,9 +84,6 @@ namespace veg_costmap
             int min_i, int min_j, int max_i, int max_j) override;
         virtual void reset() override;
         virtual bool isClearable() override { return true; }
-
-        // Obstacle
-        double getSavedObstacleCost(std::string obstacle_name);
 
     private:
         // Use Layer's parameter methods
@@ -142,6 +142,7 @@ namespace veg_costmap
             double prior_mean, double prior_stddev,
             double obs_mean, double obs_stddev,
             unsigned char *posterior_mean, unsigned char *posterior_stddev);
+        double clampCost(double cost);
     };
 
     namespace defaults
@@ -163,8 +164,6 @@ namespace veg_costmap
             {"bush_4", {{}, 150, 10}},
         };
 
-        const uint8_t UNKNOWN_COST = 120;
-        const uint8_t UNKNOWN_COVARIANCE = 20;
     } // namespace defaults
 
 } // namespace veg_costmap

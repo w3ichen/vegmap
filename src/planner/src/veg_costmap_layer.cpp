@@ -4,6 +4,7 @@
 #include "rclcpp/parameter_events_filter.hpp"
 #include "planner_msgs/srv/update_cost.hpp"
 #include "planner_msgs/srv/get_transforms.hpp"
+#include <string>
 
 /**
  * @file veg_costmap_layer.cpp
@@ -22,7 +23,6 @@ namespace veg_costmap
 {
     // Initialize the global logger and mutex
     rclcpp::Logger logger_{rclcpp::get_logger("VegCostmapLayer")};
-    std::mutex obstacle_mutex_; // Added mutex for thread safety
 
     /**
      * @brief VegCostmapLayer constructor
@@ -43,7 +43,7 @@ namespace veg_costmap
         if (!node)
             throw std::runtime_error("Failed to lock node");
 
-        RCLCPP_INFO(node->get_logger(), "Initializing VegCostmapLayer...");
+        RCLCPP_INFO(logger_, "Initializing VegCostmapLayer...");
 
         // Restart with a reset
         reset();
@@ -75,7 +75,7 @@ namespace veg_costmap
         // Initialize the map settings before accessing the costmap
         if (!layered_costmap_ || !layered_costmap_->getCostmap())
         {
-            RCLCPP_ERROR(node->get_logger(), "Layered costmap not initialized properly");
+            RCLCPP_ERROR(logger_, "Layered costmap not initialized properly");
             throw std::runtime_error("Failed to initialize layered costmap");
         }
 
@@ -86,7 +86,7 @@ namespace veg_costmap
         map_origin_x_ = layered_costmap_->getCostmap()->getOriginX();      // in meters
         map_origin_y_ = layered_costmap_->getCostmap()->getOriginY();      // in meters
         RCLCPP_INFO(
-            node->get_logger(),
+            logger_,
             "Costmap size: %u x %u cells, resolution: %.2f m, origin: (%.2f, %.2f)",
             map_width_, map_height_, map_resolution_, map_origin_x_, map_origin_y_);
 
@@ -95,7 +95,7 @@ namespace veg_costmap
         // Check for valid dimensions to prevent segfaults
         if (map_width_ == 0 || map_height_ == 0)
         {
-            RCLCPP_ERROR(node->get_logger(), "Invalid costmap dimensions: %d x %d",
+            RCLCPP_ERROR(logger_, "Invalid costmap dimensions: %d x %d",
                          map_width_, map_height_);
             throw std::runtime_error("Invalid costmap dimensions");
         }
@@ -129,13 +129,13 @@ namespace veg_costmap
         }
         catch (const std::exception &e)
         {
-            RCLCPP_ERROR(node->get_logger(), "Failed to allocate obstacle grid: %s", e.what());
+            RCLCPP_ERROR(logger_, "Failed to allocate obstacle grid: %s", e.what());
             throw std::runtime_error("Failed to allocate obstacle grid");
         }
 
         // Initialize obstacle_database_ with proper lock
         {
-            std::lock_guard<std::mutex> lock(obstacle_mutex_);
+            // std::lock_guard<std::mutex> lock(mutex_);
             // Init the obstacle_database_ unordered_map with prior knowledge
             obstacle_database_ = veg_costmap::defaults::SAVED_OBSTACLE_DATABASE;
         }
@@ -146,13 +146,13 @@ namespace veg_costmap
             bool success = VegCostmapLayer::getWorldTransforms();
             if (!success)
             {
-                RCLCPP_WARN(node->get_logger(), "Failed to get world transforms, continuing with empty map");
+                RCLCPP_WARN(logger_, "Failed to get world transforms, continuing with empty map");
             }
         }
         catch (const std::exception &e)
         {
-            RCLCPP_ERROR(node->get_logger(), "Exception during world transform fetch: %s", e.what());
-            RCLCPP_WARN(node->get_logger(), "Continuing with initialization despite transform error");
+            RCLCPP_ERROR(logger_, "Exception during world transform fetch: %s", e.what());
+            RCLCPP_WARN(logger_, "Continuing with initialization despite transform error");
             // Don't rethrow - continue with initialization even if this fails
         }
 
@@ -170,10 +170,9 @@ namespace veg_costmap
     {
         auto node = node_.lock();
 
-        nav2_costmap_2d::Costmap2D *costmap = layered_costmap_->getCostmap();
-
         RCLCPP_INFO(logger_, "Entering updateCostCallback...");
 
+        // Error checking
         if (!node)
         {
             RCLCPP_ERROR(logger_, "Cannot update cost: node is not available");
@@ -181,7 +180,6 @@ namespace veg_costmap
             response->message = "Node is not available";
             return;
         }
-
         if (!request)
         {
             RCLCPP_ERROR(logger_, "Received null request");
@@ -193,11 +191,11 @@ namespace veg_costmap
         // Get the index and cost from the request
         float world_x = request->x;
         float world_y = request->y;
-        unsigned char cost = request->cost; // unsigned char = uint8_t (0-255)
-        RCLCPP_INFO(
-            node->get_logger(),
-            "Updating cost at (%.2f, %.2f) to %d",
-            world_x, world_y, static_cast<int>(cost));
+        unsigned char new_cost = request->cost;                                  // unsigned char = uint8_t (0-255)
+        new_cost = std::min(new_cost, static_cast<unsigned char>(lethal_cost_)); // Bound cost to lethal cost
+        std::string obstacle_type = request->obstacle_type;
+
+        nav2_costmap_2d::Costmap2D *costmap = layered_costmap_->getCostmap();
 
         // Check if layered_costmap_ and its costmap are valid
         if (!layered_costmap_ || !costmap)
@@ -227,57 +225,39 @@ namespace veg_costmap
             return;
         }
 
-        // Unknown obstacle name
-        std::string obstacle_name = "";
-
-        unsigned char *master_array = costmap->getCharMap();
-        if (!master_array)
-        {
-            RCLCPP_ERROR(logger_, "Invalid master array pointer");
-            return;
-        }
-
-        // Thread safety for accessing obstacle grid
-        std::lock_guard<std::mutex> lock(obstacle_mutex_);
+        // // Thread safety for accessing obstacle grid
+        // std::lock_guard<std::mutex> lock(mutex_);
 
         ObstaclePoint &obstacle = obstacle_grid_[map_x][map_y];
-        // If obstacle has name, set to obstacle_name
-        if (!obstacle.name.empty())
+
+        if (obstacle.x != map_x || obstacle.y != map_y)
         {
-            obstacle_name = obstacle.name;
+            // If the obstacle is not already in the grid, add it
+            obstacle.x = world_x;
+            obstacle.y = world_y;
+            obstacle.mx = map_x;
+            obstacle.my = map_y;
+            obstacle.name = obstacle_type;
+
+            // Add to the obstacle database
+            obstacle_database_[obstacle_type].others.insert(obstacle);
         }
-
-        unsigned char new_cost = cost; // Default fixed cost
-        // Bound cost to lethal cost
-        new_cost = std::min(new_cost, static_cast<unsigned char>(lethal_cost_));
-
-        // Update the costmap layer with the new cost
-        int index = costmap->getIndex(map_x, map_y);
-        if (index < 0 || index >= static_cast<int>(map_width_ * map_height_))
-        {
-            RCLCPP_ERROR(logger_, "Invalid index %d for costmap of size %d x %d",
-                         index, map_width_, map_height_);
-            return;
-        }
-
-        master_array[index] = new_cost;
-        RCLCPP_INFO(
-            node->get_logger(),
-            "Updating cost at %d to %d",
-            index, static_cast<int>(new_cost));
 
         // Update the obstacle grid with the code
-        obstacle.cost = cost;
+        obstacle.cost = new_cost;
         obstacle.cost_stddev = 0; // Mark as already sampled!
 
         // If obstacle has name, update the obstacle_database_ with the new cost
-        if (!obstacle_name.empty())
+        if (!obstacle_type.empty())
         {
-            ObstacleData &obstacle_data = obstacle_database_[obstacle_name];
+            RCLCPP_INFO(logger_, "Updating for other obstacles of type %s", obstacle_type.c_str());
+
+            ObstacleData &obstacle_data = obstacle_database_[obstacle_type];
             if (obstacle_data.cost == 0)
             {
                 // No prior data, set initial cost and stddev
-                obstacle_data.cost = cost;
+                obstacle_data.cost = new_cost;
+                obstacle_data.cost_stddev = obstacle_database_[obstacle_type].cost_stddev;
             }
             else
             {
@@ -285,34 +265,33 @@ namespace veg_costmap
                 bayesianUpdateGaussian(
                     // Old prior knowledge
                     obstacle_data.cost, obstacle_data.cost_stddev,
-                    // New sample, assume twice as accurate as prior
-                    cost, obstacle_data.cost_stddev / 2.0,
+                    // New sample, assume twice as accurate as prior (ie. divide by 2)
+                    new_cost, obstacle_data.cost_stddev / 2.0,
                     // Output updated mean and stddev
                     &obstacle_data.cost, &obstacle_data.cost_stddev);
             }
-            obstacle_data.cost = cost;
-            obstacle_data.cost_stddev = 0; // Mark as already sampled!
 
-            // UPDATE similar obstacles
+            // UPDATE similar obstacles of the same type
             // Iterate through all the other similar obstacles and update their cost
             for (auto &obstacle : obstacle_data.others)
             {
-                // If stddev is not 0 (ie. not sampled), update cost from a normal distribution to account for uncertainty
-                if (obstacle.cost_stddev != 0)
+                // If stddev is not 0 (ie. not already sampled), update cost from a normal distribution
+                bool is_sampled = obstacle_grid_[obstacle.mx][obstacle.my].cost_stddev == 0;
+                if (!is_sampled)
                 {
                     std::normal_distribution<double> normal_dist(obstacle_data.cost, obstacle_data.cost_stddev);
                     // Sample from normal distribution
                     double sampled_cost = normal_dist(gen);
                     // Ensure cost is within valid range (0-255)
-                    obstacle_grid_[obstacle.x][obstacle.y].cost =
-                        static_cast<unsigned char>(std::max(0.0, std::min(255.0, sampled_cost)));
+
+                    // IMPORTANT: Use mx and my for grid coordinates, not x and y
+                    if (obstacle.mx < map_width_ && obstacle.my < map_height_)
+                    {
+                        obstacle_grid_[obstacle.mx][obstacle.my].cost =
+                            static_cast<unsigned char>(clampCost(sampled_cost));
+                    }
                 }
             }
-
-            RCLCPP_INFO(
-                node->get_logger(),
-                "Updated costmap for obstacle %s at (%u, %u) with cost %d",
-                obstacle_name.c_str(), map_x, map_y, static_cast<int>(cost));
         }
 
         costmap_updated_ = true;
@@ -359,8 +338,8 @@ namespace veg_costmap
             return;
         }
 
-        // Add mutex protection for obstacle grid access
-        std::lock_guard<std::mutex> lock(obstacle_mutex_);
+        // // Add mutex protection for obstacle grid access
+        // std::lock_guard<std::mutex> lock(mutex_);
 
         // Option 2: Loop through obstacle_grid_ to find bounds of changed areas
         // This is more efficient if changes are localized
@@ -479,8 +458,8 @@ namespace veg_costmap
             return;
         }
 
-        // Thread safety for accessing obstacle database
-        std::lock_guard<std::mutex> lock(obstacle_mutex_);
+        // // Thread safety for accessing obstacle database
+        // std::lock_guard<std::mutex> lock(mutex_);
 
         // Then update the master grid directly with all obstacles
         int count = 0;
@@ -492,8 +471,7 @@ namespace veg_costmap
                 if (point.mx < size_x && point.my < size_y)
                 {
                     // Bound the cost to [0, 255]
-                    unsigned char cost = static_cast<unsigned char>(
-                        std::max(0.0, std::min(255.0, static_cast<double>(obstacle_pair.second.cost))));
+                    unsigned char cost = static_cast<unsigned char>(clampCost(obstacle_pair.second.cost));
 
                     // Get index in master grid
                     int index = master_grid.getIndex(point.mx, point.my);
@@ -535,8 +513,8 @@ namespace veg_costmap
     {
         RCLCPP_INFO(logger_, "Entering reset...");
 
-        // Thread safety for accessing obstacle grid and database
-        std::lock_guard<std::mutex> lock(obstacle_mutex_);
+        // // Thread safety for accessing obstacle grid and database
+        // std::lock_guard<std::mutex> lock(mutex_);
 
         // Reset the obstacle grid
         try
@@ -574,39 +552,6 @@ namespace veg_costmap
         obstacle_database_ = veg_costmap::defaults::SAVED_OBSTACLE_DATABASE;
 
         RCLCPP_INFO(logger_, "Exiting reset...");
-    }
-
-    /**
-     * @brief Get the cost of a saved obstacle from the database
-     * Samples with a normal distribution to account for uncertainty, and bounds the cost to lethal cost
-     * @param obstacle_name Name of the obstacle
-     * @return Cost of the obstacle
-     */
-    double VegCostmapLayer::getSavedObstacleCost(std::string obstacle_name)
-    {
-        // Thread safety for accessing obstacle database
-        std::lock_guard<std::mutex> lock(obstacle_mutex_);
-
-        // Check if in the database
-        if (obstacle_database_.find(obstacle_name) == obstacle_database_.end())
-        {
-            // Use unknown values if obstacle not found
-            obstacle_database_[obstacle_name] = {{}, veg_costmap::defaults::UNKNOWN_COST, veg_costmap::defaults::UNKNOWN_COVARIANCE};
-        }
-
-        // Get the obstacle data from the database
-        ObstacleData obstacle_data = obstacle_database_[obstacle_name];
-
-        // Ensure we have valid stddev to prevent NaN - FIX: Add explicit cast
-        double stddev = std::max(0.1, static_cast<double>(obstacle_data.cost_stddev));
-
-        std::normal_distribution<double> normal_dist(obstacle_data.cost, stddev);
-
-        // Sample from normal distribution
-        double cost = normal_dist(gen);
-
-        // Bound cost to valid range [0, lethal_cost_]
-        return std::max(0.0, std::min(static_cast<double>(lethal_cost_), cost));
     }
 
     void VegCostmapLayer::publishCostmapCallback()
@@ -695,7 +640,7 @@ namespace veg_costmap
         auto node = node_.lock();
         if (!node)
         {
-            RCLCPP_ERROR(rclcpp::get_logger("VegCostmapLayer"), "Cannot get transforms: node is not available");
+            RCLCPP_ERROR(logger_, "Cannot get transforms: node is not available");
             return false;
         }
 
@@ -710,11 +655,11 @@ namespace veg_costmap
         auto client = node->create_client<planner_msgs::srv::GetTransforms>(world_tf_service_);
 
         // Wait for service to be available with timeout
-        RCLCPP_INFO(node->get_logger(), "Waiting for world_tf_service to be available at topic: %s",
+        RCLCPP_INFO(logger_, "Waiting for world_tf_service to be available at topic: %s",
                     world_tf_service_.c_str());
         if (!client->wait_for_service(std::chrono::seconds(10)))
         {
-            RCLCPP_ERROR(node->get_logger(), "Timed out waiting for world_tf_service");
+            RCLCPP_ERROR(logger_, "Timed out waiting for world_tf_service");
             return false;
         }
 
@@ -723,38 +668,38 @@ namespace veg_costmap
         request->world = "outdoors";
 
         // Send request and wait for response
-        RCLCPP_INFO(node->get_logger(), "Requesting transforms for world: outdoors");
+        RCLCPP_INFO(logger_, "Requesting transforms for world: outdoors");
         auto future = client->async_send_request(request);
 
         // Wait for response with timeout
         if (rclcpp::spin_until_future_complete(node, future, std::chrono::seconds(20)) !=
             rclcpp::FutureReturnCode::SUCCESS)
         {
-            RCLCPP_ERROR(node->get_logger(), "Failed to receive response from world_tf_service");
+            RCLCPP_ERROR(logger_, "Failed to receive response from world_tf_service");
             return false;
         }
 
         auto response = future.get();
         if (!response || !response->success)
         {
-            RCLCPP_ERROR(node->get_logger(), "Service call failed: %s",
+            RCLCPP_ERROR(logger_, "Service call failed: %s",
                          response ? response->message.c_str() : "null response");
             return false;
         }
 
         auto transforms = response->transforms.transforms;
-        RCLCPP_INFO(node->get_logger(), "Received %zu transforms", transforms.size());
+        RCLCPP_INFO(logger_, "Received %zu transforms", transforms.size());
 
         int num_obstacles = 0;
 
-        // Thread safety for accessing obstacle database
-        std::lock_guard<std::mutex> lock(obstacle_mutex_);
+        // // Thread safety for accessing obstacle database
+        // std::lock_guard<std::mutex> lock(mutex_);
 
         // Process transforms in a single loop
         for (const auto &transform : transforms)
         {
             const std::string &child_frame = transform.child_frame_id;
-            RCLCPP_INFO(node->get_logger(), "Processing transform for: %s", child_frame.c_str());
+            RCLCPP_INFO(logger_, "Processing transform for: %s", child_frame.c_str());
 
             // Skip if not vegetation - check if any vegetation name is in the child_frame
             bool is_vegetation = false;
@@ -769,39 +714,33 @@ namespace veg_costmap
 
             if (!is_vegetation)
             {
-                RCLCPP_INFO(node->get_logger(), "Skipping non-vegetation transform: %s", child_frame.c_str());
+                RCLCPP_INFO(logger_, "Skipping non-vegetation transform: %s", child_frame.c_str());
                 continue;
             }
 
-            RCLCPP_INFO(node->get_logger(), "Found vegetation transform: %s", child_frame.c_str());
-
-            // Initialize obstacle in database if not present
-            if (obstacle_database_.find(child_frame) == obstacle_database_.end())
-            {
-                obstacle_database_[child_frame] = {{}, veg_costmap::defaults::UNKNOWN_COST, veg_costmap::defaults::UNKNOWN_COVARIANCE};
-            }
+            RCLCPP_INFO(logger_, "Found vegetation transform: %s", child_frame.c_str());
 
             // Get the obstacle data from the database
             ObstacleData &obstacle_data = obstacle_database_[child_frame];
 
             // Use safe normal distribution with proper bounds checking
-            double mean_cost = std::max(0.0, std::min(255.0, static_cast<double>(obstacle_data.cost)));
+            double mean_cost = clampCost(obstacle_data.cost);
             double stddev = std::max(0.1, static_cast<double>(obstacle_data.cost_stddev)); // Ensure positive stddev
 
             std::normal_distribution<double> normal_dist(mean_cost, stddev);
             double obstacle_cost = normal_dist(gen);
-            obstacle_cost = std::max(0.0, std::min(static_cast<double>(lethal_cost_), obstacle_cost));
+            obstacle_cost = clampCost(obstacle_cost);
 
             double x = transform.transform.translation.x;
             double y = transform.transform.translation.y;
 
-            RCLCPP_INFO(node->get_logger(), "Vegetation at (%.2f, %.2f) with cost %f", x, y, obstacle_cost);
+            RCLCPP_INFO(logger_, "Vegetation at (%.2f, %.2f) with cost %f", x, y, obstacle_cost);
 
             // Convert world coordinates to map coordinates
             unsigned int mx, my;
             if (!layered_costmap_->getCostmap()->worldToMap(x, y, mx, my))
             {
-                RCLCPP_ERROR(node->get_logger(), "Failed to convert world coordinates to map coordinates: (%.2f, %.2f)",
+                RCLCPP_ERROR(logger_, "Failed to convert world coordinates to map coordinates: (%.2f, %.2f)",
                              x, y);
                 continue;
             }
@@ -809,7 +748,7 @@ namespace veg_costmap
             // Verify converted coordinates are within bounds
             if (mx >= map_width_ || my >= map_height_)
             {
-                RCLCPP_ERROR(node->get_logger(), "Converted coordinates outside map bounds: (%u, %u) > (%u, %u)",
+                RCLCPP_ERROR(logger_, "Converted coordinates outside map bounds: (%u, %u) > (%u, %u)",
                              mx, my, map_width_, map_height_);
                 continue;
             }
@@ -822,18 +761,18 @@ namespace veg_costmap
             obstacle_point.my = my;
             obstacle_point.name = child_frame;
             obstacle_point.cost = static_cast<unsigned char>(obstacle_cost);
-            obstacle_point.cost_stddev = 0;
+            obstacle_point.cost_stddev = obstacle_database_[child_frame].cost_stddev;
 
             // Add to obstacles database - ensure others set is initialized first
             if (!obstacle_database_[child_frame].others.insert(obstacle_point).second)
             {
-                RCLCPP_INFO(node->get_logger(), "Obstacle %s at (%.2f, %.2f) already exists in database",
+                RCLCPP_INFO(logger_, "Obstacle %s at (%.2f, %.2f) already exists in database",
                             child_frame.c_str(), x, y);
             }
             else
             {
                 RCLCPP_INFO(
-                    node->get_logger(),
+                    logger_,
                     "Added vegetation obstacle %s at (%.2f, %.2f) with cost %d",
                     child_frame.c_str(), x, y, static_cast<int>(obstacle_point.cost));
                 num_obstacles++;
@@ -853,7 +792,7 @@ namespace veg_costmap
         }
 
         RCLCPP_INFO(
-            node->get_logger(),
+            logger_,
             "Saved %d vegetation obstacles from world to database",
             num_obstacles);
 
@@ -900,14 +839,24 @@ namespace veg_costmap
                            posterior_precision;
 
         // Ensure the result is within the valid range for unsigned char (0-255)
-        post_mean = std::max(0.0, std::min(255.0, post_mean));
+        post_mean = clampCost(post_mean);
 
         // Calculate posterior standard deviation
         double post_stddev = sqrt(1.0 / posterior_precision);
 
         // Store results with proper bounds checking for unsigned char
         *posterior_mean = static_cast<unsigned char>(post_mean);
-        *posterior_stddev = static_cast<unsigned char>(std::min(255.0, post_stddev));
+        *posterior_stddev = static_cast<unsigned char>(std::min(static_cast<double>(lethal_cost_), post_stddev));
+    }
+
+    /**
+     * @brief Clamps the cost to be within the range [0, lethal_cost_]
+     * @param cost The cost to clamp
+     * @return The clamped cost
+     */
+    double VegCostmapLayer::clampCost(double cost)
+    {
+        return std::max(0.0, std::min(static_cast<double>(veg_costmap::VegCostmapLayer::lethal_cost_), cost));
     }
 
 } // namespace veg_costmap

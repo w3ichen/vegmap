@@ -59,3 +59,7 @@ ros2 launch clearpath_nav2_demos nav2.launch.py setup_path:=src/setup_path/ use_
 
 # Test service
 ros2 service call /world/get_tf planner_msgs/srv/GetTransforms "{world: 'outdoors'}"
+
+
+# Updating costmaps
+ros2 service call /veg_costmap/update planner_msgs/srv/UpdateCost "{x: 0.0, y: 0.0, cost: 255, obstacle_type: 'palm_tree'}"

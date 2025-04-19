@@ -1,8 +1,9 @@
 # Request
-float64 x      # x coordinate in world frame
-float64 y      # y coordinate in world frame
-uint8 cost     # cost value to set (0-255)
+float64 x                       # x coordinate in world frame
+float64 y                       # y coordinate in world frame
+uint8 cost              # cost value to set (0-255)
+string obstacle_type            # type of obstacle
 ---
 # Response
-bool success           # whether the update was successful
-string message         # error message if not successful
+bool success                    # whether the update was successful
+string message                  # error message if not successful
