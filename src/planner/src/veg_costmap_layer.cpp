@@ -55,7 +55,7 @@ namespace veg_costmap
         declareParameter("updated_topic", rclcpp::ParameterValue("/veg_costmap/updated"));
         declareParameter("costmap_topic", rclcpp::ParameterValue("/veg_costmap"));
         declareParameter("obstacle_range", rclcpp::ParameterValue(5.0));
-        declareParameter("obstacle_radius", rclcpp::ParameterValue(0.5));
+        declareParameter("obstacle_radius", rclcpp::ParameterValue(20.0));
         declareParameter("lethal_cost", rclcpp::ParameterValue(254));
         declareParameter("use_gradient_costs", rclcpp::ParameterValue(true));
         declareParameter("gradient_factor", rclcpp::ParameterValue(0.8));
@@ -338,7 +338,7 @@ namespace veg_costmap
         double *min_x, double *min_y, double *max_x, double *max_y)
     {
 
-        RCLCPP_INFO(logger_, "Entering updateBounds...");
+        RCLCPP_DEBUG(logger_, "Entering updateBounds...");
 
         // Unused parameters
         (void)robot_x;
@@ -422,7 +422,7 @@ namespace veg_costmap
             *max_y = map_origin_y_ + (map_height_ * map_resolution_);
         }
 
-        RCLCPP_INFO(logger_, "Exiting updateBounds");
+        RCLCPP_DEBUG(logger_, "Exiting updateBounds");
     }
 
     /**
@@ -448,7 +448,7 @@ namespace veg_costmap
         if (!node)
             return;
 
-        RCLCPP_INFO(logger_, "Entering updateCosts...");
+        RCLCPP_DEBUG(logger_, "Entering updateCosts...");
 
         // Validate input bounds
         unsigned int size_x = master_grid.getSizeInCellsX();
@@ -494,16 +494,32 @@ namespace veg_costmap
                     int index = master_grid.getIndex(point.mx, point.my);
 
                     // Set cost directly in master grid
-                    master_array[index] = cost;
+                    // Set constant cost for the obstacle around its radius by obstacle_radius_
+                    for (int dx = -obstacle_radius_; dx <= obstacle_radius_; ++dx)
+                    {
+                        for (int dy = -obstacle_radius_; dy <= obstacle_radius_; ++dy)
+                        {
+                            // Check if the cell is within the circular radius
+                            if (dx * dx + dy * dy <= obstacle_radius_ * obstacle_radius_)
+                            {
+                                int new_index = master_grid.getIndex(point.mx + dx, point.my + dy);
+                                if (new_index >= 0 && new_index < static_cast<int>(size_x * size_y))
+                                {
+                                    master_array[new_index] = cost;
+                                }
+                            }
+                        }
+                    }
+
                     count++;
                 }
             }
         }
 
         // Log how many obstacles we're updating
-        RCLCPP_INFO(logger_, "Updating %d obstacles in costmap", count);
+        RCLCPP_DEBUG(logger_, "Updating %d obstacles in costmap", count);
 
-        RCLCPP_INFO(logger_, "Exiting updateCosts");
+        RCLCPP_DEBUG(logger_, "Exiting updateCosts");
     }
 
     /**
