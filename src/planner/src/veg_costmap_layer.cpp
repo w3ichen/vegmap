@@ -308,6 +308,11 @@ namespace veg_costmap
                         static_cast<unsigned char>(std::max(0.0, std::min(255.0, sampled_cost)));
                 }
             }
+
+            RCLCPP_INFO(
+                node->get_logger(),
+                "Updated costmap for obstacle %s at (%u, %u) with cost %d",
+                obstacle_name.c_str(), map_x, map_y, static_cast<int>(cost));
         }
 
         costmap_updated_ = true;

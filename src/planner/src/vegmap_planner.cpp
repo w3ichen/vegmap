@@ -419,10 +419,11 @@ namespace vegmap_planner
         }
 
         // Calculate movement cost (diagonal movements cost more)
-        double movement_cost = (from.x == to.x || from.y == to.y) ? 1.0 : std::sqrt(2.0);
+        // double movement_cost = (from.x == to.x || from.y == to.y) ? 1.0 : std::sqrt(2.0);
+        double movement_cost = 1.0; // Disable diagonal movement cost for simplicity
 
-        // Scale cost based on costmap
-        double cost_multiplier = 1.0 + (static_cast<double>(cost) / 252.0);
+        // Scale cost based on costmap - make sure even small costs have an impact
+        double cost_multiplier = 1.0 + (static_cast<double>(cost) / 50.0); // More significant scaling
 
         return movement_cost * cost_multiplier;
     }
