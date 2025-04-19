@@ -354,69 +354,72 @@ namespace veg_costmap
             return;
         }
 
-        if (costmap_updated_)
+        // Add mutex protection for obstacle grid access
+        std::lock_guard<std::mutex> lock(obstacle_mutex_);
+
+        // Option 2: Loop through obstacle_grid_ to find bounds of changed areas
+        // This is more efficient if changes are localized
+        bool found_update = false;
+        double update_min_x = std::numeric_limits<double>::max();
+        double update_min_y = std::numeric_limits<double>::max();
+        double update_max_x = std::numeric_limits<double>::lowest();
+        double update_max_y = std::numeric_limits<double>::lowest();
+
+        // Check if costmap and layered_costmap_ pointers are valid
+        if (!layered_costmap_ || !layered_costmap_->getCostmap())
         {
-            // Add mutex protection for obstacle grid access
-            std::lock_guard<std::mutex> lock(obstacle_mutex_);
+            RCLCPP_ERROR(logger_, "Layered costmap not initialized in updateBounds");
+            return;
+        }
 
-            // Option 2: Loop through obstacle_grid_ to find bounds of changed areas
-            // This is more efficient if changes are localized
-            bool found_update = false;
-            double update_min_x = std::numeric_limits<double>::max();
-            double update_min_y = std::numeric_limits<double>::max();
-            double update_max_x = std::numeric_limits<double>::lowest();
-            double update_max_y = std::numeric_limits<double>::lowest();
+        // Make sure obstacle_grid_ dimensions match the expected size
+        if (obstacle_grid_.size() != map_width_)
+        {
+            RCLCPP_ERROR(logger_, "Obstacle grid width mismatch: %zu vs %u",
+                         obstacle_grid_.size(), map_width_);
+            return;
+        }
 
-            // Check if costmap and layered_costmap_ pointers are valid
-            if (!layered_costmap_ || !layered_costmap_->getCostmap())
+        for (size_t i = 0; i < obstacle_grid_.size(); i++)
+        {
+            if (obstacle_grid_[i].size() != map_height_)
             {
-                RCLCPP_ERROR(logger_, "Layered costmap not initialized in updateBounds");
+                RCLCPP_ERROR(logger_, "Obstacle grid height mismatch at row %zu: %zu vs %u",
+                             i, obstacle_grid_[i].size(), map_height_);
                 return;
             }
 
-            // Make sure obstacle_grid_ dimensions match the expected size
-            if (obstacle_grid_.size() != map_width_)
+            for (size_t j = 0; j < obstacle_grid_[i].size(); j++)
             {
-                RCLCPP_ERROR(logger_, "Obstacle grid width mismatch: %zu vs %u",
-                             obstacle_grid_.size(), map_width_);
-                return;
-            }
+                const auto &obstacle = obstacle_grid_[i][j];
+                if (obstacle.cost > 0)
+                { // Only consider cells with obstacles
+                    double wx, wy;
+                    layered_costmap_->getCostmap()->mapToWorld(i, j, wx, wy);
 
-            for (size_t i = 0; i < obstacle_grid_.size(); i++)
-            {
-                if (obstacle_grid_[i].size() != map_height_)
-                {
-                    RCLCPP_ERROR(logger_, "Obstacle grid height mismatch at row %zu: %zu vs %u",
-                                 i, obstacle_grid_[i].size(), map_height_);
-                    return;
-                }
-
-                for (size_t j = 0; j < obstacle_grid_[i].size(); j++)
-                {
-                    const auto &obstacle = obstacle_grid_[i][j];
-                    if (obstacle.cost > 0)
-                    { // Only consider cells with obstacles
-                        double wx, wy;
-                        layered_costmap_->getCostmap()->mapToWorld(i, j, wx, wy);
-
-                        update_min_x = std::min(update_min_x, wx - obstacle_radius_);
-                        update_min_y = std::min(update_min_y, wy - obstacle_radius_);
-                        update_max_x = std::max(update_max_x, wx + obstacle_radius_);
-                        update_max_y = std::max(update_max_y, wy + obstacle_radius_);
-                        found_update = true;
-                    }
+                    update_min_x = std::min(update_min_x, wx - obstacle_radius_);
+                    update_min_y = std::min(update_min_y, wy - obstacle_radius_);
+                    update_max_x = std::max(update_max_x, wx + obstacle_radius_);
+                    update_max_y = std::max(update_max_y, wy + obstacle_radius_);
+                    found_update = true;
                 }
             }
+        }
 
-            if (found_update)
-            {
-                *min_x = std::min(*min_x, update_min_x);
-                *min_y = std::min(*min_y, update_min_y);
-                *max_x = std::max(*max_x, update_max_x);
-                *max_y = std::max(*max_y, update_max_y);
-            }
-
-            costmap_updated_ = false;
+        if (found_update)
+        {
+            *min_x = std::min(*min_x, update_min_x);
+            *min_y = std::min(*min_y, update_min_y);
+            *max_x = std::max(*max_x, update_max_x);
+            *max_y = std::max(*max_y, update_max_y);
+        }
+        else
+        {
+            // No updates found, set bounds to the entire costmap
+            *min_x = map_origin_x_;
+            *min_y = map_origin_y_;
+            *max_x = map_origin_x_ + (map_width_ * map_resolution_);
+            *max_y = map_origin_y_ + (map_height_ * map_resolution_);
         }
 
         RCLCPP_INFO(logger_, "Exiting updateBounds");
@@ -814,6 +817,9 @@ namespace veg_costmap
                     child_frame.c_str(), x, y, static_cast<int>(obstacle_point.cost));
                 num_obstacles++;
             }
+
+            // Add to obstacle grid
+            obstacle_grid_[mx][my] = obstacle_point;
         }
 
         if (num_obstacles > 0)

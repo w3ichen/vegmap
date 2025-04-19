@@ -187,17 +187,17 @@ global_costmap:
       footprint: "[ [0.55, 0.45], [0.55, -0.45], [-0.55, -0.45], [-0.55, 0.45] ]"
       # !! order of plugins is important !! starts from left to right
       # plugins: ["gradient_layer"] # ["veg_costmap_layer"] #, "static_layer", "obstacle_layer", "inflation_layer"]
-      plugins: ["veg_costmap_layer", "inflation_layer"]
+      plugins: ["veg_costmap_layer"]
       veg_costmap_layer:
         plugin: "veg_costmap::VegCostmapLayer"
         enabled: True
       gradient_layer:
         plugin: "nav2_gradient_costmap_plugin::GradientLayer"
         enabled: True
-      inflation_layer:
-        plugin: "nav2_costmap_2d::InflationLayer"
-        cost_scaling_factor: 0.1 # Close to 0 is no dropoff 
-        inflation_radius: 1.0 # in meters
+      # inflation_layer:
+      #   plugin: "nav2_costmap_2d::InflationLayer"
+      #   cost_scaling_factor: 0.1 # Close to 0 is no dropoff 
+      #   inflation_radius: 1.0 # in meters
       # static_layer:
       #   plugin: "nav2_costmap_2d::StaticLayer"
       #   map_subscribe_transient_local: True

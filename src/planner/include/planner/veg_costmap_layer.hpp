@@ -115,6 +115,7 @@ namespace veg_costmap
         rclcpp::TimerBase::SharedPtr costmap_pub_timer_;
 
         // Parameters
+        bool enabled_;
         std::mutex mutex_;
         bool costmap_updated_{false};
         std::string world_tf_service_;
