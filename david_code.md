@@ -108,3 +108,41 @@ ros2 launch planner traverse_cost.launch.py
 
 ros2 topic echo /cost_traverse # monitor real time published cost
 ```
+
+# X. Costmap (Failed)
+planner/maps/resistance_zone_costmap_params.yaml
+planner/config/nav2_resistance_params.yaml
+planner/launch/resistance_nav2.launch.py
+planner/scripts/resistance_costmap_publisher.py
+planner/launch/complete_resistance_system.launch.py
+
+# 7. resistance_zone_2.sdf
+
+
+
+
+
+# Weichen
+```bash
+# Weichen runs
+
+ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path world:=~/vegmap/src/planner/worlds/outdoors
+# and
+ros2 launch planner vegmap_planner.launch.py
+```
+
+
+presentaiton 
+problem
+- assumptions
+- steps we took and why
+  
+
+Qs
+- when to replan (upon collision or constantly)
+- save time vs energy
+- x/y inplace rotate = false | except goal (DWA (slide), .yaml file)
+- 
+
+
+frame work | 

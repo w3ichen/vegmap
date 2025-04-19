@@ -1,0 +1,984 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="resistance_zones_2">
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <plugin filename="libignition-gazebo-physics-system.so" name="ignition::gazebo::systems::Physics"/>
+    <plugin filename="libignition-gazebo-sensors-system.so" name="ignition::gazebo::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin filename="libignition-gazebo-scene-broadcaster-system.so" name="ignition::gazebo::systems::SceneBroadcaster"/>
+    <plugin filename="libignition-gazebo-user-commands-system.so" name="ignition::gazebo::systems::UserCommands"/>
+
+    <scene>
+      <ambient>1.0 1.0 1.0 1.0</ambient>
+      <background>0.8 0.8 0.8 1.0</background>
+      <shadows>true</shadows>
+    </scene>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.8 0.8 0.8 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <!-- Ground Plane -->
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>20 20</size>
+            </plane>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>20 20</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.4 0.4 0.4 1</ambient>
+            <diffuse>0.4 0.4 0.4 1</diffuse>
+            <specular>0.4 0.4 0.4 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- DENSE RESISTANCE ZONES
+    ==========================================================
+    ==========================================================
+    ==========================================================
+    -->
+
+    <!-- Transparency mapping for resistance:
+         0.01 = 20% resistance (nearly solid)
+         0.7 = 90% resistance (nearly transparent)
+    -->
+    
+    <!-- Original 10 zones (kept for reference) -->
+    <!-- Zone 1 - 50% resistance -->
+    <model name="resistance_zone_1">
+      <static>true</static>
+      <pose>3 2 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>1.5</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.36 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.3</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- Zone 2 - 70% resistance -->
+    <model name="resistance_zone_2">
+      <static>true</static>
+      <pose>-4 5 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>2.0</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.5</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- Zone 3 - 30% resistance -->
+    <model name="resistance_zone_3">
+      <static>true</static>
+      <pose>6 -3 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.8</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.1</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- Additional 20 new zones (30 total) -->
+    <!-- Zone 11 - 55% resistance -->
+    <model name="resistance_zone_11">
+      <static>true</static>
+      <pose>2 4 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.6</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.35</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- Zone 12 - 65% resistance -->
+    <model name="resistance_zone_12">
+      <static>true</static>
+      <pose>4 5 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>1.5</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.45</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- Zone 13 - 45% resistance -->
+    <model name="resistance_zone_13">
+      <static>true</static>
+      <pose>0 3 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>1.5</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.25</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- Zone 14 - 35% resistance -->
+    <model name="resistance_zone_14">
+      <static>true</static>
+      <pose>-2 3 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.5</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.15</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- Zone 15 - 25% resistance -->
+    <model name="resistance_zone_15">
+      <static>true</static>
+      <pose>-3 0 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.6</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.05</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- Zone 16 - 95% resistance (extreme) -->
+    <model name="resistance_zone_16">
+      <static>true</static>
+      <pose>2 -1 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>2.5</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.75</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- Zone 17 - 78% resistance -->
+    <model name="resistance_zone_17">
+      <static>true</static>
+      <pose>-2 -2 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.5</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.58</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- Zone 18 - 42% resistance -->
+    <model name="resistance_zone_18">
+      <static>true</static>
+      <pose>-4 -4 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.7</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.22</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- Zone 19 - 63% resistance -->
+    <model name="resistance_zone_19">
+      <static>true</static>
+      <pose>3 -4 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.5</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.43</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- Zone 20 - 82% resistance -->
+    <model name="resistance_zone_20">
+      <static>true</static>
+      <pose>-1 -4 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>2.0</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.62</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- Zone 21 - 15% resistance (very light) -->
+    <model name="resistance_zone_21">
+      <static>true</static>
+      <pose>-8 -3 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.8</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.01</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- Zone 22 - 38% resistance -->
+    <model name="resistance_zone_22">
+      <static>true</static>
+      <pose>-6 -7 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.6</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.18</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- Zone 23 - 68% resistance -->
+    <model name="resistance_zone_23">
+      <static>true</static>
+      <pose>2 -8 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.6</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.48</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- Zone 24 - 72% resistance -->
+    <model name="resistance_zone_24">
+      <static>true</static>
+      <pose>8 0 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.7</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.52</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- Zone 25 - 58% resistance -->
+    <model name="resistance_zone_25">
+      <static>true</static>
+      <pose>9 3 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.5</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.38</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- Zone 26 - 47% resistance -->
+    <model name="resistance_zone_26">
+      <static>true</static>
+      <pose>-2 7 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.5</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.27</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- Zone 27 - 33% resistance -->
+    <model name="resistance_zone_27">
+      <static>true</static>
+      <pose>-8 8 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.6</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.13</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- Zone 28 - 88% resistance -->
+    <model name="resistance_zone_28">
+      <static>true</static>
+      <pose>5 9 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>1.2</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.68</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- Zone 29 - 93% resistance -->
+    <model name="resistance_zone_29">
+      <static>true</static>
+      <pose>7 6 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>1.0</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.73</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- Zone 30 - 28% resistance -->
+    <model name="resistance_zone_30">
+      <static>true</static>
+      <pose>9 -9 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.5</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.08</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- DENSE RESISTANCE ZONES END
+    ==========================================================
+    ==========================================================
+    ==========================================================
+    -->
+
+    <!-- Rigid Obstacles - Trees & Rocks -->
+    <!-- Tree 1 -->
+    <model name="tree_1">
+      <static>true</static>
+      <pose>0 6 0.5 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.2</radius>
+              <length>5.0</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.4 0.2 0.1 1</ambient>
+            <diffuse>0.4 0.2 0.1 1</diffuse>
+            <specular>0.4 0.2 0.1 1</specular>
+          </material>
+        </visual>
+      <collision name="collision">
+        <geometry>
+          <cylinder>
+            <radius>0.2</radius>
+            <length>5.0</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      </link>
+    </model>
+
+    <!-- Tree 2 -->
+    <model name="tree_2">
+      <static>true</static>
+      <pose>-7 -1 0.5 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.2</radius>
+              <length>5.0</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.4 0.2 0.1 1</ambient>
+            <diffuse>0.4 0.2 0.1 1</diffuse>
+            <specular>0.4 0.2 0.1 1</specular>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.2</radius>
+              <length>5.0</length>
+            </cylinder>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- Tree 3 -->
+    <model name="tree_3">
+      <static>true</static>
+      <pose>3 -2 0.5 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.5</radius>
+              <length>5.0</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.4 0.2 0.1 1</ambient>
+            <diffuse>0.4 0.2 0.1 1</diffuse>
+            <specular>0.4 0.2 0.1 1</specular>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.5</radius>
+              <length>5.0</length>
+            </cylinder>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- Additional Trees -->
+    <!-- Tree 4 -->
+    <model name="tree_4">
+      <static>true</static>
+      <pose>8 4 0.5 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.3</radius>
+              <length>5.0</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.4 0.2 0.1 1</ambient>
+            <diffuse>0.4 0.2 0.1 1</diffuse>
+            <specular>0.4 0.2 0.1 1</specular>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.3</radius>
+              <length>5.0</length>
+            </cylinder>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- Tree 5 -->
+    <model name="tree_5">
+      <static>true</static>
+      <pose>-4 -7 0.5 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.25</radius>
+              <length>5.0</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.4 0.2 0.1 1</ambient>
+            <diffuse>0.4 0.2 0.1 1</diffuse>
+            <specular>0.4 0.2 0.1 1</specular>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.25</radius>
+              <length>5.0</length>
+            </cylinder>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- Rock 1 -->
+    <model name="rock_1">
+      <static>true</static>
+      <pose>-3 -8 0.5 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3.5 3.5 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.2 0.2 0.2 1</ambient>
+            <diffuse>0.2 0.2 0.2 1</diffuse>
+            <specular>0.2 0.2 0.2 1</specular>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- Rock 2 -->
+    <model name="rock_2">
+      <static>true</static>
+      <pose>-7 6 0.5 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.5 1.5 1.5</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.2 0.2 0.2 1</ambient>
+            <diffuse>0.2 0.2 0.2 1</diffuse>
+            <specular>0.2 0.2 0.2 1</specular>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.5 1.5 1.5</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- Additional Rocks -->
+    <!-- Rock 3 -->
+    <model name="rock_3">
+      <static>true</static>
+      <pose>6 2 0.5 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.8 0.8 0.8</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.2 0.2 0.2 1</ambient>
+            <diffuse>0.2 0.2 0.2 1</diffuse>
+            <specular>0.2 0.2 0.2 1</specular>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.8 0.8 0.8</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- Rock 4 -->
+    <model name="rock_4">
+      <static>true</static>
+      <pose>-5 -3 0.5 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.7 0.7 0.7</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.2 0.2 0.2 1</ambient>
+            <diffuse>0.2 0.2 0.2 1</diffuse>
+            <specular>0.2 0.2 0.2 1</specular>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.7 0.7 0.7</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+    <!-- Boundary Wall -->
+    <model name="boundary_wall">
+      <static>true</static>
+      <link name="wall_link">
+        <!-- North wall -->
+        <collision name="north_collision">
+          <pose>0 10 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.2 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="north_visual">
+          <pose>0 10 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.2 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.1 0.1 0.1 1</ambient>
+            <diffuse>0.1 0.1 0.1 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+        
+        <!-- South wall -->
+        <collision name="south_collision">
+          <pose>0 -10 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.2 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="south_visual">
+          <pose>0 -10 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.2 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.1 0.1 0.1 1</ambient>
+            <diffuse>0.1 0.1 0.1 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+        
+        <!-- East wall -->
+        <collision name="east_collision">
+          <pose>10 0 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.2 20 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="east_visual">
+          <pose>10 0 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.2 20 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.1 0.1 0.1 1</ambient>
+            <diffuse>0.1 0.1 0.1 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+        
+        <!-- West wall -->
+        <collision name="west_collision">
+          <pose>-10 0 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.2 20 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="west_visual">
+          <pose>-10 0 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.2 20 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.1 0.1 0.1 1</ambient>
+            <diffuse>0.1 0.1 0.1 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>
