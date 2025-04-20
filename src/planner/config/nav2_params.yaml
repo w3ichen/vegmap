@@ -265,9 +265,12 @@ planner_server:
     plugins: ["GridBased"]
     use_sim_time: True
     GridBased:
-      plugin: "vegmap_planner::VegmapPlanner"
+      # plugin: "vegmap_planner::VegmapPlanner"
       # plugin: "nav2_straight_line_planner::StraightLine"
-
+      plugin: "nav2_navfn_planner/NavfnPlanner"
+      use_astar: true           # Enable A* algorithm instead of Dijkstra
+      allow_unknown: true       # Allow planning through unknown space
+      tolerance: 0.5            # Goal tolerance in meters
 
 smoother_server:
   ros__parameters:

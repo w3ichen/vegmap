@@ -473,9 +473,6 @@ namespace veg_costmap
                     // Bound the cost to [0, 255]
                     unsigned char cost = static_cast<unsigned char>(clampCost(obstacle_pair.second.cost));
 
-                    // Get index in master grid
-                    int index = master_grid.getIndex(point.mx, point.my);
-
                     // Set cost directly in master grid
                     // Set constant cost for the obstacle around its radius by obstacle_radius_
                     for (int dx = -obstacle_radius_; dx <= obstacle_radius_; ++dx)
