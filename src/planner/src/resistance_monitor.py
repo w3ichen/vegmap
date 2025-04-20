@@ -28,6 +28,8 @@ class ResistanceMonitor(Node):
         self.commanded_speed = 0.0 # Las commanded linear speed
         self.cost = 0.0            # traverse cost
         self.actual_speed = 0.0    # Actual speed of the robot
+
+        self.update_cost_client = self.create_client(UpdateCost, '/veg_costmap/update')
         
         # Define resistance zones (x, y, width, height, resistance_factor)
         # Higher resistance_factor = stronger resistance (more reduction)
@@ -38,7 +40,7 @@ class ResistanceMonitor(Node):
             {'x': 6.0, 'y': -3.0, 'radius': 1.0, 'resistance_factor': 0.3}, # 30% reduction
             {'x': 1.0, 'y': -6.0, 'radius': 3.0, 'resistance_factor': 0.8}, # 80% reduction
             {'x': 8.0, 'y': 7.0, 'radius': 1.0, 'resistance_factor': 0.6},  # 60% reduction
-            {'x': 0.0, 'y': 0.0, 'radius': 1.0, 'resistance_factor': 0.4},  # 40% reduction (center)
+            {'x': -3.0, 'y': 0.0, 'radius': 1.0, 'resistance_factor': 0.4},  # 40% reduction (center)
             {'x': 5.0, 'y': 5.0, 'radius': 1.0, 'resistance_factor': 0.9},  # 90% reduction (very high)
             {'x': -5.0, 'y': -5.0, 'radius': 2.0, 'resistance_factor': 0.2}, # 20% reduction (light)
             {'x': -6.0, 'y': 2.0, 'radius': 1.0, 'resistance_factor': 0.75}, # 75% reduction
@@ -179,11 +181,36 @@ class ResistanceMonitor(Node):
             if in_zone:
                 self.get_logger().info(f'Robot entered grass {active_index} ' +
                                      f'(factor: {active_factor:.2f})')
+                
+                ### Call service to update costmap
+                self.update_costmap(
+                    x=self.resistance_zones[active_index]['x'],
+                    y=self.resistance_zones[active_index]['y'],
+                    cost=int(255 * active_factor),
+                    obstacle_type = f'grass_{active_index}'
+                )
+
             else:
                 self.get_logger().info('Robot left resistance zone')
             
             # Adjust velocity based on new state
             self.adjust_velocity()
+
+
+    def update_costmap(self, x, y, cost, obstacle_type):
+        if not self.update_cost_client.wait_for_service(timeout_sec=1.0):
+            self.get_logger().error('Service /veg_costmap/update not available')
+            return
+        
+        # create request
+        request = UpdateCost.Request()
+        request.x = float(x)
+        request.y = float(y)
+        request.cost = int(cost)
+        request.obstacle_type = obstacle_type
+
+        future = self.update_cost_client.call_async(request)
+        self.get_logger().info(f'Updating costmap for {obstacle_type} at ({x}, {y}) with cost {cost}')
     
     def cmd_vel_callback(self, msg):
         """Store the latest velocity command and adjust if needed"""
