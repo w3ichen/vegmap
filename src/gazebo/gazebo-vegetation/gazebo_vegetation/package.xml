@@ -1,0 +1,16 @@
+<package format="2">
+  <name>gazebo_vegetation</name>
+  <version>0.1.0</version>
+  <description>
+  Package with Gazebo vegetation models.
+  </description>
+  <maintainer email="jakub@tomasek.fr">Jakub Tomasek</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+    <gazebo_ros gazebo_model_path="${prefix}/models"/>
+  </export>
+  <!-- <buildtool_depend>ament</buildtool_depend> -->
+</package>
