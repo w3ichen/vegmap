@@ -5,8 +5,10 @@ from rclpy.node import Node
 from geometry_msgs.msg import Twist, TransformStamped
 from nav_msgs.msg import Odometry
 import std_msgs.msg
+from std_msgs.msg import Float32
 from tf2_msgs.msg import TFMessage
 import math
+from planner_msgs.srv import UpdateCost
 
 class ResistanceMonitor(Node):
     """
@@ -20,6 +22,12 @@ class ResistanceMonitor(Node):
         # Parameters - default resistance factor (used as fallback)
         self.declare_parameter('default_resistance_factor', 0.5)
         self.default_resistance_factor = self.get_parameter('default_resistance_factor').value
+
+        self.prev_position = None  # [x, y, z]
+        self.prev_time = None      # seconds
+        self.commanded_speed = 0.0 # Las commanded linear speed
+        self.cost = 0.0            # traverse cost
+        self.actual_speed = 0.0    # Actual speed of the robot
         
         # Define resistance zones (x, y, width, height, resistance_factor)
         # Higher resistance_factor = stronger resistance (more reduction)
@@ -37,21 +45,31 @@ class ResistanceMonitor(Node):
             {'x': 7.0, 'y': -7.0, 'radius': 1.0, 'resistance_factor': 0.85}, # 85% reduction
         ]
 
-        # using ground truth position for position
-        self.pos_sub = self.create_subscription(
+        """ Create subscribers """
+        # Commanded velocity subscription
+        self.cmd_vel_sub = self.create_subscription(
+            Twist,
+            'a200_0000/cmd_vel',
+            self.cmd_vel_callback,
+            10  
+        )
+
+        # Ground truth pose subscription
+        self.ground_truth_sub = self.create_subscription(
             TFMessage,
             '/model/a200_0000/robot/pose',
             self.position_callback,
+            10  
+        )
+    
+        """ Create publishers """
+        # Cost publisher
+        self.cost_pub = self.create_publisher(
+            Float32,
+            '/cost_traverse',
             10
         )
-        
-        self.cmd_vel_sub = self.create_subscription(
-            Twist, 
-            'a200_0000/cmd_vel', 
-            self.cmd_vel_callback, 
-            10
-        )
-        
+
         # Publisher for adjusted velocity
         self.cmd_vel_pub = self.create_publisher( 
             Twist,
@@ -64,33 +82,73 @@ class ResistanceMonitor(Node):
         self.last_cmd_vel = Twist()
         self.active_zone_index = -1
         self.active_resistance_factor = self.default_resistance_factor
+        self.timer = self.create_timer(0.1, self.publish_cost)
 
         # keeping track of robot position
         self.robot_x = 0.0
         self.robot_y = 0.0
-    
-        self.get_logger().info('Circular Resistance Monitor started')
-        self.get_logger().info(f'Monitoring {len(self.resistance_zones)} circular resistance zones')
 
     def position_callback(self,msg):
         """process robot position from /model/a200_0000/robot/pose"""
         found_transform = False
 
         for transform in msg.transforms:
-            if (transform.header.frame_id == 'resistance_zones' and
-                transform.child_frame_id == 'a200_0000/robot'):
+            if (transform.header.frame_id == 'resistance_zone' and   # in world frame
+                transform.child_frame_id == 'a200_0000/robot'):       # get robot pose
 
-                # set robot position
-                self.robot_x = transform.transform.translation.x
-                self.robot_y = transform.transform.translation.y
+                # extract current position
+                current_position = [
+                    transform.transform.translation.x,
+                    transform.transform.translation.y,
+                    transform.transform.translation.z
+                ]
+
+                # extract current time
+                current_time = transform.header.stamp.sec + transform.header.stamp.nanosec / 1e9
+
+                # calculate actual speed
+                if self.prev_position is not None and self.prev_time is not None:
+                    # difference in time
+                    dt = current_time - self.prev_time
+
+                    if dt > 0:
+                        dx = current_position[0] - self.prev_position[0]
+                        dy = current_position[1] - self.prev_position[1]
+
+                        distance = math.sqrt(dx**2 + dy**2)
+
+                        self.actual_speed = distance / dt
+
+                        if self.commanded_speed > 0:
+                            temp_cost = 1.0 - (self.actual_speed / self.commanded_speed)
+                            self.cost = max(0.0, temp_cost)
+                            self.get_logger().info(f"current cost: {temp_cost:.2f}")
+                            
+                # update previous position and time
+                self.prev_position = current_position
+                self.prev_time = current_time
 
                 self.get_logger().debug(f'Robot at x={self.robot_x:.2f}, y={self.robot_y:.2f}')
+                
+                self.robot_x = current_position[0]
+                self.robot_y = current_position[1]      
+                
                 found_transform = True
                 break
 
         if found_transform:
             self.check_zones()
 
+
+    def publish_cost(self):
+        """ Publish current grid cost """
+        if hasattr(self, 'actual_speed') and self.commanded_speed > 0: 
+            # calculate cost
+            # cost = 1.0 - (self.actual_speed / self.commanded_speed)
+            # cost = max(0.0, cost)
+            cost_msg = Float32()
+            cost_msg.data = float(self.cost)
+            self.cost_pub.publish(cost_msg)
 
     def check_zones(self):
         """checking if robot is in a circular resistance zone"""
@@ -119,7 +177,7 @@ class ResistanceMonitor(Node):
             self.active_resistance_factor = active_factor
             
             if in_zone:
-                self.get_logger().info(f'Robot entered circular resistance zone {active_index} ' +
+                self.get_logger().info(f'Robot entered grass {active_index} ' +
                                      f'(factor: {active_factor:.2f})')
             else:
                 self.get_logger().info('Robot left resistance zone')
