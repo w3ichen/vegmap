@@ -125,13 +125,13 @@ def generate_launch_description():
         namespace=namespace,
         arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom']
     )
-    odom_to_base_link = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        name='odom_to_base_link_publisher',
-        namespace=namespace,
-        arguments=['0', '0', '0', '0', '0', '0', 'odom', 'base_link']
-    )
+    # odom_to_base_link = Node(
+    #     package='tf2_ros',
+    #     executable='static_transform_publisher',
+    #     name='odom_to_base_link_publisher',
+    #     namespace=namespace,
+    #     arguments=['0', '0', '0', '0', '0', '0', 'odom', 'base_link']
+    # )
 
     # Navigation lifecycle manager
     lifecycle_manager_navigation = Node(
@@ -157,7 +157,7 @@ def generate_launch_description():
         behavior_server,
         bt_navigator,
         map_to_odom,
-        odom_to_base_link,
+        # odom_to_base_link,
         lifecycle_manager_navigation
     ])
 

@@ -9,6 +9,7 @@ from subprocess import PIPE
 import re
 import os
 from planner_msgs.srv import GetTransforms
+from tf2_ros import TransformBroadcaster
 
 
 class PoseInfoService(Node):
@@ -19,8 +20,45 @@ class PoseInfoService(Node):
         self.srv = self.create_service(
             GetTransforms, "/world/get_tf", self.get_tf_callback
         )
+        
+        # Create a publisher to the namespaced topic
+        self.tf_publisher = self.create_publisher(
+            TFMessage,
+            '/a200_0000/tf',  # This topic gets relayed to /tf
+            10
+        )        
+        # Create a subscription to the robot pose
+        # self.subscription = self.create_subscription(
+        #     TFMessage,
+        #     '/model/a200_0000/robot/pose',
+        #     self.pose_callback,
+        #     10
+        # )
+
+        # self.tf_broadcaster = TransformBroadcaster(self)
 
         self.get_logger().info("Pose info service initialized")
+    
+    # In your pose_callback method, change the broadcaster to use the namespaced topic
+    def pose_callback(self, msg):
+        """Callback for robot pose updates from Gazebo"""
+
+        for transform in msg.transforms:
+            # Create a new transform with odom as parent and base_link as child
+            new_transform = TransformStamped()
+            new_transform.header.stamp = transform.header.stamp
+            new_transform.header.frame_id = 'odom'
+            new_transform.child_frame_id = 'base_link'
+            
+            # Copy the transform data - use directly from Gazebo
+            new_transform.transform = transform.transform
+            
+            # Create a TFMessage to publish
+            tf_msg = TFMessage()
+            tf_msg.transforms.append(new_transform)
+            
+            # Publish to the namespaced topic that gets relayed
+            self.tf_publisher.publish(tf_msg)
 
     def get_tf_callback(self, request, response):
         world = request.world

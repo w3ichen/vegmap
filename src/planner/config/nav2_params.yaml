@@ -3,7 +3,7 @@ bt_navigator:
     use_sim_time: True
     global_frame: map
     robot_base_frame: base_link
-    odom_topic: platform/odom/filtered
+    # odom_topic: platform/odom/filtered
     bt_loop_duration: 10
     default_server_timeout: 20
     # 'default_nav_through_poses_bt_xml' and 'default_nav_to_pose_bt_xml' are use defaults:
@@ -142,7 +142,7 @@ local_costmap:
     ros__parameters:
       update_frequency: 5.0
       publish_frequency: 2.0
-      global_frame: odom
+      global_frame: map
       robot_base_frame: base_link
       enable_stamped_cmd_vel: True
       rolling_window: True
@@ -298,7 +298,7 @@ behavior_server:
       plugin: "nav2_behaviors/Wait"
     assisted_teleop:
       plugin: "nav2_behaviors/AssistedTeleop"
-    global_frame: odom
+    global_frame: map # odom
     robot_base_frame: base_link
     transform_tolerance: 0.2
     enable_stamped_cmd_vel: True
