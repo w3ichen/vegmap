@@ -63,3 +63,9 @@ ros2 service call /world/get_tf planner_msgs/srv/GetTransforms "{world: 'outdoor
 
 # Updating costmaps
 ros2 service call /veg_costmap/update planner_msgs/srv/UpdateCost "{x: 0.0, y: 0.0, cost: 255, obstacle_type: 'palm_tree'}"
+
+
+# Full run
+ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path world:=~/vegmap/src/planner/worlds/resistance_zone 
+
+ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path world:=~/vegmap/src/planner/worlds/resistance_zone x:=9.0 y:=-9.0 yaw:=2.325

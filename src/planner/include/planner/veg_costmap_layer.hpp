@@ -90,7 +90,7 @@ namespace veg_costmap
         using nav2_costmap_2d::Layer::declareParameter;
 
         // Obstacles considered as vegetation
-        std::vector<std::string> veg_names_ = {"tree", "bush"};
+        std::vector<std::string> veg_names_ = {"tree", "bush", "grass", "rock"};
         bool getWorldTransforms(void);
 
         // Callbacks
@@ -133,6 +133,7 @@ namespace veg_costmap
         double map_resolution_;
         double map_origin_x_;
         double map_origin_y_;
+        std::string world_name_;
 
         // Random generators
         std::mt19937 gen;
@@ -149,19 +150,17 @@ namespace veg_costmap
     {
         // Prior knowledge base of vegetation obstacles
         static const std::initializer_list<std::pair<const std::string, VegCostmapLayer::ObstacleData>> SAVED_OBSTACLE_DATABASE = {
-            {"tree_1", {{}, 250, 2}},
-            {"tree_2", {{}, 250, 2}},
-            {"tree_3", {{}, 250, 2}},
-            {"tree_4", {{}, 250, 2}},
-            {"tree_5", {{}, 250, 2}},
-            {"tree_6", {{}, 250, 2}},
-            {"tree_7", {{}, 250, 2}},
-            {"tree_8", {{}, 250, 2}},
-            {"palm_tree", {{}, 254, 2}},
-            {"bush_1", {{}, 150, 10}},
-            {"bush_2", {{}, 150, 10}},
-            {"bush_3", {{}, 150, 10}},
-            {"bush_4", {{}, 150, 10}},
+            {"grass_1", {{}, 150, 10}},
+            {"grass_2", {{}, 200, 10}},
+            {"grass_3", {{}, 100, 10}},
+            {"grass_4", {{}, 110, 10}},
+            {"grass_5", {{}, 230, 10}},
+            {"grass_6", {{}, 250, 10}},
+            {"tree_1", {{}, 250, 5}},
+            {"tree_2", {{}, 250, 5}},
+            {"tree_3", {{}, 250, 5}},
+            {"rock_1", {{}, 250, 5}},
+            {"rock_2", {{}, 250, 5}},
         };
 
     } // namespace defaults

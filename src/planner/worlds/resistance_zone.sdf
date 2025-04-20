@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <sdf version="1.6">
-  <world name="resistance_zones">
+  <world name="resistance_zone">
     <physics name="1ms" type="ignored">
       <max_step_size>0.001</max_step_size>
       <real_time_factor>1.0</real_time_factor>
@@ -66,7 +66,7 @@
     <!-- Transparency - 0.2 -->
     
     <!-- Resistance Zone 1 - 50% resistance (original) -->
-    <model name="resistance_zone_1">
+    <model name="grass_1">
       <static>true</static>
       <pose>3 2 0.01 0 0 0</pose>
       <link name="link">
@@ -89,9 +89,10 @@
         <!-- No collision element -->
       </link>
     </model>
+    
 
     <!-- Resistance Zone 2 - 70% resistance -->
-    <model name="resistance_zone_2">
+    <model name="grass_2">
       <static>true</static>
       <pose>-4 5 0.01 0 0 0</pose>
       <link name="link">
@@ -115,7 +116,7 @@
     </model>
 
     <!-- Resistance Zone 3 - 30% resistance -->
-    <model name="resistance_zone_3">
+    <model name="grass_3">
       <static>true</static>
       <pose>6 -3 0.01 0 0 0</pose>
       <link name="link">
@@ -139,7 +140,7 @@
     </model>
 
     <!-- Resistance Zone 4 - 80% resistance -->
-    <model name="resistance_zone_4">
+    <model name="grass_4">
       <static>true</static>
       <pose>1 -6 0.01 0 0 0</pose>
       <link name="link">
@@ -163,7 +164,7 @@
     </model>
 
     <!-- Resistance Zone 5 - 60% resistance -->
-    <model name="resistance_zone_5">
+    <model name="grass_5">
       <static>true</static>
       <pose>8 7 0.01 0 0 0</pose>
       <link name="link">
@@ -187,7 +188,7 @@
     </model>
 
     <!-- New Zone 6 - 40% resistance (center, larger) -->
-    <model name="resistance_zone_6">
+    <model name="grass_6">
       <static>true</static>
       <pose>0 0 0.01 0 0 0</pose>
       <link name="link">
@@ -211,7 +212,7 @@
     </model>
 
     <!-- New Zone 7 - 90% resistance (very high) -->
-    <model name="resistance_zone_7">
+    <model name="grass_7">
       <static>true</static>
       <pose>5 5 0.01 0 0 0</pose>
       <link name="link">
@@ -235,7 +236,7 @@
     </model>
 
     <!-- New Zone 8 - 20% resistance (light) -->
-    <model name="resistance_zone_8">
+    <model name="grass_8">
       <static>true</static>
       <pose>-5 -5 0.01 0 0 0</pose>
       <link name="link">
@@ -259,7 +260,7 @@
     </model>
 
     <!-- New Zone 9 - 75% resistance -->
-    <model name="resistance_zone_9">
+    <model name="grass_9">
       <static>true</static>
       <pose>-6 2 0.01 0 0 0</pose>
       <link name="link">
@@ -283,7 +284,7 @@
     </model>
 
     <!-- New Zone 10 - 85% resistance -->
-    <model name="resistance_zone_10">
+    <model name="grass_10">
       <static>true</static>
       <pose>7 -7 0.01 0 0 0</pose>
       <link name="link">

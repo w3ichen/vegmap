@@ -59,6 +59,7 @@ namespace veg_costmap
         declareParameter("lethal_cost", rclcpp::ParameterValue(254));
         declareParameter("use_gradient_costs", rclcpp::ParameterValue(true));
         declareParameter("gradient_factor", rclcpp::ParameterValue(0.8));
+        declareParameter("world_name", rclcpp::ParameterValue("resistance_zone"));
 
         // Get parameters
         node->get_parameter(name_ + ".enabled", enabled_);
@@ -71,6 +72,7 @@ namespace veg_costmap
         node->get_parameter(name_ + ".lethal_cost", lethal_cost_);
         node->get_parameter(name_ + ".use_gradient_costs", use_gradient_costs_);
         node->get_parameter(name_ + ".gradient_factor", gradient_factor_);
+        node->get_parameter(name_ + ".world_name", world_name_);
 
         // Initialize the map settings before accessing the costmap
         if (!layered_costmap_ || !layered_costmap_->getCostmap())
@@ -662,10 +664,10 @@ namespace veg_costmap
 
         // Create request
         auto request = std::make_shared<planner_msgs::srv::GetTransforms::Request>();
-        request->world = "outdoors";
+        request->world = world_name_;
 
         // Send request and wait for response
-        RCLCPP_INFO(logger_, "Requesting transforms for world: outdoors");
+        RCLCPP_INFO(logger_, "Requesting transforms for world: %s", world_name_.c_str());
         auto future = client->async_send_request(request);
 
         // Wait for response with timeout

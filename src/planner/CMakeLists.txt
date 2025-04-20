@@ -114,12 +114,12 @@ target_include_directories(nav2_gradient_costmap_plugin_core PUBLIC
 # Python executables
 install(PROGRAMS
   src/pose_info_bridge.py
-  resistance/resistance_monitor.py
-  resistance/costmap_generator.py
-  resistance/costmap_visualizer.py
-  resistance/cost_traverse.py
-  resistance/robot_pose_tf_publisher.py
-  resistance/traverse_cost_updater.py
+  src/resistance_monitor.py
+  src/costmap_generator.py
+  src/costmap_visualizer.py
+  src/cost_traverse.py
+  src/robot_pose_tf_publisher.py
+  src/traverse_cost_updater.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

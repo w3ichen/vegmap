@@ -94,11 +94,33 @@ def generate_launch_description():
     # push_namespace = PushRosNamespace(namespace=namespace)
     delayed_rviz = TimerAction(period=0.0, actions=[rviz])
 
+
+    # resistance_monitor.py
+    resistance_monitor = Node(
+        package="planner",
+        executable="resistance_monitor.py",
+        name="resistance_monitor",
+        namespace=namespace,  
+        output='screen',
+    )
+
+    # cost_traverse.py
+    cost_traverse = Node(
+        package="planner",
+        executable="cost_traverse.py",
+        name="cost_traverse",
+        namespace=namespace,  
+        output='screen',
+    )
+    
+
     return LaunchDescription(
         [
             # push_namespace,
             custom_nav_bringup,
             delayed_rviz,
             gz_bridge_launch,
+            resistance_monitor,
+            cost_traverse
         ]
     )
