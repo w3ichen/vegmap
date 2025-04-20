@@ -1,0 +1,680 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="resistance_zones">
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <plugin filename="libignition-gazebo-physics-system.so" name="ignition::gazebo::systems::Physics"/>
+    <plugin filename="libignition-gazebo-sensors-system.so" name="ignition::gazebo::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin filename="libignition-gazebo-scene-broadcaster-system.so" name="ignition::gazebo::systems::SceneBroadcaster"/>
+    <plugin filename="libignition-gazebo-user-commands-system.so" name="ignition::gazebo::systems::UserCommands"/>
+
+    <scene>
+      <ambient>1.0 1.0 1.0 1.0</ambient>
+      <background>0.8 0.8 0.8 1.0</background>
+      <shadows>true</shadows>
+    </scene>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.8 0.8 0.8 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <!-- Ground Plane -->
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>20 20</size>
+            </plane>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>20 20</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.4 0.4 0.4 1</ambient>
+            <diffuse>0.4 0.4 0.4 1</diffuse>
+            <specular>0.4 0.4 0.4 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+
+
+    <!-- RESISTANCE ZONES
+    ==========================================================
+    ==========================================================
+    ==========================================================
+    -->
+
+    <!-- Resistance Zone 1 - 50% resistance (original) -->
+    <model name="resistance_zone_1">
+      <static>true</static>
+      <pose>3 2 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>2.0</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.36 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <!-- transparency = 0.5 - 0.2 -->
+          <transparency>0.5</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- Resistance Zone 2 - 70% resistance -->
+    <model name="resistance_zone_2">
+      <static>true</static>
+      <pose>-4 5 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>1.0</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.3</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- Resistance Zone 3 - 30% resistance -->
+    <model name="resistance_zone_3">
+      <static>true</static>
+      <pose>6 -3 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>1.0</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.7</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- Resistance Zone 4 - 80% resistance -->
+    <model name="resistance_zone_4">
+      <static>true</static>
+      <pose>1 -6 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>3.0</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.2</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- Resistance Zone 5 - 60% resistance -->
+    <model name="resistance_zone_5">
+      <static>true</static>
+      <pose>8 7 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>1.0</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.4</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- New Zone 6 - 40% resistance (center, larger) -->
+    <model name="resistance_zone_6">
+      <static>true</static>
+      <pose>0 0 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>1.0</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.60</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- New Zone 7 - 90% resistance (very high) -->
+    <model name="resistance_zone_7">
+      <static>true</static>
+      <pose>5 5 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>1.0</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.10</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- New Zone 8 - 20% resistance (light) -->
+    <model name="resistance_zone_8">
+      <static>true</static>
+      <pose>-5 -5 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>2.0</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.80</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- New Zone 9 - 75% resistance -->
+    <model name="resistance_zone_9">
+      <static>true</static>
+      <pose>-6 2 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>1.0</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.25</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+    <!-- New Zone 10 - 85% resistance -->
+    <model name="resistance_zone_10">
+      <static>true</static>
+      <pose>7 -7 0.01 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>1.0</radius>
+              <length>0.5</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.0 0.36 0.0 0.7</ambient>
+            <diffuse>0.0 0.36 0.0 0.7</diffuse>
+            <specular>0.0 0.24 0.0 0.7</specular>
+            <emissive>0.0 0.04 0.0 1.0</emissive>
+          </material>
+          <transparency>0.15</transparency>
+        </visual>
+        <!-- No collision element -->
+      </link>
+    </model>
+
+
+    <!-- RESISTANCE ZONES
+    ==========================================================
+    ==========================================================
+    ==========================================================
+    -->
+    
+
+
+    <!-- Rigid Obstacles - Trees & Rocks
+    ==========================================================
+    ==========================================================
+    ==========================================================
+    -->
+    <!-- Tree 1 -->
+
+    <!-- DAVE TREE to BENNY TRREE -->
+    <!-- <model name="tree_1">
+      <static>true</static>
+      <pose>0 6 0.5 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.2</radius>
+              <length>5.0</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.4 0.2 0.1 1</ambient>
+            <diffuse>0.4 0.2 0.1 1</diffuse>
+            <specular>0.4 0.2 0.1 1</specular>
+          </material>
+        </visual>
+      <collision name="collision">
+        <geometry>
+          <cylinder>
+            <radius>0.2</radius>
+            <length>5.0</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      </link>
+    </model> -->
+
+    <!-- <BENNY TREE STUFF> -->
+    <model name="tree_1_mesh">
+      <static>true</static>
+      <pose>0 6 0 1.57079 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <mesh>
+              <scale>5 5 5</scale>
+              <uri>model://tree_1/meshes/tree_1.obj</uri>
+            </mesh>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <mesh>
+              <scale>5 5 5</scale>
+              <uri>model://tree_1/meshes/tree_1.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Replace Tree 2 with mesh-based model -->
+    <model name="tree_2_mesh">
+      <static>true</static>
+      <pose>-7 -1 0 1.57079 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <mesh>
+              <scale>5 5 5</scale>
+              <uri>model://tree_2/meshes/tree_2.obj</uri>
+            </mesh>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <mesh>
+              <scale>5 5 5</scale>
+              <uri>model://tree_2/meshes/tree_2.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Replace Tree 3 with mesh-based model -->
+    <model name="tree_3_mesh">
+      <static>true</static>
+      <pose>3 -2 0 1.57079 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <mesh>
+              <scale>5 5 5</scale>
+              <uri>model://tree_3/meshes/tree_3.obj</uri>
+            </mesh>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <mesh>
+              <scale>5 5 5</scale>
+              <uri>model://tree_3/meshes/tree_3.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Add Oak Tree (using tree_6) -->
+    <model name="oak_tree">
+      <static>true</static>
+      <pose>8 2 0 1.57079 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <mesh>
+              <scale>5 5 5</scale>
+              <uri>model://tree_6/meshes/tree.obj</uri>
+            </mesh>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <mesh>
+              <scale>5 5 5</scale>
+              <uri>model://tree_6/meshes/tree.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Add Tree 8 -->
+    <model name="tree_8">
+      <static>true</static>
+      <pose>-5 -7 0 1.57079 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <mesh>
+              <scale>5 5 5</scale>
+              <uri>model://tree_8/meshes/tree_8.obj</uri>
+            </mesh>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <mesh>
+              <scale>5 5 5</scale>
+              <uri>model://tree_8/meshes/tree_8.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Add Bush 0 -->
+    <model name="bush_0_1">
+      <static>true</static>
+      <pose>2 9 0 1.57079 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <mesh>
+              <scale>5 5 5</scale>
+              <uri>model://bush_0/meshes/bush_0.obj</uri>
+            </mesh>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <mesh>
+              <scale>5 5 5</scale>
+              <uri>model://bush_0/meshes/bush_0.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Add Bush 0 (second instance) -->
+    <model name="bush_0_2">
+      <static>true</static>
+      <pose>-2 4 0 1.57079 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <mesh>
+              <scale>5 5 5</scale>
+              <uri>model://bush_0/meshes/bush_0.obj</uri>
+            </mesh>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <mesh>
+              <scale>5 5 5</scale>
+              <uri>model://bush_0/meshes/bush_0.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Add Bush 2 -->
+    <model name="bush_2">
+      <static>true</static>
+      <pose>9 -9 0 1.57079 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <mesh>
+              <scale>5 5 5</scale>
+              <uri>model://bush_2/meshes/bush_2.obj</uri>
+            </mesh>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <mesh>
+              <scale>5 5 5</scale>
+              <uri>model://bush_2/meshes/bush_2.obj</uri>
+            </mesh>
+          </geometry>
+        </visual>
+      </link>
+    </model>
+
+    <!-- </BENNY TREE STUFF> -->
+
+    <!-- Rock 2 -->
+    <model name="rock_2">
+      <static>true</static>
+      <pose>-7 6 0.5 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>2 2 2</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.2 0.2 0.2 1</ambient>
+            <diffuse>0.2 0.2 0.2 1</diffuse>
+            <specular>0.2 0.2 0.2 1</specular>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>2 2 2</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
+
+
+    <!-- Rigid Obstacles - Trees & Rocks
+    ==========================================================
+    ==========================================================
+    ==========================================================
+    -->
+
+    <!-- Boundary Wall -->
+    <model name="boundary_wall">
+      <static>true</static>
+      <link name="wall_link">
+        <!-- North wall -->
+        <collision name="north_collision">
+          <pose>0 10 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.2 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="north_visual">
+          <pose>0 10 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.2 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.1 0.1 0.1 1</ambient>
+            <diffuse>0.1 0.1 0.1 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+        
+        <!-- South wall -->
+        <collision name="south_collision">
+          <pose>0 -10 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.2 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="south_visual">
+          <pose>0 -10 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.2 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.1 0.1 0.1 1</ambient>
+            <diffuse>0.1 0.1 0.1 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+        
+        <!-- East wall -->
+        <collision name="east_collision">
+          <pose>10 0 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.2 20 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="east_visual">
+          <pose>10 0 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.2 20 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.1 0.1 0.1 1</ambient>
+            <diffuse>0.1 0.1 0.1 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
+        </visual>
+        
+        <!-- West wall -->
+        <collision name="west_collision">
+          <pose>-10 0 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.2 20 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="west_visual">
+          <pose>-10 0 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.2 20 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.1 0.1 0.1 1</ambient>
+            <diffuse>0.1 0.1 0.1 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+         </material>
+        </visual>
+      </link>
+    </model>
+
+  </world>
+</sdf>
