@@ -96,18 +96,43 @@ python3 src/planner/sensors/ground_truth.py # show ground truth
 ros2 topic echo /a200_0000/platform/odom --field twist.twist.linear
 ```
 
+
+
 # 5. traverse_cost.launch.py
 ```bash
+
+# runs resistance zone map
+# positions robot upper right corner
 ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path world:=~/vegmap/src/planner/worlds/resistance_zone x:=9.0 y:=-9.0 yaw:=2.325
 
 ros2 launch planner traverse_cost.launch.py
 # launch file that launches
-- gz_bridge.launch.py
-- python3 ~/vegmap/src/planner/resistance/resistance_monitor.py # applies resistance to obstacles
-- python3 ~/vegmap/src/planner/resistance/cost_traverse.py # compares cmd_vel with actual speed from /model/a200_0000/robot_pose to publish traverse cost
+
+- gz_bridge.launch.py 
+# bridges /model/a200_0000/robot_pose topic from gazebo to ROS2 - this topic contains ground truth position of the robot
+
+- python3 ~/vegmap/src/planner/resistance/resistance_monitor.py 
+# monitors robot's position to determine if it has entered a resistance zone
+# applies resistance to obstacles from worlds/resistance_zone.sdf
+
+- python3 ~/vegmap/src/planner/resistance/cost_traverse.py 
+# compares cmd_vel with actual speed from /model/a200_0000/robot_pose to publish traverse cost
+  # /cost_traverse  # topic that continuously publishes traversal cost
+  # takes in ground truth position and cmd_velocity
+  # calculates real time speed using grouth truth position change, compares to cmd_velocity to publish traversability cost
+
+
+
 
 ros2 topic echo /cost_traverse # monitor real time published cost
 ```
+
+
+
+
+
+
+
 
 # X. Costmap (Failed)
 planner/maps/resistance_zone_costmap_params.yaml
@@ -122,7 +147,7 @@ planner/launch/complete_resistance_system.launch.py
 
 
 
-# Weichen
+# Weichen' stuff
 ```bash
 # Weichen runs
 
@@ -130,19 +155,3 @@ ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path world:=
 # and
 ros2 launch planner vegmap_planner.launch.py
 ```
-
-
-presentaiton 
-problem
-- assumptions
-- steps we took and why
-  
-
-Qs
-- when to replan (upon collision or constantly)
-- save time vs energy
-- x/y inplace rotate = false | except goal (DWA (slide), .yaml file)
-- 
-
-
-frame work | 
