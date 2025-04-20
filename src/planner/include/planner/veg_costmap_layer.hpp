@@ -20,6 +20,7 @@
 #include "std_msgs/msg/empty.hpp"
 #include "planner_msgs/srv/update_cost.hpp"
 #include "planner_msgs/srv/get_transforms.hpp"
+#include "std_msgs/msg/float32_multi_array.hpp"
 
 #define UNKNOWN_COST 120
 #define UNKNOWN_STDDEV 20
@@ -31,6 +32,20 @@ namespace veg_costmap
     public:
         // Constructor
         VegCostmapLayer();
+
+        // Define a struct to store zone information
+        struct ZoneInfo
+        {
+            double x;
+            double y;
+            double radius;
+            std::string name;
+        };
+
+        rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr zones_sub_;
+        std::vector<ZoneInfo> zones_info_;
+
+        void zonesCallback(const std_msgs::msg::Float32MultiArray::SharedPtr msg);
 
         // Define ObstaclePoint first, before using it in containers
         struct ObstaclePoint

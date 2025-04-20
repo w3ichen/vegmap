@@ -48,6 +48,10 @@ namespace veg_costmap
         // Restart with a reset
         reset();
 
+        zones_sub_ = node->create_subscription<std_msgs::msg::Float32MultiArray>(
+            "/grass_zones", 10,
+            std::bind(&VegCostmapLayer::zonesCallback, this, std::placeholders::_1));
+
         // Declare parameters - using Layer's inherited methods
         declareParameter("enabled", rclcpp::ParameterValue(true));
         declareParameter("world_tf_service", rclcpp::ParameterValue("/world/get_tf"));
@@ -55,7 +59,7 @@ namespace veg_costmap
         declareParameter("updated_topic", rclcpp::ParameterValue("/veg_costmap/updated"));
         declareParameter("costmap_topic", rclcpp::ParameterValue("/veg_costmap"));
         declareParameter("obstacle_range", rclcpp::ParameterValue(5.0));
-        declareParameter("obstacle_radius", rclcpp::ParameterValue(20.0));
+        declareParameter("obstacle_radius", rclcpp::ParameterValue(20.0)); // radius of obstacle in .sdf / resolution {in this case 1/.05 = 20}
         declareParameter("lethal_cost", rclcpp::ParameterValue(254));
         declareParameter("use_gradient_costs", rclcpp::ParameterValue(true));
         declareParameter("gradient_factor", rclcpp::ParameterValue(0.8));
@@ -159,6 +163,40 @@ namespace veg_costmap
         }
 
         RCLCPP_INFO(logger_, "VegCostmapLayer initialized");
+    }
+
+    /**
+     * @brief Callback for zones subscription
+     * @param msg The received message
+     */
+    void VegCostmapLayer::zonesCallback(const std_msgs::msg::Float32MultiArray::SharedPtr msg)
+    {
+        zones_info_.clear();
+
+        // Each zone has 3 values: x, y, radius
+        if (msg->data.size() % 3 != 0)
+        {
+            RCLCPP_ERROR(logger_, "Invalid zones data: size not a multiple of 3");
+            return;
+        }
+
+        for (size_t i = 0; i < msg->data.size(); i += 3)
+        {
+            if (i + 2 < msg->data.size())
+            {
+                ZoneInfo zone;
+                zone.x = msg->data[i];
+                zone.y = msg->data[i + 1];
+                zone.radius = msg->data[i + 2];
+                zone.name = "grass_" + std::to_string(i / 3 + 1);
+
+                zones_info_.push_back(zone);
+                RCLCPP_INFO(logger_, "Added zone %s at (%.2f, %.2f) with radius %.2f",
+                            zone.name.c_str(), zone.x, zone.y, zone.radius);
+            }
+        }
+
+        costmap_updated_ = true;
     }
 
     /**
@@ -463,9 +501,6 @@ namespace veg_costmap
             return;
         }
 
-        // // Thread safety for accessing obstacle database
-        // std::lock_guard<std::mutex> lock(mutex_);
-
         // Then update the master grid directly with all obstacles
         int count = 0;
         for (const auto &obstacle_pair : obstacle_database_)
@@ -478,14 +513,42 @@ namespace veg_costmap
                     // Bound the cost to [0, 255]
                     unsigned char cost = static_cast<unsigned char>(clampCost(obstacle_pair.second.cost));
 
-                    // Set cost directly in master grid
-                    // Set constant cost for the obstacle around its radius by obstacle_radius_
-                    for (int dx = -obstacle_radius_; dx <= obstacle_radius_; ++dx)
+                    // Find the matching zone radius for grass obstacles
+                    double radius = obstacle_radius_; // Default fallback
+
+                    // Try to find a matching zone for grass obstacles
+                    if (point.name.find("grass_") == 0)
                     {
-                        for (int dy = -obstacle_radius_; dy <= obstacle_radius_; ++dy)
+                        // Extract zone number from name (e.g., "grass_1" -> 1)
+                        size_t pos = point.name.find('_');
+                        if (pos != std::string::npos)
+                        {
+                            try
+                            {
+                                int zone_idx = std::stoi(point.name.substr(pos + 1)) - 1;
+                                if (zone_idx >= 0 && zone_idx < static_cast<int>(zones_info_.size()))
+                                {
+                                    radius = zones_info_[zone_idx].radius;
+                                    RCLCPP_DEBUG(logger_, "Using zone-specific radius %.2f for %s",
+                                                 radius, point.name.c_str());
+                                }
+                            }
+                            catch (...)
+                            {
+                                // Use default radius if conversion fails
+                                RCLCPP_DEBUG(logger_, "Using default radius for %s", point.name.c_str());
+                            }
+                        }
+                    }
+
+                    // Set cost directly in master grid
+                    // Set constant cost for the obstacle around its radius
+                    for (int dx = -radius; dx <= radius; ++dx)
+                    {
+                        for (int dy = -radius; dy <= radius; ++dy)
                         {
                             // Check if the cell is within the circular radius
-                            if (dx * dx + dy * dy <= obstacle_radius_ * obstacle_radius_)
+                            if (dx * dx + dy * dy <= radius * radius)
                             {
                                 int new_index = master_grid.getIndex(point.mx + dx, point.my + dy);
                                 if (new_index >= 0 && new_index < static_cast<int>(size_x * size_y))
@@ -506,7 +569,6 @@ namespace veg_costmap
 
         RCLCPP_DEBUG(logger_, "Exiting updateCosts");
     }
-
     /**
      * reset()
      * It may have any code to be executed during costmap reset.

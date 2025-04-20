@@ -18,6 +18,8 @@ class ResistanceMonitor(Node):
     
     def __init__(self):
         super().__init__('resistance_monitor')
+        self.timer_init = self.create_timer(1.0, self.initialize_costmap_zones)
+
         
         # Parameters - default resistance factor (used as fallback)
         self.declare_parameter('default_resistance_factor', 0.5)
@@ -65,6 +67,13 @@ class ResistanceMonitor(Node):
         )
     
         """ Create publishers """
+        # Publish grass zone radius for costmap visualization
+        self.grass_pub = self.create_publisher(
+            std_msgs.msg.Float32MultiArray,
+            '/grass_zones',
+            10
+        )
+
         # Cost publisher
         self.cost_pub = self.create_publisher(
             Float32,
@@ -89,6 +98,18 @@ class ResistanceMonitor(Node):
         # keeping track of robot position
         self.robot_x = 0.0
         self.robot_y = 0.0
+
+    # publish grass zones
+    def initialize_costmap_zones(self):
+        """Initialize all zones in the costmap at startup"""
+        for i, zone in enumerate(self.resistance_zones):
+            self.update_costmap(
+                x=zone['x'],
+                y=zone['y'],
+                cost=int(255 * zone['resistance_factor']),
+                obstacle_type=f'grass_{i+1}'
+            )
+        self.timer_init.cancel()  # Only run once
 
     def position_callback(self,msg):
         """process robot position from /model/a200_0000/robot/pose"""

@@ -73,7 +73,7 @@
         <visual name="visual">
           <geometry>
             <cylinder>
-              <radius>1.0</radius>
+              <radius>2.0</radius>
               <length>0.5</length>
             </cylinder>
           </geometry>
@@ -147,7 +147,7 @@
         <visual name="visual">
           <geometry>
             <cylinder>
-              <radius>1.0</radius>
+              <radius>3.0</radius>
               <length>0.5</length>
             </cylinder>
           </geometry>
@@ -243,7 +243,7 @@
         <visual name="visual">
           <geometry>
             <cylinder>
-              <radius>1.0</radius>
+              <radius>2.0</radius>
               <length>0.5</length>
             </cylinder>
           </geometry>
@@ -329,7 +329,7 @@
         <visual name="visual">
           <geometry>
             <cylinder>
-              <radius>1.0</radius>
+              <radius>0.2</radius>
               <length>5.0</length>
             </cylinder>
           </geometry>
@@ -342,7 +342,7 @@
       <collision name="collision">
         <geometry>
           <cylinder>
-            <radius>1.0</radius>
+            <radius>0.2</radius>
             <length>5.0</length>
           </cylinder>
         </geometry>
@@ -358,7 +358,7 @@
         <visual name="visual">
           <geometry>
             <cylinder>
-              <radius>1.0</radius>
+              <radius>0.2</radius>
               <length>5.0</length>
             </cylinder>
           </geometry>
@@ -371,7 +371,7 @@
         <collision name="collision">
           <geometry>
             <cylinder>
-              <radius>1.0</radius>
+              <radius>0.2</radius>
               <length>5.0</length>
             </cylinder>
           </geometry>
@@ -387,7 +387,7 @@
         <visual name="visual">
           <geometry>
             <cylinder>
-              <radius>1.0</radius>
+              <radius>0.5</radius>
               <length>5.0</length>
             </cylinder>
           </geometry>
@@ -400,13 +400,69 @@
         <collision name="collision">
           <geometry>
             <cylinder>
-              <radius>1.0</radius>
+              <radius>0.5</radius>
               <length>5.0</length>
             </cylinder>
           </geometry>
         </collision>
       </link>
     </model>
+
+    <!-- Rock 1 -->
+    <!-- <model name="rock_1">
+      <static>true</static>
+      <pose>-3 -8 0.5 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.2 0.2 0.2 1</ambient>
+            <diffuse>0.2 0.2 0.2 1</diffuse>
+            <specular>0.2 0.2 0.2 1</specular>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model> -->
+
+    <!-- Rock 2 -->
+    <!-- <model name="rock_2">
+      <static>true</static>
+      <pose>-7 6 0.5 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>2 2 2</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.2 0.2 0.2 1</ambient>
+            <diffuse>0.2 0.2 0.2 1</diffuse>
+            <specular>0.2 0.2 0.2 1</specular>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>2 2 2</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model> -->
+
+
 
     <!-- Rigid Obstacles - Trees & Rocks
     ==========================================================
