@@ -144,23 +144,18 @@ namespace veg_costmap
             double obs_mean, double obs_stddev,
             unsigned char *posterior_mean, unsigned char *posterior_stddev);
         double clampCost(double cost);
+        void fetchObstacleDB(std::string obstacle_name, ObstacleData **obstacle_data);
     };
 
     namespace defaults
     {
         // Prior knowledge base of vegetation obstacles
         static const std::initializer_list<std::pair<const std::string, VegCostmapLayer::ObstacleData>> SAVED_OBSTACLE_DATABASE = {
-            {"grass_1", {{}, 150, 10}},
-            {"grass_2", {{}, 200, 10}},
-            {"grass_3", {{}, 100, 10}},
-            {"grass_4", {{}, 110, 10}},
-            {"grass_5", {{}, 230, 10}},
-            {"grass_6", {{}, 250, 10}},
-            {"tree_1", {{}, 250, 5}},
-            {"tree_2", {{}, 250, 5}},
-            {"tree_3", {{}, 250, 5}},
-            {"rock_1", {{}, 250, 5}},
-            {"rock_2", {{}, 250, 5}},
+            {"grass", {{}, 120, 10}},
+            {"bush", {{}, 180, 10}},
+            {"tree", {{}, 250, 5}},
+            {"rock", {{}, 250, 5}},
+
         };
 
     } // namespace defaults

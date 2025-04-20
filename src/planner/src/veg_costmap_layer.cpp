@@ -232,6 +232,9 @@ namespace veg_costmap
 
         ObstaclePoint &obstacle = obstacle_grid_[map_x][map_y];
 
+        ObstacleData *obstacle_data;
+        fetchObstacleDB(obstacle_type, &obstacle_data);
+
         if (obstacle.x != map_x || obstacle.y != map_y)
         {
             // If the obstacle is not already in the grid, add it
@@ -242,7 +245,8 @@ namespace veg_costmap
             obstacle.name = obstacle_type;
 
             // Add to the obstacle database
-            obstacle_database_[obstacle_type].others.insert(obstacle);
+
+            obstacle_data->others.insert(obstacle);
         }
 
         // Update the obstacle grid with the code
@@ -254,34 +258,33 @@ namespace veg_costmap
         {
             RCLCPP_INFO(logger_, "Updating for other obstacles of type %s", obstacle_type.c_str());
 
-            ObstacleData &obstacle_data = obstacle_database_[obstacle_type];
-            if (obstacle_data.cost == 0)
+            if (obstacle_data->cost == 0)
             {
                 // No prior data, set initial cost and stddev
-                obstacle_data.cost = new_cost;
-                obstacle_data.cost_stddev = obstacle_database_[obstacle_type].cost_stddev;
+                obstacle_data->cost = new_cost;
+                obstacle_data->cost_stddev = UNKNOWN_STDDEV;
             }
             else
             {
                 // Combine the new normal dist with the prior normal dist
                 bayesianUpdateGaussian(
                     // Old prior knowledge
-                    obstacle_data.cost, obstacle_data.cost_stddev,
+                    obstacle_data->cost, obstacle_data->cost_stddev,
                     // New sample, assume twice as accurate as prior (ie. divide by 2)
-                    new_cost, obstacle_data.cost_stddev / 2.0,
+                    new_cost, obstacle_data->cost_stddev / 2.0,
                     // Output updated mean and stddev
-                    &obstacle_data.cost, &obstacle_data.cost_stddev);
+                    &obstacle_data->cost, &obstacle_data->cost_stddev);
             }
 
             // UPDATE similar obstacles of the same type
             // Iterate through all the other similar obstacles and update their cost
-            for (auto &obstacle : obstacle_data.others)
+            for (auto &obstacle : obstacle_data->others)
             {
                 // If stddev is not 0 (ie. not already sampled), update cost from a normal distribution
                 bool is_sampled = obstacle_grid_[obstacle.mx][obstacle.my].cost_stddev == 0;
                 if (!is_sampled)
                 {
-                    std::normal_distribution<double> normal_dist(obstacle_data.cost, obstacle_data.cost_stddev);
+                    std::normal_distribution<double> normal_dist(obstacle_data->cost, obstacle_data->cost_stddev);
                     // Sample from normal distribution
                     double sampled_cost = normal_dist(gen);
                     // Ensure cost is within valid range (0-255)
@@ -720,11 +723,12 @@ namespace veg_costmap
             RCLCPP_INFO(logger_, "Found vegetation transform: %s", child_frame.c_str());
 
             // Get the obstacle data from the database
-            ObstacleData &obstacle_data = obstacle_database_[child_frame];
+            ObstacleData *obstacle_data;
+            fetchObstacleDB(child_frame, &obstacle_data);
 
             // Use safe normal distribution with proper bounds checking
-            double mean_cost = clampCost(obstacle_data.cost);
-            double stddev = std::max(0.1, static_cast<double>(obstacle_data.cost_stddev)); // Ensure positive stddev
+            double mean_cost = clampCost(obstacle_data->cost);
+            double stddev = std::max(0.1, static_cast<double>(obstacle_data->cost_stddev)); // Ensure positive stddev
 
             std::normal_distribution<double> normal_dist(mean_cost, stddev);
             double obstacle_cost = normal_dist(gen);
@@ -760,10 +764,10 @@ namespace veg_costmap
             obstacle_point.my = my;
             obstacle_point.name = child_frame;
             obstacle_point.cost = static_cast<unsigned char>(obstacle_cost);
-            obstacle_point.cost_stddev = obstacle_database_[child_frame].cost_stddev;
+            obstacle_point.cost_stddev = obstacle_data->cost_stddev;
 
             // Add to obstacles database - ensure others set is initialized first
-            if (!obstacle_database_[child_frame].others.insert(obstacle_point).second)
+            if (!obstacle_data->others.insert(obstacle_point).second)
             {
                 RCLCPP_INFO(logger_, "Obstacle %s at (%.2f, %.2f) already exists in database",
                             child_frame.c_str(), x, y);
@@ -856,6 +860,23 @@ namespace veg_costmap
     double VegCostmapLayer::clampCost(double cost)
     {
         return std::max(0.0, std::min(static_cast<double>(veg_costmap::VegCostmapLayer::lethal_cost_), cost));
+    }
+
+    /**
+     * @brief Fetches obstacle data from the database based on the obstacle name
+     * @param obstacle_name The name of the obstacle, eg. "tree_1"
+     * @return Pointer to the ObstacleData structure
+     * @note This function assumes that the obstacle name is formatted as "type_id"
+     *       and only uses the type part for fetching data from the database.
+     */
+    void VegCostmapLayer::fetchObstacleDB(std::string obstacle_name, ObstacleData **obstacle_data)
+    {
+        // Split by underscore and only use the first part
+        std::stringstream ss(obstacle_name);
+        std::string obstacle_type;
+        std::getline(ss, obstacle_type, '_');
+
+        *obstacle_data = &obstacle_database_[obstacle_type];
     }
 
 } // namespace veg_costmap

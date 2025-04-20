@@ -26,7 +26,7 @@ ros2 launch planner vegmap_planner.launch.py
 
 
 
-make plan && clear && ros2 launch planner vegmap_planner.launch.py
+clear && make plan && ros2 launch planner vegmap_planner.launch.py
 
 
 

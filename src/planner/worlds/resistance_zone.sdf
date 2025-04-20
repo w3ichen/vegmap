@@ -190,7 +190,7 @@
     <!-- New Zone 6 - 40% resistance (center, larger) -->
     <model name="grass_6">
       <static>true</static>
-      <pose>0 0 0.01 0 0 0</pose>
+      <pose>-3 0 0.01 0 0 0</pose>
       <link name="link">
         <visual name="visual">
           <geometry>
