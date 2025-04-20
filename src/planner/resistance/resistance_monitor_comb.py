@@ -21,8 +21,13 @@ class ResistanceMonitorComb(Node):
         self.declare_parameter('default_resistance_factor', 0.5)
         self.default_resistance_factor = self.get_parameter('default_resistance_factor').value
         
-        # Define resistance zones from resistance_comb.sdf
-        # Note: resistance_factor values adjusted based on updated transparency values
+        self.in_damping_zone = False
+        self.active_damping_factor = 0.0
+
+        self.damping_zones = [
+            {'x': -3.0, 'y': 0.0, 'radius': 3.0, 'max_resistance': 1.0}
+        ]
+
         self.resistance_zones = [
             {'x': 3.0, 'y': 2.0, 'radius': 2.0, 'resistance_factor': 0.5},  # Zone 1
             {'x': -4.0, 'y': 5.0, 'radius': 1.0, 'resistance_factor': 0.7}, # Zone 2
@@ -103,6 +108,7 @@ class ResistanceMonitorComb(Node):
 
         if found_transform:
             self.check_zones()
+            self.check_damping_zones
             # self.check_vegetation_proximity()
 
     # def check_vegetation_proximity(self):
@@ -141,14 +147,12 @@ class ResistanceMonitorComb(Node):
         for i, zone in enumerate(self.resistance_zones):
             # Calculate distance from robot to zone center
             distance = math.sqrt((self.robot_x - zone['x'])**2 + (self.robot_y - zone['y'])**2)
-            
             # Check if robot is within the circle radius
             if distance <= zone['radius']:
                 in_zone = True
                 active_index = i
                 active_factor = zone['resistance_factor']
                 break
-        
         # Update state if changed
         if (in_zone != self.robot_in_zone or
             active_index != self.active_zone_index or
@@ -163,9 +167,52 @@ class ResistanceMonitorComb(Node):
                                      f'(factor: {active_factor:.2f})')
             else:
                 self.get_logger().info('Robot left resistance zone')
-            
             # Adjust velocity based on new state
             self.adjust_velocity()
+
+
+    def check_damping_zones(self):
+        """Check if robot is in a damping zone with gradient resistance"""
+        in_damping_zone = False
+        active_damping_factor = 0.0
+        
+        for zone in self.damping_zones:
+            # Calculate distance from robot to zone center
+            distance = math.sqrt((self.robot_x - zone['x'])**2 + (self.robot_y - zone['y'])**2)
+            
+            # Check if robot is within the circle radius
+            if distance <= zone['radius']:
+                in_damping_zone = True
+                
+                # Calculate resistance based on distance from center
+                # 0 at edge, max_resistance at center
+                normalized_distance = distance / zone['radius']
+                active_damping_factor = zone['max_resistance'] * (1.0 - normalized_distance)
+                
+                self.get_logger().debug(
+                    f'In damping zone: distance={distance:.2f}m, ' +
+                    f'normalized={normalized_distance:.2f}, ' +
+                    f'resistance={active_damping_factor:.2f}'
+                )
+                break
+        
+        # Update and log only if changed significantly
+        if (in_damping_zone and abs(active_damping_factor - self.active_damping_factor) > 0.05) or \
+        (in_damping_zone != self.in_damping_zone):
+            self.in_damping_zone = in_damping_zone
+            self.active_damping_factor = active_damping_factor
+            
+            if in_damping_zone:
+                self.get_logger().info(f'Robot in damping zone - gradient resistance: {active_damping_factor:.2f}')
+            else:
+                self.get_logger().info('Robot left damping zone')
+            
+            self.adjust_velocity()
+
+
+
+
+
     
     def cmd_vel_callback(self, msg):
         """Store the latest velocity command and adjust if needed"""
@@ -184,7 +231,7 @@ class ResistanceMonitorComb(Node):
         adjusted_cmd.angular.y = self.last_cmd_vel.angular.y
         adjusted_cmd.angular.z = self.last_cmd_vel.angular.z
         
-        # Apply resistance factor if in a zone
+        # Apply regular resistance if in a zone
         if self.robot_in_zone:
             before_x = adjusted_cmd.linear.x
             before_y = adjusted_cmd.linear.y
@@ -204,6 +251,25 @@ class ResistanceMonitorComb(Node):
                 f'{before_y:.2f}->{adjusted_cmd.linear.y:.2f}'
             )
         
+        # Apply damping gradient resistance if in damping zone
+        elif self.in_damping_zone:
+            before_x = adjusted_cmd.linear.x
+            before_y = adjusted_cmd.linear.y
+            
+            # Apply the gradient damping factor
+            adjusted_cmd.linear.x *= (1.0 - self.active_damping_factor)
+            adjusted_cmd.linear.y *= (1.0 - self.active_damping_factor)
+            adjusted_cmd.linear.z *= (1.0 - self.active_damping_factor)
+            adjusted_cmd.angular.x *= (1.0 - self.active_damping_factor)
+            adjusted_cmd.angular.y *= (1.0 - self.active_damping_factor)
+            adjusted_cmd.angular.z *= (1.0 - self.active_damping_factor)
+            
+            self.get_logger().info(
+                f'Gradient damping: {self.active_damping_factor:.2f}: ' +
+                f'{before_x:.2f}->{adjusted_cmd.linear.x:.2f}, ' +
+                f'{before_y:.2f}->{adjusted_cmd.linear.y:.2f}'
+            )
+        
         # Publish adjusted velocity
         self.cmd_vel_pub.publish(adjusted_cmd)
 
@@ -213,7 +279,7 @@ def main(args=None):
     
     try:
         rclpy.spin(node)
-    except KeyboardInterrupt:
+    except KeyboardInterrupt: 
         pass
     finally:
         node.destroy_node()
