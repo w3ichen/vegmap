@@ -32,20 +32,20 @@ find_package(planner_msgs REQUIRED)
 add_library(vegmap_planner_plugin SHARED
   src/vegmap_planner.cpp
 )
-
 # Define the vegetation costmap layer library
 add_library(veg_costmap_layer_plugin SHARED
   src/veg_costmap_layer.cpp
 )
-
 # Define the straight line planner library
 add_library(straight_line_planner_plugin SHARED
   src/straight_line_planner.cpp
 )
-
 add_library(nav2_gradient_costmap_plugin_core SHARED
             src/gradient_layer.cpp)
-
+add_library(nav2_navfn_planner_plugin SHARED
+  src/navfn_planner.cpp
+  src/navfn.cpp
+)
 
 # Define dependencies
 set(dependencies
@@ -76,7 +76,7 @@ ament_target_dependencies(vegmap_planner_plugin ${dependencies})
 ament_target_dependencies(straight_line_planner_plugin ${dependencies})
 ament_target_dependencies(veg_costmap_layer_plugin ${dependencies})
 ament_target_dependencies(nav2_gradient_costmap_plugin_core ${dependencies})
-
+ament_target_dependencies(nav2_navfn_planner_plugin ${dependencies})
 
 # Link plugins with the planner_msgs library
 target_link_libraries(vegmap_planner_plugin
@@ -110,6 +110,11 @@ target_include_directories(nav2_gradient_costmap_plugin_core PUBLIC
   $<INSTALL_INTERFACE:include>
   ${nav2_costmap_2d_INCLUDE_DIRS}
 )
+target_include_directories(nav2_navfn_planner_plugin PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+  ${nav2_costmap_2d_INCLUDE_DIRS}
+)
 
 # Python executables
 install(PROGRAMS
@@ -129,6 +134,7 @@ install(TARGETS
   veg_costmap_layer_plugin
   straight_line_planner_plugin
   nav2_gradient_costmap_plugin_core
+  nav2_navfn_planner_plugin
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
@@ -139,6 +145,7 @@ pluginlib_export_plugin_description_file(nav2_core vegmap_planner_plugin.xml)
 pluginlib_export_plugin_description_file(nav2_costmap_2d veg_costmap_plugin.xml)
 pluginlib_export_plugin_description_file(nav2_core straight_line_planner_plugin.xml)
 pluginlib_export_plugin_description_file(nav2_costmap_2d gradient_layer_plugin.xml)
+pluginlib_export_plugin_description_file(nav2_core navfn_planner_plugin.xml)
 
 # Install directories
 install(
@@ -179,7 +186,6 @@ endif()
 
 # Export dependencies
 ament_export_include_directories(include)
-ament_export_libraries(vegmap_planner_plugin veg_costmap_layer_plugin nav2_gradient_costmap_plugin_core
-  straight_line_planner_plugin)
+ament_export_libraries(vegmap_planner_plugin veg_costmap_layer_plugin nav2_gradient_costmap_plugin_core straight_line_planner_plugin nav2_navfn_planner_plugin)
 ament_export_dependencies(${dependencies})
 ament_package()

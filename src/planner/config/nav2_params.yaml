@@ -267,7 +267,9 @@ planner_server:
     GridBased:
       # plugin: "vegmap_planner::VegmapPlanner"
       # plugin: "nav2_straight_line_planner::StraightLine"
-      plugin: "nav2_navfn_planner/NavfnPlanner"
+      # plugin: "nav2_navfn_planner/NavfnPlanner" # Default plugin from library
+      plugin: "nav2_navfn_planner::NavfnPlanner" # Custom navfn planner
+
       use_astar: true           # Enable A* algorithm instead of Dijkstra
       allow_unknown: true       # Allow planning through unknown space
       tolerance: 0.5            # Goal tolerance in meters

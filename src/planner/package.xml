@@ -28,6 +28,7 @@
   <depend>ros_gz_bridge</depend>
   <depend>tf2_msgs</depend>
   <depend>rclpy</depend>
+  <depend>nav2_common</depend>
   <depend>planner_msgs</depend>
 
   <test_depend>ament_lint_auto</test_depend>
@@ -43,5 +44,6 @@
     <nav2_core plugin="${prefix}/straight_line_planner_plugin.xml" />
     <costmap_2d plugin="${prefix}/gradient_layer_plugin.xml" />
     <costmap_2d plugin="${prefix}/veg_costmap_plugin.xml" />
+    <costmap_2d plugin="${prefix}/navfn_planner_plugin.xml" />
   </export>
 </package>
