@@ -49,9 +49,9 @@ class ResistanceMonitor(Node):
             {'x': 7.0, 'y': -7.0, 'radius': 1.0, 'resistance_factor': 0.75}, # 75% reduction
 
             # tree zones - bigger radius so they stop before hitting the tree in simulation
-            {'x': 0.0, 'y': 6.0, 'radius':1.0, 'resistance_factor': 0.96}, # 100% reduction (stop)
-            {'x':-7.0, 'y': 0.0, 'radius':1.0, 'resistance_factor': 0.96}, # 100% reduction (stop)
-            {'x': 3.0, 'y':-2.0, 'radius':1.0, 'resistance_factor': 0.96}, # 100% reduction (stop)
+            {'x': 0.0, 'y': 6.0, 'radius':1.0, 'resistance_factor': 0.8}, # 100% reduction (stop)
+            {'x':-7.0, 'y': 0.0, 'radius':1.0, 'resistance_factor': 0.8}, # 100% reduction (stop)
+            {'x': 3.0, 'y':-2.0, 'radius':1.0, 'resistance_factor': 0.8}, # 100% reduction (stop)
         ]
 
         """ Create subscribers """
@@ -167,7 +167,34 @@ class ResistanceMonitor(Node):
 
     def update_nearest_tree_cost(self):
         """find the nearest tree and update its cost in the costmap"""
-        tree_indices = [10, 11, 12]
+        tree_indices = [10, 11, 12] #### lol there's got to be a better way to do this ####
+
+        nearest_tree_idx = -1
+        min_distance = float('inf')
+
+        for idx in tree_indices:
+            if idx < len(self.resistance_zones):
+                tree = self.resistance_zones[idx]
+                distance = math.sqrt((self.robot_x - tree['x'])**2 + (self.robot_y - tree['y'])**2)
+
+                if distance < min_distance:
+                    min_distance = distance
+                    nearest_tree_idx = idx
+
+
+        if nearest_tree_idx != -1 and min_distance < 2.0:
+            tree = self.resistance_zones[nearest_tree_idx]
+            self.get_logger().info(f'Robot is blocked - updating costmap for tree {nearest_tree_idx} at ({tree["x"]}, {tree["y"]})')    
+
+            
+            self.update_costmap(
+                x=tree['x'],
+                y=tree['y'],
+                cost=255,
+                obstacle_type=f'tree_{nearest_tree_idx - 9}'
+            )
+    
+
 
 
     def publish_cost(self):
