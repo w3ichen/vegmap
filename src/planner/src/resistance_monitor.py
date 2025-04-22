@@ -10,6 +10,9 @@ from tf2_msgs.msg import TFMessage
 import math
 from planner_msgs.srv import UpdateCost
 
+from geometry_msgs.msg import TransformStamped
+from tf2_ros import TransformBroadcaster
+
 class ResistanceMonitor(Node):
     """
     Monitors robot position and reduces velocity when in resistance zones.
@@ -18,8 +21,9 @@ class ResistanceMonitor(Node):
     
     def __init__(self):
         super().__init__('resistance_monitor')
+        self.tf_broadcaster = TransformBroadcaster(self)
         self.timer_init = self.create_timer(1.0, self.initialize_costmap_zones)
-
+        
         
         # Parameters - default resistance factor (used as fallback)
         self.declare_parameter('default_resistance_factor', 0.5)
@@ -127,6 +131,17 @@ class ResistanceMonitor(Node):
 
                 # extract current time
                 current_time = transform.header.stamp.sec + transform.header.stamp.nanosec / 1e9
+
+                t = TransformStamped()
+                t.header.stamp = self.get_clock().now().to_msg()
+                t.header.frame_id = 'map'
+                t.child_frame_id = 'base_link'
+                t.transform.translation.x = current_position[0]
+                t.transform.translation.y = current_position[1]
+                t.transform.translation.z = current_position[2]
+                t.transform.rotation = transform.transform.rotation
+                self.tf_broadcaster.sendTransform(t)
+
 
                 # calculate actual speed
                 if self.prev_position is not None and self.prev_time is not None:

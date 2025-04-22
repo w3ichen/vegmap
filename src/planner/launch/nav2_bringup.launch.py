@@ -118,13 +118,15 @@ def generate_launch_description():
     )
 
     # Create the map->odom transform publisher
-    map_to_odom = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        name='map_to_odom_publisher',
-        namespace=namespace,
-        arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom']
-    )
+    # map_to_odom = Node(
+    #     package='tf2_ros',
+    #     executable='static_transform_publisher',
+    #     name='map_to_odom_publisher',
+    #     namespace=namespace,
+    #     arguments=['0', '0', '0', '0', '0', '0', 'map', 'odom']
+    # )
+
+
     # odom_to_base_link = Node(
     #     package='tf2_ros',
     #     executable='static_transform_publisher',
@@ -156,7 +158,7 @@ def generate_launch_description():
         planner_server,
         behavior_server,
         bt_navigator,
-        map_to_odom,
+        # map_to_odom,
         # odom_to_base_link,
         lifecycle_manager_navigation
     ])
