@@ -311,9 +311,9 @@ behavior_server:
     transform_tolerance: 1.0
     enable_stamped_cmd_vel: True
     simulate_ahead_time: 2.0
-    max_rotational_vel: 2.0
-    min_rotational_vel: 0.2
-    rotational_acc_lim: 1.0
+    max_rotational_vel: 5.0
+    min_rotational_vel: 1.0
+    rotational_acc_lim: 3.0
 
 waypoint_follower:
   ros__parameters:
@@ -332,10 +332,10 @@ velocity_smoother:
     smoothing_frequency: 20.0
     scale_velocities: False
     feedback: "OPEN_LOOP"
-    max_velocity: [1.0, 0.0, 1.0]
-    min_velocity: [-1.0, 0.0, -1.0]
-    max_accel: [0.5, 0.0, 0.5]
-    max_decel: [-0.5, 0.0, -0.5]
+    max_velocity: [10.0, 0.0, 10.0]
+    min_velocity: [-10.0, 0.0, -10.0]
+    max_accel: [5.0, 0.0, 5.0]
+    max_decel: [-5.0, 0.0, -5.0]
     odom_topic: platform/odom/filtered
     odom_duration: 0.1
     deadband_velocity: [0.0, 0.0, 0.0]
