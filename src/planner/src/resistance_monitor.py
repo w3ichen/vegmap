@@ -53,9 +53,9 @@ class ResistanceMonitor(Node):
             {'x': 7.0, 'y': -7.0, 'radius': 1.0, 'resistance_factor': 0.75}, # 75% reduction
 
             # tree zones - bigger radius so they stop before hitting the tree in simulation
-            {'x': 0.0, 'y': 6.0, 'radius':0.3, 'resistance_factor': 0.8}, # 80% reduction (should technically be 100%)
-            {'x':-7.0, 'y': 0.0, 'radius':0.3, 'resistance_factor': 0.8}, 
-            {'x': 3.0, 'y':-2.0, 'radius':0.3, 'resistance_factor': 0.8}, 
+            {'x': 0.0, 'y': 6.0, 'radius':0.1, 'resistance_factor': 0.8}, # 80% reduction (should technically be 100%)
+            {'x':-7.0, 'y': 0.0, 'radius':0.1, 'resistance_factor': 0.8}, 
+            {'x': 3.0, 'y':-2.0, 'radius':0.1, 'resistance_factor': 0.8}, 
         ]
 
         """ Create subscribers """
