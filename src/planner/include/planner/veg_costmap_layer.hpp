@@ -166,6 +166,11 @@ namespace veg_costmap
             {"tree", {{}, 250, 5}},
             {"rock", {{}, 250, 5}},
 
+            // // Lethal costs
+            // {"grass", {{}, 254, 0}},
+            // {"bush", {{}, 254, 0}},
+            // {"tree", {{}, 254, 0}},
+            // {"rock", {{}, 254, 0}},
         };
 
     } // namespace defaults

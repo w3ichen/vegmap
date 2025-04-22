@@ -191,6 +191,9 @@ global_costmap:
       veg_costmap_layer:
         plugin: "veg_costmap::VegCostmapLayer"
         enabled: True
+        world_name: resistance_zone
+        # world_name: boxed_in_world
+
       gradient_layer:
         plugin: "nav2_gradient_costmap_plugin::GradientLayer"
         enabled: True
