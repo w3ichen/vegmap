@@ -94,7 +94,7 @@ class PoseInfoService(Node):
             # Create transform
             transform = TransformStamped()
             transform.header.stamp = self.get_clock().now().to_msg()
-            transform.header.frame_id = "world"
+            transform.header.frame_id = "resistance_zone"
             transform.child_frame_id = name
 
             transform.transform.translation.x = pos_x

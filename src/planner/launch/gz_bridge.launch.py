@@ -63,6 +63,8 @@ def generate_launch_description():
                     {'qos_durability': 'transient_local'},
                     {'logger_level': 'error'},
                 ]
-            ),
+            )
+
+            
         ]
     )

@@ -103,15 +103,6 @@ def generate_launch_description():
         namespace=namespace,  
         output='screen',
     )
-
-    # # cost_traverse.py
-    # cost_traverse = Node(
-    #     package="planner",
-    #     executable="cost_traverse.py",
-    #     name="cost_traverse",
-    #     namespace=namespace,  
-    #     output='screen',
-    # )
     
 
     return LaunchDescription(
@@ -121,6 +112,5 @@ def generate_launch_description():
             delayed_rviz,
             gz_bridge_launch,
             resistance_monitor,
-            # cost_traverse
         ]
     )
