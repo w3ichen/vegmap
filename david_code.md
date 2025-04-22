@@ -151,7 +151,7 @@ planner/launch/complete_resistance_system.launch.py
 ```bash
 # Weichen runs
 
-ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path world:=~/vegmap/src/planner/worlds/outdoors
+ros2 launch clearpath_gz simulation.launch.py setup_path:=src/setup_path world:=~/vegmap/src/planner/worlds/resistance_zone
 # and
 ros2 launch planner vegmap_planner.launch.py
 ```
