@@ -340,14 +340,14 @@
           </material>
           <transparency>0.10</transparency>
         </visual>
-      <!-- <collision name="collision">
+      <collision name="collision">
         <geometry>
           <cylinder>
             <radius>1.0</radius>
             <length>5.0</length>
           </cylinder>
         </geometry>
-      </collision> -->
+      </collision>
       </link>
     </model>
 
@@ -370,14 +370,14 @@
           </material>
           <transparency>0.10</transparency>
         </visual>
-        <!-- <collision name="collision">
+        <collision name="collision">
           <geometry>
             <cylinder>
               <radius>1.0</radius>
               <length>5.0</length>
             </cylinder>
           </geometry>
-        </collision> -->
+        </collision>
       </link>
     </model>
 
@@ -400,14 +400,14 @@
           </material>
           <transparency>0.10</transparency>
         </visual>
-        <!-- <collision name="collision">
+        <collision name="collision">
           <geometry>
             <cylinder>
               <radius>1.0</radius>
               <length>5.0</length>
             </cylinder>
           </geometry>
-        </collision> -->
+        </collision>
       </link>
     </model>
 

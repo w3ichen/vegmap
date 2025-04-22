@@ -43,15 +43,15 @@ class ResistanceMonitor(Node):
             {'x': 1.0, 'y': -6.0, 'radius': 1.0, 'resistance_factor': 0.8}, # 80% reduction
             {'x': 8.0, 'y': 7.0, 'radius': 1.0, 'resistance_factor': 0.6},  # 60% reduction
             {'x': -3.0, 'y': 0.0, 'radius': 1.0, 'resistance_factor': 0.4},  # 40% reduction (center)
-            {'x': 5.0, 'y': 5.0, 'radius': 1.0, 'resistance_factor': 0.9},  # 90% reduction (very high)
+            {'x': 5.0, 'y': 5.0, 'radius': 1.0, 'resistance_factor': 0.6},  # 60% reduction (very high)
             {'x': -5.0, 'y': -5.0, 'radius': 1.0, 'resistance_factor': 0.2}, # 20% reduction (light)
             {'x': -6.0, 'y': 2.0, 'radius': 1.0, 'resistance_factor': 0.75}, # 75% reduction
-            {'x': 7.0, 'y': -7.0, 'radius': 1.0, 'resistance_factor': 0.85}, # 85% reduction
+            {'x': 7.0, 'y': -7.0, 'radius': 1.0, 'resistance_factor': 0.75}, # 75% reduction
 
             # tree zones - bigger radius so they stop before hitting the tree in simulation
-            {'x': 0.0, 'y': 6.0, 'radius':1.5, 'resistance_factor': 100.0}, # 100% reduction (stop)
-            {'x':-7.0, 'y': 0.0, 'radius':1.5, 'resistance_factor': 100.0}, # 100% reduction (stop)
-            {'x': 3.0, 'y':-2.0, 'radius':1.5, 'resistance_factor': 100.0}, # 100% reduction (stop)
+            {'x': 0.0, 'y': 6.0, 'radius':1.0, 'resistance_factor': 0.96}, # 100% reduction (stop)
+            {'x':-7.0, 'y': 0.0, 'radius':1.0, 'resistance_factor': 0.96}, # 100% reduction (stop)
+            {'x': 3.0, 'y':-2.0, 'radius':1.0, 'resistance_factor': 0.96}, # 100% reduction (stop)
         ]
 
         """ Create subscribers """
@@ -81,7 +81,7 @@ class ResistanceMonitor(Node):
         # Publisher for adjusted velocity
         self.cmd_vel_pub = self.create_publisher( 
             Twist,
-            'a200_0000/platform/cmd_vel_unstamped',
+            '/a200_0000/platform/cmd_vel_unstamped',
             10
         )
         
@@ -145,6 +145,10 @@ class ResistanceMonitor(Node):
                             temp_cost = 1.0 - (self.actual_speed / self.commanded_speed)
                             self.cost = max(0.0, temp_cost)
                             self.get_logger().info(f"current cost: {temp_cost:.2f}")
+
+                            if self.cost > 0.9:
+                                self.update_nearest_tree_cost()
+                                # when blocked by tree | here defined as cost > 0.9
                             
                 # update previous position and time
                 self.prev_position = current_position
@@ -160,6 +164,10 @@ class ResistanceMonitor(Node):
 
         if found_transform:
             self.check_zones()
+
+    def update_nearest_tree_cost(self):
+        """find the nearest tree and update its cost in the costmap"""
+        tree_indices = [10, 11, 12]
 
 
     def publish_cost(self):
@@ -242,6 +250,8 @@ class ResistanceMonitor(Node):
     def cmd_vel_callback(self, msg):
         """Store the latest velocity command and adjust if needed"""
         self.last_cmd_vel = msg
+        self.commanded_speed = math.sqrt(msg.linear.x**2 + msg.linear.y**2 + msg.linear.z**2)
+        self.get_logger().info(f"Received cmd_vel: linear.x={msg.linear.x:.2f}, linear.y={msg.linear.y:.2f}")
         self.adjust_velocity()
     
     def adjust_velocity(self):
@@ -261,17 +271,24 @@ class ResistanceMonitor(Node):
             before_x = adjusted_cmd.linear.x
             before_y = adjusted_cmd.linear.y
             
-            # Apply the active zone's resistance factor
-            adjusted_cmd.linear.x *= self.active_resistance_factor
-            adjusted_cmd.linear.y *= self.active_resistance_factor
-            adjusted_cmd.linear.z *= self.active_resistance_factor
-            adjusted_cmd.angular.x *= self.active_resistance_factor
-            adjusted_cmd.angular.y *= self.active_resistance_factor
-            adjusted_cmd.angular.z *= self.active_resistance_factor
+            if self.active_resistance_factor >= 1.0:
+                # For tree zones (factor ≥ 1.0), we want to completely stop
+                reduction_factor = 0
+            else:
+                # For grass zones (factor < 1.0), we reduce by that factor
+                reduction_factor = 1.0 - self.active_resistance_factor
+            
+            # Apply the calculated reduction factor
+            adjusted_cmd.linear.x *= reduction_factor
+            adjusted_cmd.linear.y *= reduction_factor
+            adjusted_cmd.linear.z *= reduction_factor
+            adjusted_cmd.angular.x *= reduction_factor
+            adjusted_cmd.angular.y *= reduction_factor
+            adjusted_cmd.angular.z *= reduction_factor
             
             self.get_logger().info(
                 f'Reducing velocity in zone {self.active_zone_index} ' +
-                f'(factor: {self.active_resistance_factor:.2f}): ' +
+                f'(factor: {self.active_resistance_factor:.2f}, reduction: {reduction_factor:.2f}): ' +
                 f'{before_x:.2f}->{adjusted_cmd.linear.x:.2f}, ' +
                 f'{before_y:.2f}->{adjusted_cmd.linear.y:.2f}'
             )
