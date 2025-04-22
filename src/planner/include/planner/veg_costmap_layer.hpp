@@ -135,6 +135,8 @@ namespace veg_costmap
         std::string global_frame_;
         double obstacle_range_;
         double obstacle_radius_;
+        double tree_radius_;
+
         int lethal_cost_;
         bool use_gradient_costs_;
         double gradient_factor_;

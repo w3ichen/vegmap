@@ -55,7 +55,10 @@ namespace veg_costmap
         declareParameter("updated_topic", rclcpp::ParameterValue("/veg_costmap/updated"));
         declareParameter("costmap_topic", rclcpp::ParameterValue("/veg_costmap"));
         declareParameter("obstacle_range", rclcpp::ParameterValue(5.0));
+
         declareParameter("obstacle_radius", rclcpp::ParameterValue(20.0)); // radius of obstacle in .sdf / resolution {in this case 1/.05 = 20}
+        declareParameter("tree_radius", rclcpp::ParameterValue(10.0));     // radius of tree in .sdf / resolution {in this case 1/.05 = 20}
+
         declareParameter("lethal_cost", rclcpp::ParameterValue(254));
         declareParameter("use_gradient_costs", rclcpp::ParameterValue(true));
         declareParameter("gradient_factor", rclcpp::ParameterValue(0.8));
@@ -68,7 +71,10 @@ namespace veg_costmap
         node->get_parameter(name_ + ".updated_topic", updated_topic_);
         node->get_parameter(name_ + ".costmap_topic", costmap_pub_topic_);
         node->get_parameter(name_ + ".obstacle_range", obstacle_range_);
+
         node->get_parameter(name_ + ".obstacle_radius", obstacle_radius_);
+        node->get_parameter(name_ + ".tree_radius", tree_radius_);
+
         node->get_parameter(name_ + ".lethal_cost", lethal_cost_);
         node->get_parameter(name_ + ".use_gradient_costs", use_gradient_costs_);
         node->get_parameter(name_ + ".gradient_factor", gradient_factor_);
