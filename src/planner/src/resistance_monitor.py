@@ -36,24 +36,29 @@ class ResistanceMonitor(Node):
         # Define resistance zones (x, y, width, height, resistance_factor)
         # Higher resistance_factor = stronger resistance (more reduction)
         self.resistance_zones = [
-            # Original zones with variable resistance
-            {'x': 3.0, 'y': 2.0, 'radius': 2.0, 'resistance_factor': 0.5},  # 50% reduction
+            # grass zones
+            {'x': 3.0, 'y': 2.0, 'radius': 1.0, 'resistance_factor': 0.5},  # 50% reduction
             {'x': -4.0, 'y': 5.0, 'radius': 1.0, 'resistance_factor': 0.7}, # 70% reduction
             {'x': 6.0, 'y': -3.0, 'radius': 1.0, 'resistance_factor': 0.3}, # 30% reduction
-            {'x': 1.0, 'y': -6.0, 'radius': 3.0, 'resistance_factor': 0.8}, # 80% reduction
+            {'x': 1.0, 'y': -6.0, 'radius': 1.0, 'resistance_factor': 0.8}, # 80% reduction
             {'x': 8.0, 'y': 7.0, 'radius': 1.0, 'resistance_factor': 0.6},  # 60% reduction
             {'x': -3.0, 'y': 0.0, 'radius': 1.0, 'resistance_factor': 0.4},  # 40% reduction (center)
             {'x': 5.0, 'y': 5.0, 'radius': 1.0, 'resistance_factor': 0.9},  # 90% reduction (very high)
-            {'x': -5.0, 'y': -5.0, 'radius': 2.0, 'resistance_factor': 0.2}, # 20% reduction (light)
+            {'x': -5.0, 'y': -5.0, 'radius': 1.0, 'resistance_factor': 0.2}, # 20% reduction (light)
             {'x': -6.0, 'y': 2.0, 'radius': 1.0, 'resistance_factor': 0.75}, # 75% reduction
             {'x': 7.0, 'y': -7.0, 'radius': 1.0, 'resistance_factor': 0.85}, # 85% reduction
+
+            # tree zones - bigger radius so they stop before hitting the tree in simulation
+            {'x': 0.0, 'y': 6.0, 'radius':1.5, 'resistance_factor': 100.0}, # 100% reduction (stop)
+            {'x':-7.0, 'y': 0.0, 'radius':1.5, 'resistance_factor': 100.0}, # 100% reduction (stop)
+            {'x': 3.0, 'y':-2.0, 'radius':1.5, 'resistance_factor': 100.0}, # 100% reduction (stop)
         ]
 
         """ Create subscribers """
         # Commanded velocity subscription
         self.cmd_vel_sub = self.create_subscription(
             Twist,
-            'a200_0000/cmd_vel',
+            '/a200_0000/cmd_vel',
             self.cmd_vel_callback,
             10  
         )
@@ -66,14 +71,6 @@ class ResistanceMonitor(Node):
             10  
         )
     
-        """ Create publishers """
-        # Publish grass zone radius for costmap visualization
-        self.grass_pub = self.create_publisher(
-            std_msgs.msg.Float32MultiArray,
-            '/grass_zones',
-            10
-        )
-
         # Cost publisher
         self.cost_pub = self.create_publisher(
             Float32,
@@ -101,6 +98,8 @@ class ResistanceMonitor(Node):
 
     # publish grass zones
     def initialize_costmap_zones(self):
+
+        return # Disable
         """Initialize all zones in the costmap at startup"""
         for i, zone in enumerate(self.resistance_zones):
             self.update_costmap(
@@ -200,8 +199,12 @@ class ResistanceMonitor(Node):
             self.active_resistance_factor = active_factor
             
             if in_zone:
-                self.get_logger().info(f'Robot entered grass {active_index} ' +
-                                     f'(factor: {active_factor:.2f})')
+                if (active_index < 10):
+                    self.get_logger().info(f'Robot entered grass {active_index} ' +
+                                        f'(factor: {active_factor:.2f})')
+                else:
+                    self.get_logger().info(f'Robot entered tree {active_index} ' +
+                                        f'(factor: {active_factor:.2f})')
                 
                 ### Call service to update costmap
                 self.update_costmap(
@@ -227,7 +230,10 @@ class ResistanceMonitor(Node):
         request = UpdateCost.Request()
         request.x = float(x)
         request.y = float(y)
-        request.cost = int(cost)
+
+        cost = min(255, max(0, int(cost)))  # Ensure cost is within valid range
+        request.cost = cost
+
         request.obstacle_type = obstacle_type
 
         future = self.update_cost_client.call_async(request)

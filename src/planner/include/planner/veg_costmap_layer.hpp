@@ -42,17 +42,12 @@ namespace veg_costmap
             std::string name;
         };
 
-        rclcpp::Subscription<std_msgs::msg::Float32MultiArray>::SharedPtr zones_sub_;
-        std::vector<ZoneInfo> zones_info_;
-
-        void zonesCallback(const std_msgs::msg::Float32MultiArray::SharedPtr msg);
-
         // Define ObstaclePoint first, before using it in containers
         struct ObstaclePoint
         {
             // World coords from gazebo are floats
-            float x{0.0};
-            float y{0.0};
+            float x{std::numeric_limits<float>::max()};
+            float y{std::numeric_limits<float>::max()};
             // Costmap coords are in ints
             uint16_t mx{0};
             uint16_t my{0};

@@ -62,7 +62,7 @@ ros2 service call /world/get_tf planner_msgs/srv/GetTransforms "{world: 'outdoor
 
 
 # Updating costmaps
-ros2 service call /veg_costmap/update planner_msgs/srv/UpdateCost "{x: 0.0, y: 0.0, cost: 255, obstacle_type: 'palm_tree'}"
+ros2 service call /veg_costmap/update planner_msgs/srv/UpdateCost "{x: 0.0, y: 0.0, obstacle_type: 'grass_1', cost: 255}"
 
 
 # Full run

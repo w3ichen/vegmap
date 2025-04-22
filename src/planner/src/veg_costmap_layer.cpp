@@ -48,10 +48,6 @@ namespace veg_costmap
         // Restart with a reset
         reset();
 
-        zones_sub_ = node->create_subscription<std_msgs::msg::Float32MultiArray>(
-            "/grass_zones", 10,
-            std::bind(&VegCostmapLayer::zonesCallback, this, std::placeholders::_1));
-
         // Declare parameters - using Layer's inherited methods
         declareParameter("enabled", rclcpp::ParameterValue(true));
         declareParameter("world_tf_service", rclcpp::ParameterValue("/world/get_tf"));
@@ -166,40 +162,6 @@ namespace veg_costmap
     }
 
     /**
-     * @brief Callback for zones subscription
-     * @param msg The received message
-     */
-    void VegCostmapLayer::zonesCallback(const std_msgs::msg::Float32MultiArray::SharedPtr msg)
-    {
-        zones_info_.clear();
-
-        // Each zone has 3 values: x, y, radius
-        if (msg->data.size() % 3 != 0)
-        {
-            RCLCPP_ERROR(logger_, "Invalid zones data: size not a multiple of 3");
-            return;
-        }
-
-        for (size_t i = 0; i < msg->data.size(); i += 3)
-        {
-            if (i + 2 < msg->data.size())
-            {
-                ZoneInfo zone;
-                zone.x = msg->data[i];
-                zone.y = msg->data[i + 1];
-                zone.radius = msg->data[i + 2];
-                zone.name = "grass_" + std::to_string(i / 3 + 1);
-
-                zones_info_.push_back(zone);
-                RCLCPP_INFO(logger_, "Added zone %s at (%.2f, %.2f) with radius %.2f",
-                            zone.name.c_str(), zone.x, zone.y, zone.radius);
-            }
-        }
-
-        costmap_updated_ = true;
-    }
-
-    /**
      * @brief Service call to update cost of a specific point in the costmap
      * @param request The service request
      * @param response The service response
@@ -268,28 +230,27 @@ namespace veg_costmap
         // // Thread safety for accessing obstacle grid
         // std::lock_guard<std::mutex> lock(mutex_);
 
-        ObstaclePoint &obstacle = obstacle_grid_[map_x][map_y];
+        ObstaclePoint *obstacle_point = &obstacle_grid_[map_x][map_y];
 
         ObstacleData *obstacle_data;
         fetchObstacleDB(obstacle_type, &obstacle_data);
 
-        if (obstacle.x != map_x || obstacle.y != map_y)
+        if (obstacle_point->x != map_x && obstacle_point->y != map_y)
         {
             // If the obstacle is not already in the grid, add it
-            obstacle.x = world_x;
-            obstacle.y = world_y;
-            obstacle.mx = map_x;
-            obstacle.my = map_y;
-            obstacle.name = obstacle_type;
+            obstacle_point->x = world_x;
+            obstacle_point->y = world_y;
+            obstacle_point->mx = map_x;
+            obstacle_point->my = map_y;
+            obstacle_point->name = obstacle_type;
 
             // Add to the obstacle database
-
-            obstacle_data->others.insert(obstacle);
+            obstacle_data->others.insert(*obstacle_point);
         }
 
         // Update the obstacle grid with the code
-        obstacle.cost = new_cost;
-        obstacle.cost_stddev = 0; // Mark as already sampled!
+        obstacle_point->cost = new_cost;
+        obstacle_point->cost_stddev = 0; // Mark as already sampled!
 
         // If obstacle has name, update the obstacle_database_ with the new cost
         if (!obstacle_type.empty())
@@ -326,8 +287,6 @@ namespace veg_costmap
                     // Sample from normal distribution
                     double sampled_cost = normal_dist(gen);
                     // Ensure cost is within valid range (0-255)
-
-                    // IMPORTANT: Use mx and my for grid coordinates, not x and y
                     if (obstacle.mx < map_width_ && obstacle.my < map_height_)
                     {
                         obstacle_grid_[obstacle.mx][obstacle.my].cost =
@@ -510,36 +469,13 @@ namespace veg_costmap
                 // Validate point coordinates
                 if (point.mx < size_x && point.my < size_y)
                 {
+                    ObstaclePoint &obstacle_point = obstacle_grid_[point.mx][point.my];
+
                     // Bound the cost to [0, 255]
-                    unsigned char cost = static_cast<unsigned char>(clampCost(obstacle_pair.second.cost));
+                    unsigned char cost = static_cast<unsigned char>(clampCost(obstacle_point.cost));
 
                     // Find the matching zone radius for grass obstacles
                     double radius = obstacle_radius_; // Default fallback
-
-                    // Try to find a matching zone for grass obstacles
-                    if (point.name.find("grass_") == 0)
-                    {
-                        // Extract zone number from name (e.g., "grass_1" -> 1)
-                        size_t pos = point.name.find('_');
-                        if (pos != std::string::npos)
-                        {
-                            try
-                            {
-                                int zone_idx = std::stoi(point.name.substr(pos + 1)) - 1;
-                                if (zone_idx >= 0 && zone_idx < static_cast<int>(zones_info_.size()))
-                                {
-                                    radius = zones_info_[zone_idx].radius;
-                                    RCLCPP_DEBUG(logger_, "Using zone-specific radius %.2f for %s",
-                                                 radius, point.name.c_str());
-                                }
-                            }
-                            catch (...)
-                            {
-                                // Use default radius if conversion fails
-                                RCLCPP_DEBUG(logger_, "Using default radius for %s", point.name.c_str());
-                            }
-                        }
-                    }
 
                     // Set cost directly in master grid
                     // Set constant cost for the obstacle around its radius
@@ -557,16 +493,14 @@ namespace veg_costmap
                                 }
                             }
                         }
+                        count++;
                     }
-
-                    count++;
                 }
             }
         }
 
         // Log how many obstacles we're updating
         RCLCPP_DEBUG(logger_, "Updating %d obstacles in costmap", count);
-
         RCLCPP_DEBUG(logger_, "Exiting updateCosts");
     }
     /**

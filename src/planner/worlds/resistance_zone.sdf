@@ -338,15 +338,16 @@
             <diffuse>0.4 0.2 0.1 1</diffuse>
             <specular>0.4 0.2 0.1 1</specular>
           </material>
+          <transparency>0.10</transparency>
         </visual>
-      <collision name="collision">
+      <!-- <collision name="collision">
         <geometry>
           <cylinder>
             <radius>1.0</radius>
             <length>5.0</length>
           </cylinder>
         </geometry>
-      </collision>
+      </collision> -->
       </link>
     </model>
 
@@ -367,15 +368,16 @@
             <diffuse>0.4 0.2 0.1 1</diffuse>
             <specular>0.4 0.2 0.1 1</specular>
           </material>
+          <transparency>0.10</transparency>
         </visual>
-        <collision name="collision">
+        <!-- <collision name="collision">
           <geometry>
             <cylinder>
               <radius>1.0</radius>
               <length>5.0</length>
             </cylinder>
           </geometry>
-        </collision>
+        </collision> -->
       </link>
     </model>
 
@@ -396,15 +398,16 @@
             <diffuse>0.4 0.2 0.1 1</diffuse>
             <specular>0.4 0.2 0.1 1</specular>
           </material>
+          <transparency>0.10</transparency>
         </visual>
-        <collision name="collision">
+        <!-- <collision name="collision">
           <geometry>
             <cylinder>
               <radius>1.0</radius>
               <length>5.0</length>
             </cylinder>
           </geometry>
-        </collision>
+        </collision> -->
       </link>
     </model>
 
