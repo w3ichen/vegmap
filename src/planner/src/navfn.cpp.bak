@@ -718,7 +718,6 @@ namespace nav2_navfn_planner
     bool
     NavFn::propNavFnDijkstra(int cycles, bool atStart)
     {
-        cells_visited_ = 0; 
         int nwv = 0;   // max priority block size
         int nc = 0;    // number of cells put into priority blocks
         int cycle = 0; // which cycle we're on
@@ -754,7 +753,6 @@ namespace nav2_navfn_planner
             while (i-- > 0)
             {
                 updateCell(*pb++);
-                cells_visited_++;
             }
 
             // if (displayInt > 0 && (cycle % displayInt) == 0) {

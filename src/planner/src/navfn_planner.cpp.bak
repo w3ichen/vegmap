@@ -188,15 +188,8 @@ namespace nav2_navfn_planner
 
 #ifdef BENCHMARK_TESTING
         steady_clock::time_point b = steady_clock::now();
-        auto duration_ms = duration_cast<std::chrono::milliseconds>(b - a).count();
-
-        int states_expanded = planner_->getExpandedCellCount();  
-        int path_length = static_cast<int>(path.poses.size());
-
-        RCLCPP_INFO(logger_, "==== [Benchmark] NavFn Performance ====");
-        RCLCPP_INFO(logger_, "Planning time: %ld ms", duration_ms* 1000);
-        RCLCPP_INFO(logger_, "States expanded: %d", states_expanded);
-        RCLCPP_INFO(logger_, "Path length: %d", path_length);
+        duration<double> time_span = duration_cast<duration<double>>(b - a);
+        std::cout << "It took " << time_span.count() * 1000 << std::endl;
 #endif
 
         return path;

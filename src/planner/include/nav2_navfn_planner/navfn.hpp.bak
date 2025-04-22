@@ -158,8 +158,6 @@ namespace nav2_navfn_planner
          */
         int getPathLen();
 
-        int getExpandedCellCount() const { return cells_visited_; }
-
         /**
          * @brief  Gets the cost of the path found the last time a navigation function was computed
          * @return The cost of the last path found
@@ -171,7 +169,6 @@ namespace nav2_navfn_planner
         float *potarr;     /**< potential array, navigation function potential */
         bool *pending;     /**< pending cells during propagation */
         int nobs;          /**< number of obstacle cells */
-        int cells_visited_;
 
         /** block priority buffers */
         int *pb1, *pb2, *pb3;      /**< storage buffers for priority blocks */

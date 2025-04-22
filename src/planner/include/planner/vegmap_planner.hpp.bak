@@ -56,16 +56,6 @@ namespace vegmap_planner
         }
     };
 
-    struct StateKeyCompare {
-        bool operator()(const StateKey &a, const StateKey &b) const {
-            if (a.k1 != b.k1) return a.k1 < b.k1;
-            if (a.k2 != b.k2) return a.k2 < b.k2;
-            if (a.cell.x != b.cell.x) return a.cell.x < b.cell.x;
-            return a.cell.y < b.cell.y;
-        }
-    };
-    
-
     class VegmapPlanner : public nav2_core::GlobalPlanner
     {
     public:
@@ -88,7 +78,6 @@ namespace vegmap_planner
 
     private:
         // Costmap update callback
-        int states_expanded_ = 0;
         void costmapUpdateCallback(const std_msgs::msg::Empty::SharedPtr msg);
 
         // D* Lite algorithm methods
@@ -138,7 +127,7 @@ namespace vegmap_planner
         // D* Lite data structures
         std::unordered_map<CellIndex, double, CellIndexHash> g_values_;
         std::unordered_map<CellIndex, double, CellIndexHash> rhs_values_;
-        std::set<StateKey, StateKeyCompare> open_set_;
+        std::priority_queue<StateKey> open_list_;
         double km_{0.0};
         CellIndex last_start_;
         CellIndex last_goal_;

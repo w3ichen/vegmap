@@ -132,10 +132,10 @@ namespace vegmap_planner
         g_values_.clear();
         rhs_values_.clear();
 
-        // Completely clear the open_set
-        while (!open_set_.empty())
+        // Completely clear the open_list
+        while (!open_list_.empty())
         {
-            open_set_.erase(open_set_.begin());
+            open_list_.pop();
         }
 
         km_ = 0.0;
@@ -210,26 +210,43 @@ namespace vegmap_planner
      */
     void VegmapPlanner::updateVertex(const CellIndex &cell)
     {
-        if (cell == last_goal_)
-            return;
-
-        double g = getGValue(cell);
-        double rhs = getRhsValue(cell);
-
-        for (auto it = open_set_.begin(); it != open_set_.end(); ++it)
+        if (!(cell == last_goal_))
         {
-            if (it->cell == cell)
+            // Calculate minimum rhs value based on successors
+            double min_rhs = std::numeric_limits<double>::infinity();
+            for (const auto &succ : getNeighbors(cell))
             {
-                open_set_.erase(it);
-                break;
+                double cost = getCost(cell, succ);
+                if (cost < std::numeric_limits<double>::infinity())
+                {
+                    min_rhs = std::min(min_rhs, getGValue(succ) + cost);
+                }
             }
+            rhs_values_[cell] = min_rhs;
         }
 
-        if (g != rhs)
+        // Update open list
+        std::priority_queue<StateKey> new_queue;
+        while (!open_list_.empty())
+        {
+            StateKey current = open_list_.top();
+            open_list_.pop();
+
+            // Skip the cell we're updating
+            if (current.cell == cell)
+            {
+                continue;
+            }
+            new_queue.push(current);
+        }
+        open_list_ = new_queue;
+
+        // Add the cell with updated key if needed
+        if (getGValue(cell) != getRhsValue(cell))
         {
             StateKey key = calculateKey(cell);
             key.cell = cell;
-            open_set_.insert(key);
+            open_list_.push(key);
         }
     }
 
@@ -242,11 +259,10 @@ namespace vegmap_planner
         // Set a maximum iteration count to prevent infinite loops
         const int MAX_ITERATIONS = 10000;
         int iterations = 0;
-        states_expanded_ = 0;
 
         RCLCPP_INFO(
             node_->get_logger(), "Starting path computation with open list size: %zu",
-            open_set_.size());
+            open_list_.size());
 
         // Print start and goal values before computing
         double start_g = getGValue(last_start_);
@@ -259,7 +275,7 @@ namespace vegmap_planner
             start_g, start_rhs, goal_g, goal_rhs);
 
         // If open list is empty but the goal was set, something's wrong
-        if (open_set_.empty() && last_goal_.x >= 0)
+        if (open_list_.empty() && last_goal_.x >= 0)
         {
             RCLCPP_ERROR(node_->get_logger(), "Open list is empty but goal is set, reinitializing goal");
 
@@ -270,12 +286,12 @@ namespace vegmap_planner
             // Add goal to open list
             StateKey goal_key = calculateKey(last_goal_);
             goal_key.cell = last_goal_;
-            open_set_.insert(goal_key);
+            open_list_.push(goal_key);
         }
 
-        while (!open_set_.empty() &&
+        while (!open_list_.empty() &&
                ((iterations == 0) || // Always do at least one iteration
-                (open_set_.begin()->k1 < calculateKey(last_start_).k1 ||
+                (open_list_.top().k1 < calculateKey(last_start_).k1 ||
                  getRhsValue(last_start_) != getGValue(last_start_))))
         {
             iterations++;
@@ -284,7 +300,7 @@ namespace vegmap_planner
             {
                 RCLCPP_INFO(
                     node_->get_logger(), "Path computation iteration %d, open list size: %zu",
-                    iterations, open_set_.size());
+                    iterations, open_list_.size());
             }
 
             // Break if we've hit the maximum number of iterations
@@ -296,8 +312,8 @@ namespace vegmap_planner
                 break;
             }
 
-            StateKey current = *open_set_.begin();
-            open_set_.erase(open_set_.begin());
+            StateKey current = open_list_.top();
+            open_list_.pop();
 
             CellIndex cell = current.cell;
             StateKey new_key = calculateKey(cell);
@@ -314,7 +330,7 @@ namespace vegmap_planner
             {
                 // Key outdated, reinsert with new key
                 new_key.cell = cell;
-                open_set_.insert(new_key);
+                open_list_.push(new_key);
             }
             else if (getGValue(cell) > getRhsValue(cell))
             {
@@ -384,7 +400,7 @@ namespace vegmap_planner
      * getCost()
      * Gets the cost to move from one cell to another
      */
-    double vegmap_planner::VegmapPlanner::getCost(const vegmap_planner::CellIndex & /* from */, const vegmap_planner::CellIndex &to)
+    double VegmapPlanner::getCost(const CellIndex &from, const CellIndex &to)
     {
         // Make sure the coordinates are valid for getCost
         if (to.x < 0 || to.y < 0 ||
@@ -421,11 +437,6 @@ namespace vegmap_planner
         std::vector<CellIndex> path;
         CellIndex current = last_start_;
 
-        // #ifdef BENCHMARK_TESTING
-        auto start_time = std::chrono::steady_clock::now();
-        std::cout << "I AM WORKINNNNGGGG\n";
-        // #endif
-
         RCLCPP_INFO(
             node_->get_logger(), "Extracting path from (%d, %d) to (%d, %d)",
             last_start_.x, last_start_.y, last_goal_.x, last_goal_.y);
@@ -434,7 +445,7 @@ namespace vegmap_planner
         path.push_back(current);
 
         // Check if start g-value is infinity (likely unreachable goal)
-        // double start_g = getGValue(current);
+        double start_g = getGValue(current);
 
         // Set a maximum iteration count to prevent infinite loops
         const int MAX_ITERATIONS = 1000;
@@ -453,7 +464,7 @@ namespace vegmap_planner
                 double cost = getCost(current, neighbor);
                 double total_cost = cost + getGValue(neighbor);
 
-                if (total_cost < min_cost && getGValue(neighbor) < getGValue(current))
+                if (total_cost < min_cost)
                 {
                     min_cost = total_cost;
                     next_cell = neighbor;
@@ -472,14 +483,6 @@ namespace vegmap_planner
             current = next_cell;
             path.push_back(current);
         }
-
-        // #ifdef BENCHMARK_TESTING
-        auto end_time = std::chrono::steady_clock::now();
-        auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
-
-        RCLCPP_INFO(node_->get_logger(), "[Benchmark] Path extraction time: %ld ms", duration_ms);
-        RCLCPP_INFO(node_->get_logger(), "[Benchmark] Path length: %zu cells", path.size());
-        // #endif
 
         // Check if we hit the maximum iteration count
         if (iterations >= MAX_ITERATIONS)
@@ -652,7 +655,7 @@ namespace vegmap_planner
             // Goal key must be in open list
             StateKey goal_key = calculateKey(goal_cell);
             goal_key.cell = goal_cell;
-            open_set_.insert(goal_key);
+            open_list_.push(goal_key);
 
             // Compute the shortest path
             RCLCPP_INFO(node_->get_logger(), "Computing shortest path after reset...");
@@ -672,7 +675,7 @@ namespace vegmap_planner
             // Goal key must be in open list
             StateKey goal_key = calculateKey(goal_cell);
             goal_key.cell = goal_cell;
-            open_set_.insert(goal_key);
+            open_list_.push(goal_key);
 
             // Compute the shortest path
             RCLCPP_INFO(node_->get_logger(), "Computing shortest path...");
@@ -707,7 +710,6 @@ namespace vegmap_planner
 
         // Extract path
         auto path_cells = extractPath();
-        std::cout << "I AM EXTRACTINGGG PATH!!!!\n";
 
         // Ensure we have a valid path
         if (path_cells.empty())
