@@ -68,6 +68,7 @@ bt_navigator_navigate_to_pose_rclcpp_node:
 
 controller_server:
   ros__parameters:
+    transform_tolerance: 1.0
     enable_stamped_cmd_vel: True
     controller_frequency: 5.0
     min_x_velocity_threshold: 0.001
@@ -140,6 +141,7 @@ controller_server:
 local_costmap:
   local_costmap:
     ros__parameters:
+      transform_tolerance: 1.0
       update_frequency: 5.0
       publish_frequency: 2.0
       global_frame: map
@@ -173,6 +175,7 @@ local_costmap:
 global_costmap:
   global_costmap:
     ros__parameters:
+      transform_tolerance: 1.0
       resolution: 0.05
       width: 50     # meters, 50/0.05 = 1000 cells
       height: 50    # meters, 50/0.05 = 1000 cells
@@ -305,7 +308,7 @@ behavior_server:
       plugin: "nav2_behaviors/AssistedTeleop"
     global_frame: map # odom
     robot_base_frame: base_link
-    transform_tolerance: 0.2
+    transform_tolerance: 1.0
     enable_stamped_cmd_vel: True
     simulate_ahead_time: 2.0
     max_rotational_vel: 2.0

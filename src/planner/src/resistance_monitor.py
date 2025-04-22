@@ -134,6 +134,7 @@ class ResistanceMonitor(Node):
 
                 t = TransformStamped()
                 t.header.stamp = self.get_clock().now().to_msg()
+                # t.header.stamp = transform.header.stamp
                 t.header.frame_id = 'map'
                 t.child_frame_id = 'base_link'
                 t.transform.translation.x = current_position[0]
