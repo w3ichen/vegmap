@@ -181,7 +181,8 @@ global_costmap:
       height: 50    # meters, 50/0.05 = 1000 cells
       origin_x: -25.0
       origin_y: -25.0
-      track_unknown_space: True
+      # OTHERWISE UNKNOWN SPACE COST = 255
+      track_unknown_space: False
       update_frequency: 1.0
       publish_frequency: 1.0
       global_frame: map
@@ -278,7 +279,7 @@ planner_server:
 
       use_astar: true           # Enable A* algorithm instead of Dijkstra
       allow_unknown: true       # Allow planning through unknown space
-      tolerance: 0.5            # Goal tolerance in meters
+      tolerance: 0.2            # Goal tolerance in meters
 
 smoother_server:
   ros__parameters:
