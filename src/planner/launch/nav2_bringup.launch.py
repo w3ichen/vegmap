@@ -76,8 +76,8 @@ def generate_launch_description():
                 # Override controller plugin to use RPP instead of DWB
                 'controller_plugins': ["FollowPath"],
                 'FollowPath.plugin': "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController",
-                'FollowPath.desired_linear_vel': 0.5,
-                'FollowPath.lookahead_dist': 0.6,
+                'FollowPath.desired_linear_vel': 1.0, # 0.5 too slow
+                'FollowPath.lookahead_dist': 0.9,
                 'FollowPath.min_lookahead_dist': 0.3,
                 'FollowPath.max_lookahead_dist': 0.9,
                 'FollowPath.lookahead_time': 1.5,

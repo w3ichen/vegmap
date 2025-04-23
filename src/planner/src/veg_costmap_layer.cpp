@@ -56,8 +56,8 @@ namespace veg_costmap
         declareParameter("costmap_topic", rclcpp::ParameterValue("/veg_costmap"));
         declareParameter("obstacle_range", rclcpp::ParameterValue(5.0));
 
-        declareParameter("obstacle_radius", rclcpp::ParameterValue(20.0)); // radius of obstacle in .sdf / resolution {in this case 1/.05 = 20}
-        declareParameter("tree_radius", rclcpp::ParameterValue(10.0));     // radius of tree in .sdf / resolution {in this case 1/.05 = 20}
+        declareParameter("obstacle_radius", rclcpp::ParameterValue(22.0)); // radius of obstacle in .sdf / resolution {in this case 1/.05 = 20} + 2 extra
+        declareParameter("tree_radius", rclcpp::ParameterValue(7.0));      // radius of tree in .sdf / resolution {in this case 0.1/.05 = 2} + 5 extra
 
         declareParameter("lethal_cost", rclcpp::ParameterValue(254));
         declareParameter("use_gradient_costs", rclcpp::ParameterValue(true));
@@ -123,7 +123,7 @@ namespace veg_costmap
             costmap_pub_topic_, 1);
         // Create a timer to periodically publish the costmap
         costmap_pub_timer_ = node->create_wall_timer(
-            std::chrono::milliseconds(500), // Period in ms
+            std::chrono::milliseconds(200), // Period in ms
             std::bind(&VegCostmapLayer::publishCostmapCallback, this));
 
         // Init obstacle grid 2D with safe allocation
@@ -482,6 +482,10 @@ namespace veg_costmap
 
                     // Find the matching zone radius for grass obstacles
                     double radius = obstacle_radius_; // Default fallback
+                    if (point.name.find("tree") != std::string::npos)
+                    {
+                        radius = tree_radius_;
+                    }
 
                     // Set cost directly in master grid
                     // Set constant cost for the obstacle around its radius

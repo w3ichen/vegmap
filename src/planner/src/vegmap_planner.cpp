@@ -47,7 +47,7 @@ namespace vegmap_planner
         node_->get_parameter(name_ + ".interpolation_resolution", interpolation_resolution_);
 
         nav2_util::declare_parameter_if_not_declared(
-            node_, name_ + ".heuristic_weight", rclcpp::ParameterValue(1.0));
+            node_, name_ + ".heuristic_weight", rclcpp::ParameterValue(0.5));
         node_->get_parameter(name_ + ".heuristic_weight", heuristic_weight_);
 
         nav2_util::declare_parameter_if_not_declared(
@@ -397,6 +397,14 @@ namespace vegmap_planner
         unsigned char cost = costmap_->getCost(static_cast<unsigned int>(to.x),
                                                static_cast<unsigned int>(to.y));
 
+        RCLCPP_INFO(
+            node_->get_logger(),
+            "getCost for cell (%d, %d): raw_cost=%d, lethal_cost=%d, obstacle_range=%d",
+            to.x, to.y,
+            static_cast<int>(cost),
+            lethal_cost_,
+            obstacle_range_);
+
         if (cost >= lethal_cost_ && cost <= obstacle_range_)
         {
             return std::numeric_limits<double>::infinity();
@@ -408,6 +416,15 @@ namespace vegmap_planner
 
         // Scale cost based on costmap - make sure even small costs have an impact
         double cost_multiplier = 1.0 + (static_cast<double>(cost) / 50.0); // More significant scaling
+
+        RCLCPP_INFO(
+            node_->get_logger(),
+            "Cell (%d, %d) - cost=%d, movement_cost=%f, cost_multiplier=%f, final_cost=%f",
+            to.x, to.y,
+            static_cast<int>(cost),
+            movement_cost,
+            cost_multiplier,
+            movement_cost * cost_multiplier);
 
         return movement_cost * cost_multiplier;
     }

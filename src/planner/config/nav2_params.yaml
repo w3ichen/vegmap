@@ -183,8 +183,8 @@ global_costmap:
       origin_y: -25.0
       # OTHERWISE UNKNOWN SPACE COST = 255
       track_unknown_space: False
-      update_frequency: 1.0
-      publish_frequency: 1.0
+      update_frequency: 5.0
+      publish_frequency: 5.0
       global_frame: map
       robot_base_frame: base_link
       enable_stamped_cmd_vel: True

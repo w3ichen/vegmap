@@ -41,16 +41,16 @@ class ResistanceMonitor(Node):
         # Higher resistance_factor = stronger resistance (more reduction)
         self.resistance_zones = [
             # grass zones
-            {'x': 3.0, 'y': 2.0, 'radius': 1.0, 'resistance_factor': 0.5},  # 50% reduction
-            {'x': -4.0, 'y': 5.0, 'radius': 1.0, 'resistance_factor': 0.7}, # 70% reduction
-            {'x': 6.0, 'y': -3.0, 'radius': 1.0, 'resistance_factor': 0.3}, # 30% reduction
-            {'x': 1.0, 'y': -6.0, 'radius': 1.0, 'resistance_factor': 0.8}, # 80% reduction
-            {'x': 8.0, 'y': 7.0, 'radius': 1.0, 'resistance_factor': 0.6},  # 60% reduction
-            {'x': -3.0, 'y': 0.0, 'radius': 1.0, 'resistance_factor': 0.4},  # 40% reduction (center)
-            {'x': 5.0, 'y': 5.0, 'radius': 1.0, 'resistance_factor': 0.6},  # 60% reduction (very high)
-            {'x': -5.0, 'y': -5.0, 'radius': 1.0, 'resistance_factor': 0.2}, # 20% reduction (light)
-            {'x': -6.0, 'y': 2.0, 'radius': 1.0, 'resistance_factor': 0.75}, # 75% reduction
-            {'x': 7.0, 'y': -7.0, 'radius': 1.0, 'resistance_factor': 0.75}, # 75% reduction
+            {'x': 3.0, 'y': 2.0, 'radius': 1.0, 'resistance_factor': 0.02},  # 4% reduction
+            {'x': -4.0, 'y': 5.0, 'radius': 1.0, 'resistance_factor': 0.01}, # 6% reduction
+            {'x': 6.0, 'y': -3.0, 'radius': 1.0, 'resistance_factor': 0.02}, # 3% reduction
+            {'x': 1.0, 'y': -6.0, 'radius': 1.0, 'resistance_factor': 0.01}, # 2% reduction
+            {'x': 8.0, 'y': 7.0, 'radius': 1.0, 'resistance_factor': 0.03},  # 8% reduction
+            {'x': -3.0, 'y': 0.0, 'radius': 1.0, 'resistance_factor': 0.01},  # 1% reduction (center)
+            {'x': 5.0, 'y': 5.0, 'radius': 1.0, 'resistance_factor': 0.02},  # 1% reduction (very high)
+            {'x': -5.0, 'y': -5.0, 'radius': 1.0, 'resistance_factor': 0.01}, # 7% reduction (light)
+            {'x': -6.0, 'y': 2.0, 'radius': 1.0, 'resistance_factor': 0.04}, # 1.5% reduction
+            {'x': 7.0, 'y': -7.0, 'radius': 1.0, 'resistance_factor': 0.05}, # 3.5% reduction
 
             # tree zones - bigger radius so they stop before hitting the tree in simulation
             {'x': 0.0, 'y': 6.0, 'radius':0.1, 'resistance_factor': 0.8}, # 80% reduction (should technically be 100%)

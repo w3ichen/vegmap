@@ -106,77 +106,6 @@ def generate_launch_description():
         parameters=[{'use_sim_time': True}]
     )
 
-        
-    tf2_echo_wheel = Node(
-        package='tf2_ros',
-        executable='tf2_echo',
-        name='tf2_echo_wheel',
-        namespace=namespace,
-        arguments=['base_link', 'front_left_wheel'],
-        output='screen'
-    )
-
-    # # Front left wheel
-    # front_left_wheel = Node(
-    #     package='tf2_ros',
-    #     executable='static_transform_publisher',
-    #     name='front_left_wheel_publisher',
-    #     namespace=namespace,
-    #     # These values need to be adjusted based on your robot's dimensions
-    #     arguments=['0.35', '0.35', '0', '0', '0', '0', 'base_link', 'front_left_wheel'],
-    #     parameters=[{'use_sim_time': True}]
-    # )
-
-    # Front left wheel with updated parameters
-    front_left_wheel = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        name='front_left_wheel_publisher',
-        namespace=namespace,
-        arguments=['0.35', '0.35', '0', '0', '0', '0', 'base_link', 'front_left_wheel'],
-        parameters=[
-            {'use_sim_time': use_sim_time},
-            {'qos_overrides./tf_static.publisher.reliability': 'reliable'},
-            {'qos_overrides./tf_static.publisher.durability': 'transient_local'}
-        ]
-    )
-
-    # Front right wheel
-    front_right_wheel = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        name='front_right_wheel_publisher',
-        namespace=namespace,
-        arguments=['0.35', '-0.35', '0', '0', '0', '0', 'base_link', 'front_right_wheel'],
-        parameters=[{'use_sim_time': True}]
-    )
-
-    # Rear left wheel
-    rear_left_wheel = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        name='rear_left_wheel_publisher',
-        namespace=namespace,
-        arguments=['-0.35', '0.35', '0', '0', '0', '0', 'base_link', 'rear_left_wheel'],
-        parameters=[{'use_sim_time': True}]
-    )
-
-    # Rear right wheel
-    rear_right_wheel = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        name='rear_right_wheel_publisher',
-        namespace=namespace,
-        arguments=['-0.35', '-0.35', '0', '0', '0', '0', 'base_link', 'rear_right_wheel'],
-        parameters=[{'use_sim_time': True}]
-    )
-
-
-
-
-
-
-
 
 
 
@@ -212,10 +141,5 @@ def generate_launch_description():
             resistance_monitor,
             resistance_zone_to_map,
             map_to_odom,
-            front_left_wheel,
-            front_right_wheel,
-            rear_left_wheel,
-            rear_right_wheel,
-            tf2_echo_wheel,
         ]
     )
