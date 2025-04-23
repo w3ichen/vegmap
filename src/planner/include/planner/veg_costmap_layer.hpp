@@ -163,16 +163,16 @@ namespace veg_costmap
     {
         // Prior knowledge base of vegetation obstacles
         static const std::initializer_list<std::pair<const std::string, VegCostmapLayer::ObstacleData>> SAVED_OBSTACLE_DATABASE = {
-            // {"grass", {{}, 20, 15}},
-            // {"bush", {{}, 180, 10}},
-            // {"tree", {{}, 250, 2}},
-            // {"rock", {{}, 250, 2}},
+            {"grass", {{}, 20, 15}},
+            {"bush", {{}, 180, 10}},
+            {"tree", {{}, 250, 2}},
+            {"rock", {{}, 250, 2}},
 
             // // Lethal costs
-            {"grass", {{}, 252, 0}},
-            {"bush", {{}, 252, 0}},
-            {"tree", {{}, 252, 0}},
-            {"rock", {{}, 252, 0}},
+            // {"grass", {{}, 252, 0}},
+            // {"bush", {{}, 252, 0}},
+            // {"tree", {{}, 252, 0}},
+            // {"rock", {{}, 252, 0}},
         };
 
     } // namespace defaults

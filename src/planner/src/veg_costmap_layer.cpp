@@ -59,7 +59,7 @@ namespace veg_costmap
         declareParameter("obstacle_radius", rclcpp::ParameterValue(22.0)); // radius of obstacle in .sdf / resolution {in this case 1/.05 = 20} + 2 extra
         declareParameter("tree_radius", rclcpp::ParameterValue(7.0));      // radius of tree in .sdf / resolution {in this case 0.1/.05 = 2} + 5 extra
 
-        declareParameter("lethal_cost", rclcpp::ParameterValue(254));
+        declareParameter("lethal_cost", rclcpp::ParameterValue(253));
         declareParameter("use_gradient_costs", rclcpp::ParameterValue(true));
         declareParameter("gradient_factor", rclcpp::ParameterValue(0.8));
         declareParameter("world_name", rclcpp::ParameterValue("resistance_zone"));
