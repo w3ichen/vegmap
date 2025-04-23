@@ -135,13 +135,32 @@ class ResistanceMonitor(Node):
                 t = TransformStamped()
                 t.header.stamp = self.get_clock().now().to_msg()
                 # t.header.stamp = transform.header.stamp
-                t.header.frame_id = 'map'
+                # t.header.frame_id = 'map'
+                t.header.frame_id = 'odom'
                 t.child_frame_id = 'base_link'
                 t.transform.translation.x = current_position[0]
                 t.transform.translation.y = current_position[1]
                 t.transform.translation.z = current_position[2]
                 t.transform.rotation = transform.transform.rotation
                 self.tf_broadcaster.sendTransform(t)
+
+
+                wheel_transforms = [
+                    {"name": "front_left_wheel", "x": 0.35, "y": 0.35, "z": 0.0},
+                    {"name": "front_right_wheel", "x": 0.35, "y": -0.35, "z": 0.0},
+                    {"name": "rear_left_wheel", "x": -0.35, "y": 0.35, "z": 0.0},
+                    {"name": "rear_right_wheel", "x": -0.35, "y": -0.35, "z": 0.0}
+                ]
+                for wheel in wheel_transforms:
+                    wt = TransformStamped()
+                    wt.header.stamp = self.get_clock().now().to_msg()
+                    wt.header.frame_id = 'base_link'
+                    wt.child_frame_id = wheel["name"]
+                    wt.transform.translation.x = wheel["x"]
+                    wt.transform.translation.y = wheel["y"]
+                    wt.transform.translation.z = wheel["z"]
+                    wt.transform.rotation.w = 1.0  # Identity rotation
+                    self.tf_broadcaster.sendTransform(wt)
 
 
                 # calculate actual speed
